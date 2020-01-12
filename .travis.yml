@@ -1,0 +1,25 @@
+language: go
+sudo: required
+
+go:
+  - "1.13"
+
+services:
+  - docker
+  - postgresql
+  - redis
+
+before_script:
+  - psql -c "CREATE DATABASE elite;" -U postgres
+  - psql -c "CREATE USER vicanso WITH PASSWORD '123456';" -U postgres
+  - psql -c "GRANT ALL PRIVILEGES ON DATABASE elite to vicanso;" -U postgres
+
+script:
+  - env GO111MODULE=on make test
+
+after_success:
+  - docker build -t elite .
+  - docker tag elite $DOCKER_USERNAME/elite:latest
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push $DOCKER_USERNAME/elite:latest
+  - docker images
