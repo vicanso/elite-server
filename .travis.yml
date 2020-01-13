@@ -18,8 +18,8 @@ script:
   - env GO111MODULE=on make test
 
 after_success:
-  - docker build -t elite .
-  - docker tag elite $DOCKER_USERNAME/elite:latest
+  - docker build -t elite-server .
+  - docker tag elite-server $DOCKER_USERNAME/elite-server:latest
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - docker push $DOCKER_USERNAME/elite:latest
+  - docker push $DOCKER_USERNAME/elite-server:latest
   - docker images

@@ -3,3 +3,7 @@
 # postgres 配置 (pass从env中获取pass这个配置为密码，如果未配置则为空)
 postgres:
   password: PASS
+
+# tiny服务
+tiny:
+  baseURL: http://192.168.0.171:7001

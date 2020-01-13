@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"strconv"
+	"strings"
 
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/service"
@@ -102,11 +103,17 @@ func (ctrl novelCtrl) list(c *elton.Context) (err error) {
 		where = append(where, "name LIKE ?", "%"+keyword+"%")
 	}
 
+	// 指定ID返回
+	ids := c.QueryParam("ids")
+	if ids != "" {
+		where = append(where, "id IN (?)", strings.Split(ids, ","))
+	}
+
 	novels, err := novelSrv.List(params, where...)
 	if err != nil {
 		return
 	}
-	c.CacheMaxAge("1m")
+	c.CacheMaxAge("5m")
 	c.Body = map[string]interface{}{
 		"novels": novels,
 	}
@@ -125,6 +132,7 @@ func (ctrl novelCtrl) detail(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
+	c.CacheMaxAge("5m")
 	c.Body = novel
 	return
 }
@@ -171,7 +179,6 @@ func (ctrl novelCtrl) updateChapter(c *elton.Context) (err error) {
 		return
 	}
 	c.NoContent()
-
 	return
 }
 
@@ -191,6 +198,7 @@ func (ctrl novelCtrl) listChapters(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
+	c.CacheMaxAge("5m")
 	c.Body = map[string]interface{}{
 		"chapters": chapters,
 	}
