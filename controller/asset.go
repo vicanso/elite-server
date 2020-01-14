@@ -20,8 +20,8 @@ import (
 	"os"
 
 	"github.com/gobuffalo/packr/v2"
-	"github.com/vicanso/elton"
 	"github.com/vicanso/elite/router"
+	"github.com/vicanso/elton"
 
 	staticServe "github.com/vicanso/elton-static-serve"
 )
@@ -36,7 +36,7 @@ type (
 )
 
 var (
-	box = packr.New("asset", "../web/build")
+	box = packr.New("webAsset", "../web/build")
 )
 
 func (sf *staticFile) Exists(file string) bool {

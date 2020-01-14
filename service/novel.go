@@ -21,7 +21,9 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
+	"mime"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -44,6 +46,10 @@ const (
 	StatusFinished
 	// 下架
 	StatusDiscontinued
+)
+
+const (
+	defaultCover = "404.png"
 )
 
 type (
@@ -246,6 +252,11 @@ func (srv *NovelSrv) GetCover(bookID uint, params *ImageOptimParams) (cover *Nov
 	// 如果是无封面，使用默认封面
 	if err == gorm.ErrRecordNotFound {
 		err = nil
+		buf, _ := GetAssetFile(defaultCover)
+		if len(buf) != 0 {
+			cover.Data = buf
+			cover.ContentType = mime.TypeByExtension(filepath.Ext(defaultCover))
+		}
 	}
 	if cover == nil {
 		return
