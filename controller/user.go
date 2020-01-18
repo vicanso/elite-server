@@ -15,6 +15,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -22,13 +23,14 @@ import (
 	"github.com/vicanso/elite/middleware"
 	"github.com/vicanso/elite/validate"
 	"github.com/vicanso/hes"
+	"go.uber.org/zap"
 
-	"github.com/vicanso/elton"
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elite/util"
+	"github.com/vicanso/elton"
 )
 
 type userCtrl struct{}
@@ -97,6 +99,7 @@ type (
 
 var (
 	errLoginTokenNil = hes.New("login token is nil")
+	trackKey         = config.GetTrackKey()
 )
 
 func init() {
@@ -178,6 +181,12 @@ func init() {
 		shouldBeAdmin,
 		ctrl.listLoginRecord,
 	)
+
+	// 添加用户轨迹
+	g.POST(
+		"/v1/tracks",
+		ctrl.addTrack,
+	)
 }
 
 // get user info from session
@@ -213,13 +222,12 @@ type usersMeInfoResponse struct {
 // responses:
 // 	200: usersMeInfoResponse
 func (ctrl userCtrl) me(c *elton.Context) (err error) {
-	key := config.GetTrackKey()
-	cookie, _ := c.Cookie(key)
+	cookie, _ := c.Cookie(trackKey)
 	// ulid的长度为26
 	if cookie == nil || len(cookie.Value) != 26 {
 		uid := util.GenUlid()
 		_ = c.AddCookie(&http.Cookie{
-			Name:     key,
+			Name:     trackKey,
 			Value:    uid,
 			Path:     "/",
 			HttpOnly: true,
@@ -493,5 +501,28 @@ func (ctrl userCtrl) listLoginRecord(c *elton.Context) (err error) {
 		result,
 		count,
 	}
+	return
+}
+
+func (ctrl userCtrl) addTrack(c *elton.Context) (err error) {
+	tags := map[string]string{
+		"classification": c.QueryParam("classification"),
+	}
+	fields := make(map[string]interface{})
+	err = json.Unmarshal(c.RequestBody, &fields)
+	if err != nil {
+		return
+	}
+	cookie, _ := c.Cookie(trackKey)
+	if cookie != nil {
+		fields["trackID"] = cookie.Value
+	}
+	logger.Info("user track",
+		zap.Any("tags", tags),
+		zap.Any("fields", fields),
+	)
+	influxSrv.Write(cs.MeasurementUserTrack, fields, tags)
+
+	c.Created(nil)
 	return
 }

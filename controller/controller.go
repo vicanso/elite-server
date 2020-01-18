@@ -57,6 +57,8 @@ var (
 	userSrv = new(service.UserSrv)
 	// novel服务
 	novelSrv = new(service.NovelSrv)
+	// influx服务
+	influxSrv *helper.InfluxSrv
 
 	// 创建新的并发控制中间件
 	newConcurrentLimit = middleware.NewConcurrentLimit
@@ -85,6 +87,7 @@ func init() {
 		magicalValue = cs.MagicalCaptcha
 	}
 	captchaValidate = middleware.ValidateCaptch(magicalValue)
+	influxSrv = helper.GetInfluxSrv()
 }
 
 func newTracker(action string) elton.Handler {

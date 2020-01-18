@@ -19,4 +19,5 @@ const (
 	MeasurementPG          = "pg-stats"
 	MeasurementRedis       = "redis-stats"
 	MeasurementHTTP        = "http-stats"
+	MeasurementUserTrack   = "user-track"
 )
