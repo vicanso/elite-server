@@ -19,7 +19,10 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
+	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elite/util"
@@ -36,6 +39,13 @@ type (
 	}
 	updateCoverParams struct {
 		Cover string `json:"cover,omitempty" valid:"url"`
+	}
+	// 书籍最新信息
+	latestInfo struct {
+		BookID                 uint       `json:"bookID,omitempty"`
+		ChapterCount           int        `json:"chapterCount,omitempty"`
+		LatestChapterNO        int        `json:"latestChapterNO,omitempty"`
+		LatestChpaterUpdatedAt *time.Time `json:"latestChpaterUpdatedAt,omitempty"`
 	}
 )
 
@@ -58,6 +68,11 @@ func init() {
 		loadUserSession,
 		shouldBeAdmin,
 		ctrl.update,
+	)
+	// 获取书籍最新更新信息（id可以以,分隔一次查询多本书籍）
+	g.GET(
+		"/v1/:id/latestes",
+		ctrl.listLatestes,
 	)
 	// 获取章节列表
 	g.GET(
@@ -201,6 +216,54 @@ func (ctrl novelCtrl) listChapters(c *elton.Context) (err error) {
 	c.CacheMaxAge("5m")
 	c.Body = map[string]interface{}{
 		"chapters": chapters,
+	}
+	return
+}
+
+// listLatestes 获取书籍的最新信息，包括最新章节，章节总数等
+func (ctrl novelCtrl) listLatestes(c *elton.Context) (err error) {
+	ids := strings.Split(c.Param("id"), ",")
+	where := make([]interface{}, 0)
+	where = append(where, "id IN (?)", ids)
+
+	novels, err := novelSrv.List(&helper.DbParams{
+		// Fields: "chapterCount,id",
+		Limit: len(ids),
+	}, where...)
+	if err != nil {
+		return
+	}
+	wg := sync.WaitGroup{}
+	// 限制只能最多一次查询5条
+	limits := make(chan bool, 5)
+	result := make([]*latestInfo, len(novels))
+	for i, item := range novels {
+		result[i] = &latestInfo{
+			BookID:       item.ID,
+			ChapterCount: item.ChapterCount,
+		}
+		wg.Add(1)
+		go func(bookID uint, index int) {
+			limits <- true
+			chapters, _ := novelSrv.ListChapters(&helper.DbParams{
+				Order:  "-no",
+				Limit:  1,
+				Fields: "no,updatedAt",
+			}, &service.NovelChapter{
+				BookID: bookID,
+			})
+			if len(chapters) != 0 {
+				info := result[index]
+				info.LatestChapterNO = chapters[0].NO
+				info.LatestChpaterUpdatedAt = chapters[0].UpdatedAt
+			}
+			<-limits
+			wg.Done()
+		}(item.ID, i)
+	}
+	wg.Wait()
+	c.Body = map[string][]*latestInfo{
+		"latestes": result,
 	}
 	return
 }
