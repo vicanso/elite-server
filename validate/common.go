@@ -21,11 +21,11 @@ import (
 func init() {
 	Add("xLimit", func(i interface{}, _ interface{}) bool {
 		value := govalidator.ToString(i)
-		return govalidator.InRangeInt(value, "1", "20")
+		return govalidator.InRangeInt(value, "1", "100")
 	})
 	Add("xOffset", func(i interface{}, _ interface{}) bool {
 		value := govalidator.ToString(i)
-		return govalidator.InRangeInt(value, "0", "1000")
+		return govalidator.InRangeInt(value, "0", "5000")
 	})
 
 	Add("xDuration", func(i interface{}, _ interface{}) bool {
