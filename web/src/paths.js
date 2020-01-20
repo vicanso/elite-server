@@ -10,3 +10,4 @@ export const LOGIN_PATH = "/user/login";
 export const REGISTER_PATH = "/user/register";
 export const USER_PATH = "/user";
 export const USER_LOGIN_RECORDS_PATH = "/user/login-records";
+export const NOVEL_PATH = "/novel";

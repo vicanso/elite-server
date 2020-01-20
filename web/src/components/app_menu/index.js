@@ -11,7 +11,8 @@ import {
   BASIC_CONFIG_PATH,
   ROUTER_CONFIG_PATH,
   IP_BLOCK_CONFIG_PATH,
-  SIGNED_KEYS_CONFIG_PATH
+  SIGNED_KEYS_CONFIG_PATH,
+  NOVEL_PATH
 } from "../../paths";
 import "./app_menu.sass";
 
@@ -76,7 +77,24 @@ const userMenu = {
   ]
 };
 
-const menuList = [configMenu, userMenu];
+const novelMenu = {
+  key: "novel",
+  title: (
+    <span>
+      <Icon type="book" />
+      <span>书籍</span>
+    </span>
+  ),
+  children: [
+    {
+      key: "novels",
+      url: NOVEL_PATH,
+      title: "书籍列表"
+    }
+  ]
+};
+
+const menuList = [configMenu, userMenu, novelMenu];
 
 class AppMenu extends React.Component {
   state = {

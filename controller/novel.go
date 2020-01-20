@@ -55,6 +55,7 @@ func init() {
 	// 获取书籍列表
 	g.GET(
 		"/v1",
+		validateForNoCache,
 		ctrl.list,
 	)
 	// 获取书籍详情
@@ -96,6 +97,7 @@ func init() {
 	// 获取书籍封面
 	g.GET(
 		"/v1/:id/cover",
+		validateForNoCache,
 		ctrl.getCover,
 	)
 
@@ -112,16 +114,36 @@ func (ctrl novelCtrl) list(c *elton.Context) (err error) {
 		return
 	}
 	where := make([]interface{}, 0)
-	keyword := c.QueryParam("keyword")
-	// 关键字搜索，暂仅支持对书名搜索
-	if keyword != "" {
-		where = append(where, "name LIKE ?", "%"+keyword+"%")
-	}
 
-	// 指定ID返回
+	// 指定ID返回，不支持其它参数查询
 	ids := c.QueryParam("ids")
 	if ids != "" {
 		where = append(where, "id IN (?)", strings.Split(ids, ","))
+	} else {
+		keyword := c.QueryParam("keyword")
+		status := c.QueryParam("status")
+		ql := make([]string, 0)
+		args := make([]interface{}, 0)
+		// 关键字搜索，暂仅支持对书名搜索
+		if keyword != "" {
+			ql = append(ql, "name LIKE ?")
+			args = append(args, "%"+keyword+"%")
+		}
+
+		if status != "" {
+			ql = append(ql, "status = ?")
+			args = append(args, status)
+		}
+		where = append(where, strings.Join(ql, " AND "))
+		where = append(where, args...)
+	}
+
+	count := -1
+	if params.Offset == 0 {
+		count, err = novelSrv.Count(where...)
+		if err != nil {
+			return
+		}
 	}
 
 	novels, err := novelSrv.List(params, where...)
@@ -131,6 +153,7 @@ func (ctrl novelCtrl) list(c *elton.Context) (err error) {
 	c.CacheMaxAge("5m")
 	c.Body = map[string]interface{}{
 		"novels": novels,
+		"count":  count,
 	}
 	return
 }

@@ -65,9 +65,12 @@ type (
 		Summary      string `json:"summary,omitempty"`
 		WordCount    int    `json:"wordCount,omitempty"`
 		ChapterCount int    `json:"chapterCount,omitempty"`
-		Grading      int    `json:"grading,omitempty"`
-		Score        int    `json:"score,omitempty"`
-		Status       int    `json:"status,omitempty"`
+		// Grading 自定义分级
+		Grading int `json:"grading,omitempty"`
+		// Score 动态生成的打分
+		Score int `json:"score,omitempty"`
+		// Status 状态
+		Status int `json:"status,omitempty"`
 	}
 	// NovelChapter novel chapter
 	NovelChapter struct {
@@ -185,6 +188,16 @@ func (srv *NovelSrv) FindOne(condition *Novel) (*Novel, error) {
 func (srv *NovelSrv) List(params *helper.DbParams, where ...interface{}) (novels []*Novel, err error) {
 	novels = make([]*Novel, 0)
 	err = helper.PGGetDB(params).Find(&novels, where...).Error
+	return
+}
+
+// Count count novel
+func (srv *NovelSrv) Count(where ...interface{}) (count int, err error) {
+	db := pgGetClient().Model(&Novel{})
+	if len(where) != 0 {
+		db = db.Where(where[0], where[1:]...)
+	}
+	err = db.Count(&count).Error
 	return
 }
 

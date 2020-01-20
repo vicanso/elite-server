@@ -14,6 +14,7 @@ import {
   LOGIN_PATH,
   USER_PATH,
   USER_LOGIN_RECORDS_PATH,
+  NOVEL_PATH,
   HOME_PATH
 } from "./paths";
 import { USERS_ME } from "./urls";
@@ -29,6 +30,7 @@ import UserList from "./components/user_list";
 import UserLoginRecordList from "./components/user_login_record_list";
 import IPBlockList from "./components/ip_block_list";
 import Home from "./components/home";
+import NovelList from "./components/novel_list";
 
 function NeedLoginRoute({ component: Component, account, roles, ...rest }) {
   return (
@@ -136,6 +138,12 @@ class App extends React.Component {
               <NeedLoginRoute
                 path={USER_LOGIN_RECORDS_PATH}
                 component={UserLoginRecordList}
+                account={account}
+                roles={roles}
+              />
+              <NeedLoginRoute
+                path={NOVEL_PATH}
+                component={NovelList}
                 account={account}
                 roles={roles}
               />

@@ -138,6 +138,16 @@ func checkAnonymous(c *elton.Context) (err error) {
 	return c.Next()
 }
 
+// validateForNoCache 校验请求参数是否带有no cache，如果有，则设置为no cache
+func validateForNoCache(c *elton.Context) (err error) {
+	setNoCache := c.QueryParam("nocache") == "true"
+	err = c.Next()
+	if setNoCache {
+		c.NoCache()
+	}
+	return err
+}
+
 // func newCheckRoles(validRoles []string) elton.Handler {
 // 	return func(c *elton.Context) (err error) {
 // 		if !isLogin(c) {

@@ -20,3 +20,8 @@ const commonRoute = `${prefix}/commons`;
 export const ROUTERS = `${commonRoute}/routers`;
 export const RANDOM_KEYS = `${commonRoute}/random-keys`;
 export const CAPTCHA = `${commonRoute}/captcha`;
+
+const novelRoute = `${prefix}/novels`;
+export const NOVELS = `${novelRoute}/v1`;
+export const NOVELS_UPDATE = `${novelRoute}/v1/:id`;
+export const NOVELS_COVER_UPDATE = `${novelRoute}/v1/:id/cover`;
