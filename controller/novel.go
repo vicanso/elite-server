@@ -230,9 +230,16 @@ func (ctrl novelCtrl) listChapters(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	chapters, err := novelSrv.ListChapters(params, &service.NovelChapter{
-		BookID: uint(id),
-	})
+	where := make([]interface{}, 0)
+	noList := c.QueryParam("no")
+	if noList != "" {
+		where = append(where, "book_id = ? AND no IN (?)", id, strings.Split(noList, ","))
+	} else {
+		where = append(where, &service.NovelChapter{
+			BookID: uint(id),
+		})
+	}
+	chapters, err := novelSrv.ListChapters(params, where...)
 	if err != nil {
 		return
 	}

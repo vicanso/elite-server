@@ -32,7 +32,7 @@ class NovelList extends React.Component {
     submitting: false,
     keyword: "",
     status: "",
-    order: "",
+    order: "no",
     pagination: {
       current: 1,
       pageSize: 10,
@@ -272,7 +272,7 @@ class NovelList extends React.Component {
         pagination={pagination}
         onChange={(pagination, filters, sorter) => {
           const { field, order } = sorter;
-          let orderBy = "";
+          let orderBy = "no";
           if (field && order) {
             if (order === "descend") {
               orderBy = `-${field}`;
