@@ -40,6 +40,16 @@ type (
 	updateCoverParams struct {
 		Cover string `json:"cover,omitempty" valid:"url"`
 	}
+	addNovelParams struct {
+		Name     string `json:"name,omitempty"`
+		Author   string `json:"author,omitempty"`
+		Status   int    `json:"status,omitempty"`
+		Summary  string `json:"summary,omitempty"`
+		Chapters []struct {
+			Title   string `json:"title,omitempty"`
+			Content string `json:"content,omitempty"`
+		} `json:"chapters,omitempty"`
+	}
 	// 书籍最新信息
 	latestInfo struct {
 		BookID                 uint       `json:"bookID,omitempty"`
@@ -70,6 +80,14 @@ func init() {
 		shouldBeAdmin,
 		ctrl.update,
 	)
+	// 添加书籍
+	g.POST(
+		"/v1/add-novel",
+		loadUserSession,
+		shouldBeAdmin,
+		ctrl.addNovel,
+	)
+
 	// 获取书籍最新更新信息（id可以以,分隔一次查询多本书籍）
 	g.GET(
 		"/v1/:id/latestes",
@@ -335,13 +353,48 @@ func (ctrl novelCtrl) getCover(c *elton.Context) (err error) {
 		return
 	}
 
-	c.CacheMaxAge("1h")
+	c.CacheMaxAge("24h")
 	if cover == nil {
 		c.NoContent()
 	} else {
 		c.SetHeader(elton.HeaderContentType, cover.ContentType)
 		c.BodyBuffer = bytes.NewBuffer(cover.Data)
 	}
+	return
+}
+
+// addNovel add novel
+func (ctrl novelCtrl) addNovel(c *elton.Context) (err error) {
+	params := new(addNovelParams)
+	err = json.Unmarshal(c.RequestBody, params)
+	if err != nil {
+		return
+	}
+	novel, err := novelSrv.Add(service.Novel{
+		Name:    params.Name,
+		Author:  params.Author,
+		Status:  params.Status,
+		Summary: params.Summary,
+	})
+	if err != nil {
+		return
+	}
+	for index, item := range params.Chapters {
+		_, err = novelSrv.AddChapter(service.NovelChapter{
+			BookID:    novel.ID,
+			NO:        index,
+			Content:   item.Content,
+			WordCount: len(item.Content),
+			Title:     item.Title,
+		})
+		if err != nil {
+			return
+		}
+	}
+	go func() {
+		_ = novelSrv.RefreshBasicInfo(novel)
+	}()
+	c.Created(novel)
 	return
 }
 

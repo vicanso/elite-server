@@ -12,7 +12,8 @@ import {
   ROUTER_CONFIG_PATH,
   IP_BLOCK_CONFIG_PATH,
   SIGNED_KEYS_CONFIG_PATH,
-  NOVEL_PATH
+  NOVEL_PATH,
+  NOVEL_ADD_PATH
 } from "../../paths";
 import "./app_menu.sass";
 
@@ -90,6 +91,11 @@ const novelMenu = {
       key: "novels",
       url: NOVEL_PATH,
       title: "书籍列表"
+    },
+    {
+      key: "novels-add",
+      url: NOVEL_ADD_PATH,
+      title: "添加书籍"
     }
   ]
 };

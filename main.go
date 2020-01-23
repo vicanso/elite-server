@@ -233,7 +233,11 @@ func main() {
 	d.Use(responder.NewDefault())
 
 	// 读取读取body的数的，转换为json bytes
-	d.Use(bodyparser.NewDefault())
+	bodyParserConfig := bodyparser.Config{}
+	bodyParserConfig.AddDecoder(bodyparser.NewGzipDecoder())
+	bodyParserConfig.AddDecoder(bodyparser.NewJSONDecoder())
+	bodyParserConfig.Limit = 3 * 1024 * 1024
+	d.Use(bodyparser.New(bodyParserConfig))
 
 	// 初始化路由
 	router.Init(d)

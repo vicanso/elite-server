@@ -15,13 +15,14 @@ import moment from "moment";
 
 import "./novel_list.sass";
 import * as novelService from "../../services/novel";
-import { TIME_FORMAT } from "../../vars";
+import { TIME_FORMAT, NOVEL_STATUS } from "../../vars";
 
 const { Search, TextArea } = Input;
 const { Option } = Select;
 const allStatus = "所有";
-const statusList = ["未知", "未完结", "完结", "下架"];
+const statusList = NOVEL_STATUS;
 const editMode = "edit";
+const defaultOrder = "id";
 
 class NovelList extends React.Component {
   state = {
@@ -32,7 +33,7 @@ class NovelList extends React.Component {
     submitting: false,
     keyword: "",
     status: "",
-    order: "no",
+    order: defaultOrder,
     pagination: {
       current: 1,
       pageSize: 10,
@@ -272,7 +273,7 @@ class NovelList extends React.Component {
         pagination={pagination}
         onChange={(pagination, filters, sorter) => {
           const { field, order } = sorter;
-          let orderBy = "no";
+          let orderBy = defaultOrder;
           if (field && order) {
             if (order === "descend") {
               orderBy = `-${field}`;

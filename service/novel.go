@@ -313,6 +313,33 @@ func (srv *NovelSrv) GetCover(bookID uint, params *ImageOptimParams) (cover *Nov
 	return
 }
 
+func (srv *NovelSrv) RefreshBasicInfo(novel *Novel) (err error) {
+	chapters, err := srv.ListChapters(&helper.DbParams{
+		Fields: "word_count",
+	}, &NovelChapter{
+		BookID: novel.ID,
+	})
+	if err != nil {
+		return
+	}
+	wordCount := 0
+	chapterCount := len(chapters)
+	if chapterCount == 0 {
+		return
+	}
+	for _, chapter := range chapters {
+		wordCount += chapter.WordCount
+	}
+	// 如果章节或字数不一致，则更新
+	if chapterCount != novel.ChapterCount ||
+		wordCount != novel.WordCount {
+		novel.ChapterCount = chapterCount
+		novel.WordCount = wordCount
+		_ = pgGetClient().Model(&Novel{}).Update(novel)
+	}
+	return
+}
+
 // RefreshAllBasicInfo refresh basic info
 func (srv *NovelSrv) RefreshAllBasicInfo() (err error) {
 	// 计算章节、字数等
@@ -331,35 +358,32 @@ func (srv *NovelSrv) RefreshAllBasicInfo() (err error) {
 			return
 		}
 		for _, novel := range novels {
-			chapters, e := srv.ListChapters(&helper.DbParams{
-				Fields: "word_count",
-			}, &NovelChapter{
-				BookID: novel.ID,
-			})
-			if e != nil {
-				err = e
-				return
-			}
-			wordCount := 0
-			chapterCount := len(chapters)
-			if chapterCount == 0 {
-				continue
-			}
-			for _, chapter := range chapters {
-				wordCount += chapter.WordCount
-			}
-			// 如果章节或字数不一致，则更新
-			if chapterCount != novel.ChapterCount ||
-				wordCount != novel.WordCount {
-				novel.ChapterCount = chapterCount
-				novel.WordCount = wordCount
-				_ = pgGetClient().Model(&Novel{}).Update(novel)
-			}
+			_ = srv.RefreshBasicInfo(novel)
 		}
 		if len(novels) < limit {
 			break
 		}
 		offset += limit
+	}
+	return
+}
+
+// Add add novel
+func (srv *NovelSrv) Add(data Novel) (novel *Novel, err error) {
+	novel = &data
+	err = pgGetClient().Save(novel).Error
+	if err != nil {
+		return
+	}
+	return
+}
+
+// AddChapter add chapter
+func (srv *NovelSrv) AddChapter(data NovelChapter) (chapter *NovelChapter, err error) {
+	chapter = &data
+	err = pgGetClient().Save(chapter).Error
+	if err != nil {
+		return
 	}
 	return
 }

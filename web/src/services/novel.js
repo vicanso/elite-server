@@ -1,6 +1,11 @@
 import axios from "axios";
 
-import { NOVELS, NOVELS_UPDATE, NOVELS_COVER_UPDATE } from "../urls";
+import {
+  NOVELS,
+  NOVELS_UPDATE,
+  NOVELS_COVER_UPDATE,
+  NOVELS_ADD
+} from "../urls";
 
 // list 获取书籍信息列表
 export async function list(params) {
@@ -28,5 +33,11 @@ export async function updateCoverByID(id, imageURL) {
   const { data } = await axios.patch(url, {
     cover: imageURL
   });
+  return data;
+}
+
+// add 添加书籍
+export async function add(params) {
+  const { data } = await axios.post(NOVELS_ADD, params);
   return data;
 }
