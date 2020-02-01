@@ -3,6 +3,7 @@ module github.com/vicanso/elite
 go 1.13
 
 require (
+	github.com/PuerkitoBio/goquery v1.5.0
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/disintegration/imaging v1.6.2
 	github.com/dustin/go-humanize v1.0.0
