@@ -19,7 +19,9 @@ package service
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -78,7 +80,7 @@ func (srv *LongzuSrv) sync(url string) (err error) {
 		err = errors.New("get book id fail")
 		return
 	}
-	doc.Find(".book-list li a").Each(func(i int, s *goquery.Selection) {
+	doc.Find(".book-list li").Each(func(i int, s *goquery.Selection) {
 		if err != nil {
 			return
 		}
@@ -90,7 +92,17 @@ func (srv *LongzuSrv) sync(url string) (err error) {
 		if result != nil && result.ID != 0 {
 			return
 		}
-		href, _ := s.Attr("href")
+		href, _ := s.Find("a").Attr("href")
+		if href == "" {
+			onClick, _ := s.Find("b").Attr("onclick")
+			reg := regexp.MustCompile(`(https://www.luoxia.com/longzu/\d+.htm)`)
+			href = reg.FindString(onClick)
+		}
+		if href == "" {
+			fmt.Println(s.Text())
+			err = errors.New("get page url fail")
+			return
+		}
 		tmpResp, e := longZuIns.Get(href)
 		if e != nil {
 			err = e
