@@ -24,16 +24,16 @@ import (
 )
 
 func init() {
-	go func() {
-		err := new(service.LongzuSrv).Sync()
-		if err != nil {
-			log.Default().Error("sync longzu fail",
-				zap.Error(err),
-			)
-		} else {
-			log.Default().Info("sync longzu success")
-		}
-	}()
+	// go func() {
+	// 	err := new(service.LongzuSrv).Sync()
+	// 	if err != nil {
+	// 		log.Default().Error("sync longzu fail",
+	// 			zap.Error(err),
+	// 		)
+	// 	} else {
+	// 		log.Default().Info("sync longzu success")
+	// 	}
+	// }()
 	c := cron.New()
 	_, _ = c.AddFunc("@every 5m", redisCheck)
 	_, _ = c.AddFunc("@every 1m", configRefresh)

@@ -17,6 +17,7 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -123,6 +124,11 @@ func init() {
 		"/v1/sync-wsl",
 		ctrl.sync,
 	)
+}
+
+func trimContent(content string) string {
+	reg := regexp.MustCompile(`[\s　🍄]+`)
+	return reg.ReplaceAllString(content, "")
 }
 
 // list 书籍列表查询
@@ -260,6 +266,11 @@ func (ctrl novelCtrl) listChapters(c *elton.Context) (err error) {
 	chapters, err := novelSrv.ListChapters(params, where...)
 	if err != nil {
 		return
+	}
+	for _, item := range chapters {
+		if item.Content != "" {
+			item.Content = trimContent(item.Content)
+		}
 	}
 	c.CacheMaxAge("5m")
 	c.Body = map[string]interface{}{
