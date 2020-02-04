@@ -127,7 +127,7 @@ func init() {
 }
 
 func trimContent(content string) string {
-	reg := regexp.MustCompile(`[\s　🍄]+`)
+	reg := regexp.MustCompile(`[🍄]+`)
 	return reg.ReplaceAllString(content, "")
 }
 
