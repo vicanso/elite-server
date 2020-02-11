@@ -24,7 +24,8 @@ EXPOSE 7001
 
 RUN addgroup -g 1000 go \
   && adduser -u 1000 -G go -s /bin/sh -D go \
-  && apk add --no-cache ca-certificates tzdata
+  && apk add --no-cache ca-certificates tzdata \
+  && ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 COPY --from=builder /elite/elite /usr/local/bin/elite
 

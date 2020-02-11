@@ -17,12 +17,15 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/go-redis/redis/v7"
+	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/service"
@@ -63,6 +66,7 @@ type (
 func init() {
 	g := router.NewGroup("/novels")
 	ctrl := novelCtrl{}
+
 	// 获取书籍列表
 	g.GET(
 		"/v1",
@@ -124,6 +128,19 @@ func init() {
 		"/v1/sync-wsl",
 		ctrl.sync,
 	)
+
+	// 热门搜索关键字
+	router.NewGroup("/novel-keywords").GET(
+		"/v1/hot",
+		ctrl.listSearchHotKeywords,
+	)
+}
+
+func addSearchKeyWord(keyword string) (float64, error) {
+	count, err := helper.RedisGetClient().ZIncrBy(cs.NovelSearchHotKeyWords, 1, keyword).Result()
+	fmt.Println(count)
+	fmt.Println(err)
+	return count, err
 }
 
 func trimContent(content string) string {
@@ -145,6 +162,11 @@ func (ctrl novelCtrl) list(c *elton.Context) (err error) {
 		where = append(where, "id IN (?)", strings.Split(ids, ","))
 	} else {
 		keyword := c.QueryParam("keyword")
+		if keyword != "" {
+			go func() {
+				_, _ = addSearchKeyWord(keyword)
+			}()
+		}
 		status := c.QueryParam("status")
 		ql := make([]string, 0)
 		args := make([]interface{}, 0)
@@ -423,5 +445,29 @@ func (ctrl novelCtrl) sync(c *elton.Context) (err error) {
 		_ = new(service.WslSrv).Sync()
 	}()
 	c.NoContent()
+	return
+}
+
+func (ctrl novelCtrl) listSearchHotKeywords(c *elton.Context) (err error) {
+	limit, _ := strconv.Atoi(c.QueryParam("limit"))
+	if limit == 0 {
+		limit = 10
+	}
+	if limit > 20 {
+		err = hes.New("limit should be lt 20")
+		return
+	}
+	result, err := helper.RedisGetClient().ZRevRangeByScore(cs.NovelSearchHotKeyWords, &redis.ZRangeBy{
+		Min:   "-inf",
+		Max:   "+inf",
+		Count: int64(limit),
+	}).Result()
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge("1m")
+	c.Body = map[string][]string{
+		"keywords": result,
+	}
 	return
 }

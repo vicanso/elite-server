@@ -16,6 +16,7 @@ package schedule
 
 import (
 	"github.com/robfig/cron/v3"
+	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/service"
@@ -38,6 +39,7 @@ func init() {
 	_, _ = c.AddFunc("@every 5m", redisCheck)
 	_, _ = c.AddFunc("@every 1m", configRefresh)
 	_, _ = c.AddFunc("@every 10m", novelBasicInfoRefresh)
+	_, _ = c.AddFunc("00 00 * * *", resetNovelSearchHotKeywords)
 	c.Start()
 }
 
@@ -66,6 +68,15 @@ func novelBasicInfoRefresh() {
 	err := new(service.NovelSrv).RefreshAllBasicInfo()
 	if err != nil {
 		log.Default().Error("novel basic info refresh fail",
+			zap.Error(err),
+		)
+	}
+}
+
+func resetNovelSearchHotKeywords() {
+	_, err := helper.RedisGetClient().Del(cs.NovelSearchHotKeyWords).Result()
+	if err != nil {
+		log.Default().Error("reset novel search hot key words fail",
 			zap.Error(err),
 		)
 	}
