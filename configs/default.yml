@@ -21,10 +21,10 @@ postgres:
 
 # influxdb 配置
 influxdb:
-  uri: http://127.0.0.1:9999
+  uri: http://192.168.0.171:9991
   bucket: elite
   org: bigtree
-  token: YecVRjkFWQHQCq-Qs9NH7XZy8ApyAp9QfwVjqwQC_8bWmjsYRAfYTNveCswl1NPHS8reFoXELQBWKO27maa9tw==
+  token: INFLUXDB_TOKEN 
   batchSize: 100
 
 # session的相关配置
