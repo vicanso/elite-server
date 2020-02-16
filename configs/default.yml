@@ -25,7 +25,7 @@ influxdb:
   bucket: elite
   org: bigtree
   token: INFLUXDB_TOKEN 
-  batchSize: 100
+  batchSize: 10
 
 # session的相关配置
 session:
