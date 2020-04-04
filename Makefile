@@ -1,6 +1,6 @@
 export GO111MODULE = on
 
-.PHONY: default test test-cover dev
+.PHONY: default test test-cover dev lint
 
 # for dev
 dev:
