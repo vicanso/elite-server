@@ -19,10 +19,10 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/lib/pq"
-	"github.com/vicanso/elton"
-	session "github.com/vicanso/elton-session"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/util"
+	"github.com/vicanso/elton"
+	session "github.com/vicanso/elton-session"
 	"github.com/vicanso/hes"
 
 	"go.uber.org/zap"
@@ -366,12 +366,12 @@ func (u *UserSession) ClearSessionID() {
 
 // NewUserSession create a user session
 func NewUserSession(c *elton.Context) *UserSession {
-	v := c.Get(session.Key)
-	if v == nil {
+	v, ok := c.Get(session.Key)
+	if !ok {
 		return nil
 	}
-	data := c.Get(cs.UserSession)
-	if data != nil {
+	data, ok := c.Get(cs.UserSession)
+	if ok && data != nil {
 		us, ok := data.(*UserSession)
 		if ok {
 			return us

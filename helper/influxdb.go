@@ -15,18 +15,15 @@
 package helper
 
 import (
-	"context"
 	"sync"
 	"time"
 
 	influxdb "github.com/influxdata/influxdb-client-go"
 	"github.com/vicanso/elite/config"
-	"github.com/vicanso/elite/log"
-	"go.uber.org/zap"
 )
 
 var (
-	influxdbClient   *influxdb.Client
+	influxdbClient   influxdb.InfluxDBClient
 	defaultInfluxSrv *InfluxSrv
 
 	initDefaultInfluxSrv sync.Once
@@ -34,21 +31,15 @@ var (
 
 type (
 	InfluxSrv struct {
-		sync.Mutex
-		BatchSize int
-		Bucket    string
-		Org       string
-		metrics   []influxdb.Metric
+		writer influxdb.WriteApi
 	}
 )
 
 func init() {
 	influxbConfig := config.GetInfluxdbConfig()
-	c, err := influxdb.New(influxbConfig.URI, influxbConfig.Token)
-	if err != nil {
-		panic(err)
-	}
-	influxdbClient = c
+	opts := influxdb.DefaultOptions()
+	opts.SetBatchSize(influxbConfig.BatchSize)
+	influxdbClient = influxdb.NewClientWithOptions(influxbConfig.URI, influxbConfig.Token, opts)
 }
 
 // GetInfluxSrv get default influx service
@@ -56,63 +47,18 @@ func GetInfluxSrv() *InfluxSrv {
 	initDefaultInfluxSrv.Do(func() {
 		influxbConfig := config.GetInfluxdbConfig()
 		defaultInfluxSrv = &InfluxSrv{
-			BatchSize: influxbConfig.BatchSize,
-			Bucket:    influxbConfig.Bucket,
-			Org:       influxbConfig.Org,
+			writer: influxdbClient.WriteApi(influxbConfig.Org, influxbConfig.Bucket),
 		}
+		// defaultInfluxSrv = &InfluxSrv{
+		// 	BatchSize: influxbConfig.BatchSize,
+		// 	Bucket:    influxbConfig.Bucket,
+		// 	Org:       influxbConfig.Org,
+		// }
 	})
 	return defaultInfluxSrv
 }
 
 // Write write metric to influxdb
 func (srv *InfluxSrv) Write(measurement string, fields map[string]interface{}, tags map[string]string) {
-	srv.Lock()
-	defer srv.Unlock()
-	if len(srv.metrics) == 0 {
-		srv.metrics = make([]influxdb.Metric, 0, srv.BatchSize)
-	}
-	metric := influxdb.NewRowMetric(fields, measurement, tags, time.Now())
-	srv.metrics = append(srv.metrics, metric)
-	if len(srv.metrics) > srv.BatchSize {
-		metrics := srv.metrics
-		go func() {
-			srv.writeMetrics(metrics)
-		}()
-		srv.metrics = nil
-	}
-}
-
-// Flush flush metric list
-func (srv *InfluxSrv) Flush() {
-	srv.Lock()
-	defer srv.Unlock()
-	metrics := srv.metrics
-	if len(metrics) == 0 {
-		return
-	}
-	go func() {
-		srv.writeMetrics(metrics)
-	}()
-	srv.metrics = nil
-}
-
-// writeMetrics write metric list to influxdb
-func (srv *InfluxSrv) writeMetrics(metrics []influxdb.Metric) {
-	// 如果未初始化client，直接返回
-	if influxdbClient == nil {
-		return
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	_, err := influxdbClient.Write(
-		ctx,
-		srv.Bucket,
-		srv.Org,
-		metrics...,
-	)
-	if err != nil {
-		log.Default().Error("influxdb write fail",
-			zap.Error(err),
-		)
-	}
+	defaultInfluxSrv.writer.WritePoint(influxdb.NewPoint(measurement, tags, fields, time.Now()))
 }

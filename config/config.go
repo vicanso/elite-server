@@ -60,7 +60,7 @@ type (
 		Org       string `valid:"runelength(1|100)"`
 		URI       string `valid:"url"`
 		Token     string `valid:"ascii"`
-		BatchSize int    `valid:"range(1|5000)"`
+		BatchSize uint   `valid:"range(1|5000)"`
 	}
 	// WslConfig wsl config
 	WslConfig struct {
@@ -313,7 +313,7 @@ func GetInfluxdbConfig() InfluxdbConfig {
 		Bucket:    viper.GetString(prefix + "bucket"),
 		Org:       viper.GetString(prefix + "org"),
 		Token:     token,
-		BatchSize: viper.GetInt(prefix + "batchSize"),
+		BatchSize: viper.GetUint(prefix + "batchSize"),
 	}
 	validatePanic(&influxdbConfig)
 	return influxdbConfig
