@@ -36,12 +36,15 @@ var (
 	redisSrv    = new(Redis)
 )
 
+const redisCmdStartKey = redisContextKey(startedAtKey)
+
 type (
 
 	// redisStats redis stats
 	redisStats struct {
 		Slow time.Duration
 	}
+	redisContextKey string
 )
 
 type (
@@ -57,7 +60,10 @@ type (
 )
 
 func (rs *redisStats) logSlowOrError(ctx context.Context, cmd, err string) {
-	t := ctx.Value(startedAtKey).(*time.Time)
+	t, ok := ctx.Value(redisCmdStartKey).(*time.Time)
+	if !ok {
+		return
+	}
 	d := time.Since(*t)
 	if d > rs.Slow || err != "" {
 		logger.Info("redis process slow or error",
@@ -79,7 +85,7 @@ func (rs *redisStats) logSlowOrError(ctx context.Context, cmd, err string) {
 // BeforeProcess before process
 func (rs *redisStats) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
 	t := time.Now()
-	ctx = context.WithValue(ctx, startedAtKey, &t)
+	ctx = context.WithValue(ctx, redisCmdStartKey, &t)
 	return ctx, nil
 }
 
@@ -97,7 +103,7 @@ func (rs *redisStats) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 // BeforeProcessPipeline before process pipeline
 func (rs *redisStats) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmder) (context.Context, error) {
 	t := time.Now()
-	ctx = context.WithValue(ctx, startedAtKey, &t)
+	ctx = context.WithValue(ctx, redisCmdStartKey, &t)
 	return ctx, nil
 }
 
