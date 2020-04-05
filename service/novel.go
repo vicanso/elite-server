@@ -28,6 +28,7 @@ import (
 
 	"github.com/disintegration/imaging"
 	"github.com/jinzhu/gorm"
+	"github.com/lib/pq"
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/go-axios"
@@ -43,6 +44,11 @@ const (
 	StatusFinished
 	// 下架
 	StatusDiscontinued
+)
+
+const (
+	// VIP 分类
+	CategoryVIP = "vip"
 )
 
 const (
@@ -68,6 +74,9 @@ type (
 		Score int `json:"score,omitempty"`
 		// Status 状态
 		Status int `json:"status,omitempty"`
+		// TODO 是否添加索引
+		// 产品分类
+		Categories pq.StringArray `json:"categories,omitempty" gorm:"type:text[];index:idx_categories"`
 	}
 	// NovelChapter novel chapter
 	NovelChapter struct {

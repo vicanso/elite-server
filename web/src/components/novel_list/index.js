@@ -15,7 +15,7 @@ import moment from "moment";
 
 import "./novel_list.sass";
 import * as novelService from "../../services/novel";
-import { TIME_FORMAT, NOVEL_STATUS } from "../../vars";
+import { TIME_FORMAT, NOVEL_STATUS, NOVEL_CATEGORIES } from "../../vars";
 
 const { Search, TextArea } = Input;
 const { Option } = Select;
@@ -134,6 +134,14 @@ class NovelList extends React.Component {
       </Option>
     ));
   }
+  renderCategoryList() {
+    const arr = NOVEL_CATEGORIES.slice(0);
+    return arr.map(item => (
+      <Option key={item} value={item}>
+        {item}
+      </Option>
+    ));
+  }
   renderNovelList() {
     const { loading, mode } = this.state;
     if (mode === editMode) {
@@ -215,6 +223,18 @@ class NovelList extends React.Component {
         key: "status",
         render: status => {
           return statusList[status || 0];
+        }
+      },
+      {
+        title: "分类",
+        dataIndex: "categories",
+        key: "categories",
+        render: categories => {
+          if (!categories) {
+            return;
+          }
+          const arr = categories.map(item => <li>{item}</li>);
+          return <ul>{arr}</ul>;
         }
       },
       {
@@ -331,6 +351,20 @@ class NovelList extends React.Component {
                     updateData.grading = e.target.valueAsNumber;
                   }}
                 />
+              </Form.Item>
+            </Col>
+            <Col span={colSpan}>
+              <Form.Item label="分类">
+                <Select
+                  defaultValue={current.categories}
+                  mode="multiple"
+                  placeholder="请选择书籍分类"
+                  onChange={value => {
+                    updateData.categories = value;
+                  }}
+                >
+                  {this.renderCategoryList()}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={colSpan}>

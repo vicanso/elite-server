@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v7"
+	pg "github.com/lib/pq"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/router"
@@ -174,6 +175,12 @@ func (ctrl novelCtrl) list(c *elton.Context) (err error) {
 		if keyword != "" {
 			ql = append(ql, "name LIKE ?")
 			args = append(args, "%"+keyword+"%")
+		} else {
+			// 如果非通过关键字搜索，不允许搜索VIP分类
+			ql = append(ql, "(categories IS NULL OR ? NOT IN (categories))")
+			args = append(args, pg.StringArray{
+				service.CategoryVIP,
+			})
 		}
 
 		if status != "" {
