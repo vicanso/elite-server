@@ -1,5 +1,9 @@
 # production 生产环境中使用的相关配置
 
+# influxdb 配置
+influxdb:
+  uri: http://172.18.109.188:9999
+
 # redis 配置
 redis: redis://:PASS@172.18.109.188:6379
 
