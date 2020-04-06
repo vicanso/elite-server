@@ -4,7 +4,8 @@ import {
   NOVELS,
   NOVELS_UPDATE,
   NOVELS_COVER_UPDATE,
-  NOVELS_ADD
+  NOVELS_ADD,
+  NOVELS_SYNC_BIQUGE
 } from "../urls";
 
 // list 获取书籍信息列表
@@ -40,4 +41,9 @@ export async function updateCoverByID(id, imageURL) {
 export async function add(params) {
   const { data } = await axios.post(NOVELS_ADD, params);
   return data;
+}
+
+// syncBiQuGe 同步笔趣阁
+export async function syncBiQuGe(max) {
+  await axios.patch(NOVELS_SYNC_BIQUGE.replace(":max", max));
 }

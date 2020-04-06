@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -34,6 +35,7 @@ import (
 	"github.com/vicanso/elite/validate"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/hes"
+	"go.uber.org/zap"
 )
 
 type novelCtrl struct{}
@@ -134,6 +136,14 @@ func init() {
 	router.NewGroup("/novel-keywords").GET(
 		"/v1/hot",
 		ctrl.listSearchHotKeywords,
+	)
+
+	// 更新笔趣阁
+	g.PATCH(
+		"/biquge/v1/sync/:max",
+		loadUserSession,
+		shouldBeAdmin,
+		ctrl.syncBiQuGe,
 	)
 }
 
@@ -476,5 +486,22 @@ func (ctrl novelCtrl) listSearchHotKeywords(c *elton.Context) (err error) {
 	c.Body = map[string][]string{
 		"keywords": result,
 	}
+	return
+}
+
+func (ctrl novelCtrl) syncBiQuGe(c *elton.Context) (err error) {
+	max, _ := strconv.Atoi(c.Param("max"))
+	if max > 0 {
+		go func() {
+			err := biQuGeSrv.Sync(max)
+			if err != nil {
+				logger.Error("bi qu ge sync fail",
+					zap.Int("max", max),
+					zap.Error(err),
+				)
+			}
+		}()
+	}
+	c.StatusCode = http.StatusAccepted
 	return
 }

@@ -37,7 +37,9 @@ require (
 	github.com/vicanso/go-axios v0.1.0
 	github.com/vicanso/hes v0.2.1
 	github.com/vicanso/ips v0.0.1
+	github.com/vicanso/lru-ttl v0.0.0-20200319120018-63fda41c46fc
 	go.uber.org/zap v1.14.1
 	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
+	golang.org/x/text v0.3.2
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )

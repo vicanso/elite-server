@@ -57,6 +57,8 @@ var (
 	userSrv = new(service.UserSrv)
 	// novel服务
 	novelSrv = new(service.NovelSrv)
+	// biQuGeSrv 笔趣阁服务
+	biQuGeSrv = new(service.BiQuGeSrv)
 	// influx服务
 	influxSrv *helper.InfluxSrv
 

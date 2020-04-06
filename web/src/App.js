@@ -16,7 +16,8 @@ import {
   USER_LOGIN_RECORDS_PATH,
   NOVEL_PATH,
   NOVEL_ADD_PATH,
-  HOME_PATH
+  HOME_PATH,
+  NOVEL_BIQUGE_PATH
 } from "./paths";
 import { USERS_ME } from "./urls";
 import AppMenu from "./components/app_menu";
@@ -33,6 +34,7 @@ import IPBlockList from "./components/ip_block_list";
 import Home from "./components/home";
 import NovelList from "./components/novel_list";
 import NovelAdd from "./components/novel_add";
+import NovelBiQuGe from "./components/novel_biquge";
 
 function NeedLoginRoute({ component: Component, account, roles, ...rest }) {
   return (
@@ -147,6 +149,13 @@ class App extends React.Component {
                 exact
                 path={NOVEL_ADD_PATH}
                 component={NovelAdd}
+                account={account}
+                roles={roles}
+              />
+              <NeedLoginRoute
+                extra
+                path={NOVEL_BIQUGE_PATH}
+                component={NovelBiQuGe}
                 account={account}
                 roles={roles}
               />

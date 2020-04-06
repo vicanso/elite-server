@@ -13,7 +13,8 @@ import {
   IP_BLOCK_CONFIG_PATH,
   SIGNED_KEYS_CONFIG_PATH,
   NOVEL_PATH,
-  NOVEL_ADD_PATH
+  NOVEL_ADD_PATH,
+  NOVEL_BIQUGE_PATH
 } from "../../paths";
 import "./app_menu.sass";
 
@@ -96,6 +97,11 @@ const novelMenu = {
       key: "novels-add",
       url: NOVEL_ADD_PATH,
       title: "添加书籍"
+    },
+    {
+      key: "novels-biquge",
+      url: NOVEL_BIQUGE_PATH,
+      title: "笔趣阁"
     }
   ]
 };
