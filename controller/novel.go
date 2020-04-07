@@ -17,7 +17,6 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -57,6 +56,10 @@ type (
 			Content string `json:"content,omitempty"`
 		} `json:"chapters,omitempty"`
 	}
+	syncNovelParams struct {
+		BookID int    `json:"bookID,omitempty" valid:"-"`
+		Source string `json:"source,omitempty" valid:"-"`
+	}
 	// 书籍最新信息
 	latestInfo struct {
 		BookID                 uint       `json:"bookID,omitempty"`
@@ -94,6 +97,13 @@ func init() {
 		loadUserSession,
 		shouldBeAdmin,
 		ctrl.addNovel,
+	)
+	// 同步小说
+	g.POST(
+		"/v1/sync-novel",
+		loadUserSession,
+		shouldBeAdmin,
+		ctrl.syncNovel,
 	)
 
 	// 获取书籍最新更新信息（id可以以,分隔一次查询多本书籍）
@@ -138,6 +148,13 @@ func init() {
 		ctrl.listSearchHotKeywords,
 	)
 
+	// 获取笔趣阁书籍列表
+	g.GET(
+		"/biquge/v1",
+		loadUserSession,
+		shouldBeAdmin,
+		ctrl.listBiQuGe,
+	)
 	// 更新笔趣阁
 	g.PATCH(
 		"/biquge/v1/sync/:max",
@@ -149,8 +166,6 @@ func init() {
 
 func addSearchKeyWord(keyword string) (float64, error) {
 	count, err := helper.RedisGetClient().ZIncrBy(cs.NovelSearchHotKeyWords, 1, keyword).Result()
-	fmt.Println(count)
-	fmt.Println(err)
 	return count, err
 }
 
@@ -448,6 +463,40 @@ func (ctrl novelCtrl) addNovel(c *elton.Context) (err error) {
 	return
 }
 
+func (ctrl novelCtrl) syncNovel(c *elton.Context) (err error) {
+	params := syncNovelParams{}
+	err = validate.Do(&params, c.RequestBody)
+	if err != nil {
+		return
+	}
+	// 暂时仅支持一种source，因此不判断
+	basicInfo, err := biQuGeSrv.GetBasicInfo(params.BookID)
+	if err != nil {
+		return
+	}
+	novel, err := novelSrv.Add(service.Novel{
+		Name:    basicInfo.Name,
+		Author:  basicInfo.Author,
+		Summary: basicInfo.Summary,
+		Source:  params.Source,
+	})
+	if err != nil {
+		return
+	}
+	if basicInfo.Cover != "" {
+		e := novelSrv.UpdateCover(novel.ID, basicInfo.Cover, false)
+		if e != nil {
+			logger.Error("update cover fail",
+				zap.String("name", novel.Name),
+				zap.Error(err),
+			)
+		}
+	}
+
+	c.Created(novel)
+	return
+}
+
 func (ctrl novelCtrl) sync(c *elton.Context) (err error) {
 	params := &syncParams{}
 	err = validate.Do(params, c.RequestBody)
@@ -489,6 +538,7 @@ func (ctrl novelCtrl) listSearchHotKeywords(c *elton.Context) (err error) {
 	return
 }
 
+// syncBiQuGe sync biquge
 func (ctrl novelCtrl) syncBiQuGe(c *elton.Context) (err error) {
 	max, _ := strconv.Atoi(c.Param("max"))
 	if max > 0 {
@@ -503,5 +553,43 @@ func (ctrl novelCtrl) syncBiQuGe(c *elton.Context) (err error) {
 		}()
 	}
 	c.StatusCode = http.StatusAccepted
+	return
+}
+
+// listBiQuGe list biquge
+func (ctrl novelCtrl) listBiQuGe(c *elton.Context) (err error) {
+	params, err := getDbQueryParams(c)
+	if err != nil {
+		return
+	}
+	where := make([]interface{}, 0)
+
+	keyword := c.QueryParam("keyword")
+
+	ql := make([]string, 0)
+	args := make([]interface{}, 0)
+	// 关键字搜索，暂仅支持对书名搜索
+	if keyword != "" {
+		ql = append(ql, "name LIKE ?")
+		args = append(args, "%"+keyword+"%")
+	}
+	where = append(where, strings.Join(ql, " AND "))
+	where = append(where, args...)
+	count := -1
+	if params.Offset == 0 {
+		count, err = biQuGeSrv.Count(where...)
+		if err != nil {
+			return
+		}
+	}
+	novels, err := biQuGeSrv.List(params, where...)
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge("5m")
+	c.Body = map[string]interface{}{
+		"novels": novels,
+		"count":  count,
+	}
 	return
 }

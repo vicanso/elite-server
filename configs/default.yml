@@ -23,7 +23,7 @@ postgres:
 influxdb:
   uri: http://192.168.0.171:9991
   bucket: elite
-  org: bigtree
+  org: bigTree
   token: INFLUXDB_TOKEN 
   batchSize: 10
 

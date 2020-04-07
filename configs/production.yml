@@ -4,6 +4,11 @@
 influxdb:
   uri: http://172.18.109.188:9999
 
+# key for sign cookie
+keys:
+  - 3YG6ah6C57
+  - t98MYyGIgF
+
 # redis 配置
 redis: redis://:PASS@172.18.109.188:6379
 

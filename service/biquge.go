@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -133,21 +134,86 @@ func (srv *BiQuGeSrv) GetBasicInfo(id int) (basicInfo *biQuGeBasicInfo, err erro
 	return
 }
 
-func (srv *BiQuGeSrv) GetChapters(id int) (chapters []*NovelChapter, err error) {
+func (srv *BiQuGeSrv) getChapter(url string) (content string, err error) {
+	if url == "" {
+		return
+	}
+	resp, err := biqugeIns.Get(url)
+	if err != nil {
+		return
+	}
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(resp.Data))
+	if err != nil {
+		return
+	}
+	data, err := doc.Find("#content").Html()
+	if err != nil {
+		return
+	}
+	reg := regexp.MustCompile(`<br(/?)>`)
+	arr := reg.Split(strings.TrimSpace(data), -1)
+	result := []string{}
+	for _, str := range arr {
+		v := strings.TrimSpace(str)
+		if v != "" {
+			result = append(result, v)
+		}
+	}
+	content = strings.Join(result, "\n")
+	return
+}
+
+func (srv *BiQuGeSrv) GetChapters(bookID uint, id int, start int, fn NovelChapterUpdateHandler) (err error) {
 	doc, err := srv.getBasicInfoDocument(id)
 	if err != nil {
 		return
 	}
-
-	chapters = make([]*NovelChapter, 0, 100)
-	doc.Find("#list dd a").Each(func(i int, s *goquery.Selection) {
+	doc.Find("#list dt").Eq(1).NextAll().Find("a").Each(func(i int, s *goquery.Selection) {
+		if i < start {
+			return
+		}
 		title := strings.TrimSpace(s.Text())
-		// url, _ := s.Attr("href")
-		chapters = append(chapters, &NovelChapter{
-			NO:    i,
-			Title: title,
+		url, _ := s.Attr("href")
+		content, err := srv.getChapter(url)
+		if err != nil {
+			return
+		}
+		fn(&NovelChapter{
+			BookID:    bookID,
+			NO:        i,
+			Title:     title,
+			Content:   content,
+			WordCount: len(content),
 		})
 	})
+	return
+}
+
+// GetUpdateChapters 获取更新章节
+func (srv *BiQuGeSrv) GetUpdateChapters(bookID uint, name, author string, fn NovelChapterUpdateHandler) (err error) {
+	chapter := new(NovelChapter)
+	err = helper.PGGetDB(&helper.DbParams{
+		Order: "-no",
+	}).First(chapter, &NovelChapter{
+		BookID: bookID,
+	}).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return
+	}
+	start := 0
+	if chapter.NO != 0 {
+		start = chapter.NO + 1
+	}
+	biQuGe := new(BiQuGe)
+	err = helper.PGGetClient().First(biQuGe, &BiQuGe{
+		Name:   name,
+		Author: author,
+	}).Error
+	if err != nil || biQuGe.BookID == 0 {
+		return
+	}
+	err = srv.GetChapters(bookID, biQuGe.BookID, start, fn)
+
 	return
 }
 
@@ -187,7 +253,7 @@ func (srv *BiQuGeSrv) Sync(max int) (err error) {
 				zap.Int("id", i),
 				zap.Error(err),
 			)
-			return
+			continue
 		}
 		_, e = srv.Add(BiQuGe{
 			Name:   basicInfo.Name,

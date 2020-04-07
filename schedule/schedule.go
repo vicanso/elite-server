@@ -40,6 +40,7 @@ func init() {
 	_, _ = c.AddFunc("@every 1m", configRefresh)
 	_, _ = c.AddFunc("@every 10m", novelBasicInfoRefresh)
 	_, _ = c.AddFunc("00 00 * * *", resetNovelSearchHotKeywords)
+	_, _ = c.AddFunc("@every 2h", updateNovelUnfinished)
 	c.Start()
 }
 
@@ -77,6 +78,15 @@ func resetNovelSearchHotKeywords() {
 	_, err := helper.RedisGetClient().Del(cs.NovelSearchHotKeyWords).Result()
 	if err != nil {
 		log.Default().Error("reset novel search hot key words fail",
+			zap.Error(err),
+		)
+	}
+}
+
+func updateNovelUnfinished() {
+	err := new(service.NovelSrv).UpdateUnfinished()
+	if err != nil {
+		log.Default().Error("novel update unfinished fail",
 			zap.Error(err),
 		)
 	}

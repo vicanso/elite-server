@@ -25,5 +25,7 @@ const novelRoute = `${prefix}/novels`;
 export const NOVELS = `${novelRoute}/v1`;
 export const NOVELS_UPDATE = `${novelRoute}/v1/:id`;
 export const NOVELS_ADD = `${novelRoute}/v1/add-novel`;
+export const NOVELS_SYNC = `${novelRoute}/v1/sync-novel`;
 export const NOVELS_COVER_UPDATE = `${novelRoute}/v1/:id/cover`;
 export const NOVELS_SYNC_BIQUGE = `${novelRoute}/biquge/v1/sync/:max`;
+export const NOVELS_BIQUGE = `${novelRoute}/biquge/v1`;

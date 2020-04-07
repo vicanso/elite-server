@@ -33,6 +33,7 @@ import (
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/go-axios"
 	"github.com/vicanso/hes"
+	"go.uber.org/zap"
 )
 
 const (
@@ -52,10 +53,16 @@ const (
 )
 
 const (
+	// NovelSourceBiQuGe novel source
+	NovelSourceBiQuGe = "biquge"
+)
+
+const (
 	defaultCover = "404.png"
 )
 
 type (
+	NovelChapterUpdateHandler func(chapter *NovelChapter)
 	// Novel novel
 	Novel struct {
 		ID        uint       `gorm:"primary_key" json:"id,omitempty"`
@@ -77,6 +84,7 @@ type (
 		// TODO 是否添加索引
 		// 产品分类
 		Categories pq.StringArray `json:"categories,omitempty" gorm:"type:text[];index:idx_categories"`
+		Source     string         `json:"source,omitempty"`
 	}
 	// NovelChapter novel chapter
 	NovelChapter struct {
@@ -377,6 +385,32 @@ func (srv *NovelSrv) AddChapter(data NovelChapter) (chapter *NovelChapter, err e
 	err = pgGetClient().Save(chapter).Error
 	if err != nil {
 		return
+	}
+	return
+}
+
+// UpdateUnfinished update unfinished
+func (srv *NovelSrv) UpdateUnfinished() (err error) {
+	novels := make([]*Novel, 0)
+	err = pgGetClient().Find(&novels, "status = ?", StatusUnfinished).Error
+	if err != nil {
+		return
+	}
+	fn := func(chapter *NovelChapter) {
+		_, _ = srv.AddChapter(*chapter)
+	}
+	for _, novel := range novels {
+		switch novel.Source {
+		case NovelSourceBiQuGe:
+			err = new(BiQuGeSrv).GetUpdateChapters(novel.ID, novel.Name, novel.Author, fn)
+		}
+
+		if err != nil {
+			logger.Error("update unfinished novel fail",
+				zap.String("name", novel.Name),
+				zap.Error(err),
+			)
+		}
 	}
 	return
 }

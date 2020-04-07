@@ -19,7 +19,6 @@ package service
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -99,7 +98,6 @@ func (srv *LongzuSrv) sync(url string) (err error) {
 			href = reg.FindString(onClick)
 		}
 		if href == "" {
-			fmt.Println(s.Text())
 			err = errors.New("get page url fail")
 			return
 		}
