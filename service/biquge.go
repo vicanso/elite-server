@@ -42,9 +42,16 @@ type (
 		UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
 
-		BookID int    `json:"bookId,omitempty" `
+		BookID int    `json:"bookID,omitempty" `
 		Name   string `json:"name,omitempty" gorm:"type:varchar(100);not null;unique_index:idx_biquges_name_author"`
 		Author string `json:"author,omitempty" gorm:"type:varchar(50);not null;unique_index:idx_biquges_name_author"`
+	}
+
+	biQuGeBasicInfo struct {
+		Name    string
+		Author  string
+		Summary string
+		Cover   string
 	}
 )
 
@@ -78,8 +85,6 @@ func init() {
 
 	pgGetClient().
 		AutoMigrate(&BiQuGe{})
-	// srv := new(BiQuGeSrv)
-	// fmt.Println(srv.Sync(10))
 }
 
 func (srv *BiQuGeSrv) getBasicInfoDocument(id int) (doc *goquery.Document, err error) {
@@ -103,7 +108,7 @@ func (srv *BiQuGeSrv) getBasicInfoDocument(id int) (doc *goquery.Document, err e
 	return
 }
 
-func (srv *BiQuGeSrv) GetBasicInfo(id int) (novel *Novel, err error) {
+func (srv *BiQuGeSrv) GetBasicInfo(id int) (basicInfo *biQuGeBasicInfo, err error) {
 	doc, err := srv.getBasicInfoDocument(id)
 	if err != nil {
 		return
@@ -113,15 +118,17 @@ func (srv *BiQuGeSrv) GetBasicInfo(id int) (novel *Novel, err error) {
 		err = errors.New("novel not found")
 		return
 	}
-	novel = &Novel{
+	basicInfo = &biQuGeBasicInfo{
 		Name:    strings.TrimSpace(q.Find("h1").Text()),
 		Summary: strings.TrimSpace(doc.Find("#maininfo #intro").Text()),
 	}
+	cover, _ := doc.Find("#fmimg img").Attr("src")
+	basicInfo.Cover = strings.TrimSpace(cover)
 	authorText := q.Find("p").First().Text()
 
 	arr := strings.Split(authorText, "：")
 	if len(arr) == 2 {
-		novel.Author = strings.TrimSpace(arr[1])
+		basicInfo.Author = strings.TrimSpace(arr[1])
 	}
 	return
 }
@@ -174,17 +181,24 @@ func (srv *BiQuGeSrv) Sync(max int) (err error) {
 		zap.Int("end", max),
 	)
 	for i := start; i < max; i++ {
-		novel, e := srv.GetBasicInfo(i)
+		basicInfo, e := srv.GetBasicInfo(i)
 		if e != nil {
-			err = e
+			logger.Error("bi qu ge get basic info fail",
+				zap.Int("id", i),
+				zap.Error(err),
+			)
 			return
 		}
-		_, err = srv.Add(BiQuGe{
-			Name:   novel.Name,
-			Author: novel.Author,
+		_, e = srv.Add(BiQuGe{
+			Name:   basicInfo.Name,
+			Author: basicInfo.Author,
 			BookID: i,
 		})
-		if err != nil {
+		if e != nil {
+			logger.Error("bi qu ge save basic info fail",
+				zap.Int("id", i),
+				zap.Error(err),
+			)
 			return
 		}
 	}
@@ -192,5 +206,22 @@ func (srv *BiQuGeSrv) Sync(max int) (err error) {
 		zap.Int("start", start),
 		zap.Int("end", max),
 	)
+	return
+}
+
+// List list biquge novels
+func (srv *BiQuGeSrv) List(params *helper.DbParams, where ...interface{}) (novels []*BiQuGe, err error) {
+	novels = make([]*BiQuGe, 0)
+	err = helper.PGGetDB(params).Find(&novels, where...).Error
+	return
+}
+
+// Count count novel
+func (srv *BiQuGeSrv) Count(where ...interface{}) (count int, err error) {
+	db := pgGetClient().Model(&BiQuGe{})
+	if len(where) != 0 {
+		db = db.Where(where[0], where[1:]...)
+	}
+	err = db.Count(&count).Error
 	return
 }
