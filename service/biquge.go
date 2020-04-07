@@ -37,15 +37,15 @@ import (
 type (
 	BiQuGeSrv struct{}
 
-	BiQuGe struct {
+	NovelBiQuGe struct {
 		ID        uint       `gorm:"primary_key" json:"id,omitempty"`
 		CreatedAt *time.Time `json:"createdAt,omitempty"`
 		UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 		DeletedAt *time.Time `sql:"index" json:"deletedAt,omitempty"`
 
 		BookID int    `json:"bookID,omitempty" `
-		Name   string `json:"name,omitempty" gorm:"type:varchar(100);not null;unique_index:idx_biquges_name_author"`
-		Author string `json:"author,omitempty" gorm:"type:varchar(50);not null;unique_index:idx_biquges_name_author"`
+		Name   string `json:"name,omitempty" gorm:"type:varchar(100);not null;unique_index:idx_novels_biquge_name_author"`
+		Author string `json:"author,omitempty" gorm:"type:varchar(50);not null;unique_index:idx_novels_biquge_name_author"`
 	}
 
 	biQuGeBasicInfo struct {
@@ -85,7 +85,7 @@ func init() {
 	biqugeIns.Config.TransformResponse = transformRepsonse
 
 	pgGetClient().
-		AutoMigrate(&BiQuGe{})
+		AutoMigrate(&NovelBiQuGe{})
 }
 
 func (srv *BiQuGeSrv) getBasicInfoDocument(id int) (doc *goquery.Document, err error) {
@@ -204,8 +204,8 @@ func (srv *BiQuGeSrv) GetUpdateChapters(bookID uint, name, author string, fn Nov
 	if chapter.NO != 0 {
 		start = chapter.NO + 1
 	}
-	biQuGe := new(BiQuGe)
-	err = helper.PGGetClient().First(biQuGe, &BiQuGe{
+	biQuGe := new(NovelBiQuGe)
+	err = helper.PGGetClient().First(biQuGe, &NovelBiQuGe{
 		Name:   name,
 		Author: author,
 	}).Error
@@ -217,7 +217,7 @@ func (srv *BiQuGeSrv) GetUpdateChapters(bookID uint, name, author string, fn Nov
 	return
 }
 
-func (srv *BiQuGeSrv) Add(data BiQuGe) (biquge *BiQuGe, err error) {
+func (srv *BiQuGeSrv) Add(data NovelBiQuGe) (biquge *NovelBiQuGe, err error) {
 	biquge = &data
 	err = pgGetClient().Save(biquge).Error
 	if err != nil {
@@ -231,7 +231,7 @@ func (srv *BiQuGeSrv) Sync(max int) (err error) {
 	if err != nil || !ok {
 		return
 	}
-	biquge := new(BiQuGe)
+	biquge := new(NovelBiQuGe)
 	err = helper.PGGetDB(&helper.DbParams{
 		Order: "-bookId",
 	}).First(biquge).Error
@@ -255,7 +255,7 @@ func (srv *BiQuGeSrv) Sync(max int) (err error) {
 			)
 			continue
 		}
-		_, e = srv.Add(BiQuGe{
+		_, e = srv.Add(NovelBiQuGe{
 			Name:   basicInfo.Name,
 			Author: basicInfo.Author,
 			BookID: i,
@@ -276,15 +276,15 @@ func (srv *BiQuGeSrv) Sync(max int) (err error) {
 }
 
 // List list biquge novels
-func (srv *BiQuGeSrv) List(params *helper.DbParams, where ...interface{}) (novels []*BiQuGe, err error) {
-	novels = make([]*BiQuGe, 0)
+func (srv *BiQuGeSrv) List(params *helper.DbParams, where ...interface{}) (novels []*NovelBiQuGe, err error) {
+	novels = make([]*NovelBiQuGe, 0)
 	err = helper.PGGetDB(params).Find(&novels, where...).Error
 	return
 }
 
 // Count count novel
 func (srv *BiQuGeSrv) Count(where ...interface{}) (count int, err error) {
-	db := pgGetClient().Model(&BiQuGe{})
+	db := pgGetClient().Model(&NovelBiQuGe{})
 	if len(where) != 0 {
 		db = db.Where(where[0], where[1:]...)
 	}
