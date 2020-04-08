@@ -520,13 +520,15 @@ func (ctrl userCtrl) addTrack(c *elton.Context) (err error) {
 	tags := map[string]string{
 		"classification": c.QueryParam("classification"),
 	}
-	err = validate.Do(&userTrackerParams{}, c.RequestBody)
+	params := &userTrackerParams{}
+	err = validate.Do(params, c.RequestBody)
 	if err != nil {
 		return
 	}
 
+	buf, _ := json.Marshal(params)
 	fields := make(map[string]interface{})
-	err = json.Unmarshal(c.RequestBody, &fields)
+	err = json.Unmarshal(buf, &fields)
 	if err != nil {
 		return
 	}
