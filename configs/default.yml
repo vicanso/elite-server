@@ -39,7 +39,7 @@ keys:
   - secret
 
 location:
-  baseURL: https://ip.aslant.site/
+  baseURL: http://172.18.109.188:7200/
 
 # router limit
 routerLimit:
