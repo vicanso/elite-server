@@ -192,6 +192,7 @@ func init() {
 	// 添加用户轨迹
 	g.POST(
 		"/v1/tracks",
+		newTracker(cs.ActionTrack),
 		ctrl.addTrack,
 	)
 }

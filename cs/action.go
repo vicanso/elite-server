@@ -21,6 +21,8 @@ const (
 	ActionRegister = "register"
 	// ActionLogout logout
 	ActionLogout = "logout"
+	// ActionTrack track
+	ActionTrack = "track"
 
 	// ActionConfigurationAdd add configuration
 	ActionConfigurationAdd = "add-configuration"
