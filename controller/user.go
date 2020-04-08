@@ -61,6 +61,13 @@ type (
 		// Example: 2019-10-26T10:11:25+08:00
 		LoginAt string `json:"loginAt,omitempty"`
 	}
+	// userTrackerParams user tracker params
+	userTrackerParams struct {
+		Route        string `json:"route,omitempty" valid:"-"`
+		BookID       int    `json:"bookID,omitempty" valid:"-"`
+		ChapterIndex int    `json:"chapterIndex,omitempty" valid:"-"`
+		ReadOn       bool   `json:"readOn,omitempty" valid:"-"`
+	}
 	loginTokenResp struct {
 		// 登录Token
 		// Example: IaHnYepm
@@ -508,6 +515,11 @@ func (ctrl userCtrl) addTrack(c *elton.Context) (err error) {
 	tags := map[string]string{
 		"classification": c.QueryParam("classification"),
 	}
+	err = validate.Do(&userTrackerParams{}, c.RequestBody)
+	if err != nil {
+		return
+	}
+
 	fields := make(map[string]interface{})
 	err = json.Unmarshal(c.RequestBody, &fields)
 	if err != nil {

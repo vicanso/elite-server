@@ -24,6 +24,10 @@ import (
 	"go.uber.org/zap"
 )
 
+var (
+	logger = log.Default()
+)
+
 func init() {
 	// go func() {
 	// 	err := new(service.LongzuSrv).Sync()
@@ -47,7 +51,7 @@ func init() {
 func redisCheck() {
 	err := helper.RedisPing()
 	if err != nil {
-		log.Default().Error("redis check fail",
+		logger.Error("redis check fail",
 			zap.Error(err),
 		)
 		service.AlarmError("redis check fail")
@@ -58,7 +62,7 @@ func configRefresh() {
 	configSrv := new(service.ConfigurationSrv)
 	err := configSrv.Refresh()
 	if err != nil {
-		log.Default().Error("config refresh fail",
+		logger.Error("config refresh fail",
 			zap.Error(err),
 		)
 		service.AlarmError("config refresh fail")
@@ -68,26 +72,28 @@ func configRefresh() {
 func novelBasicInfoRefresh() {
 	err := new(service.NovelSrv).RefreshAllBasicInfo()
 	if err != nil {
-		log.Default().Error("novel basic info refresh fail",
+		logger.Error("novel basic info refresh fail",
 			zap.Error(err),
 		)
 	}
 }
 
 func resetNovelSearchHotKeywords() {
-	_, err := helper.RedisGetClient().Del(cs.NovelSearchHotKeyWords).Result()
+	_, err := helper.RedisGetClient().ZRemRangeByRank(cs.NovelSearchHotKeyWords, 0, -1).Result()
 	if err != nil {
-		log.Default().Error("reset novel search hot key words fail",
+		logger.Error("reset novel search hot key words fail",
 			zap.Error(err),
 		)
 	}
 }
 
 func updateNovelUnfinished() {
+	logger.Info("start to update unfinished")
 	err := new(service.NovelSrv).UpdateUnfinished()
 	if err != nil {
-		log.Default().Error("novel update unfinished fail",
+		logger.Error("novel update unfinished fail",
 			zap.Error(err),
 		)
 	}
+	logger.Info("update unfinished novel done")
 }
