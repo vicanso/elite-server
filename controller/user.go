@@ -23,7 +23,6 @@ import (
 	"github.com/vicanso/elite/middleware"
 	"github.com/vicanso/elite/validate"
 	"github.com/vicanso/hes"
-	"go.uber.org/zap"
 
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/cs"
@@ -63,10 +62,15 @@ type (
 	}
 	// userTrackerParams user tracker params
 	userTrackerParams struct {
-		Route        string `json:"route,omitempty" valid:"-"`
-		BookID       int    `json:"bookID,omitempty" valid:"-"`
-		ChapterIndex int    `json:"chapterIndex,omitempty" valid:"-"`
-		ReadOn       bool   `json:"readOn,omitempty" valid:"-"`
+		Route         string `json:"route,omitempty" valid:"-"`
+		BookID        int    `json:"bookID,omitempty" valid:"-"`
+		ChapterIndex  int    `json:"chapterIndex,omitempty" valid:"-"`
+		ReadOn        bool   `json:"readOn,omitempty" valid:"-"`
+		Brand         string `json:"brand,omitempty" valid:"-"`
+		SystemName    string `json:"systemName,omitempty" valid:"-"`
+		SystemVersion string `json:"systemVersion,omitempty" valid:"-"`
+		TrackID       string `json:"trackID,omitempty" valid:"-"`
+		UUID          string `json:"uuid,omitempty" valid:"-"`
 	}
 	loginTokenResp struct {
 		// 登录Token
@@ -526,14 +530,6 @@ func (ctrl userCtrl) addTrack(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	cookie, _ := c.Cookie(trackKey)
-	if cookie != nil {
-		fields["trackID"] = cookie.Value
-	}
-	logger.Info("user track",
-		zap.Any("tags", tags),
-		zap.Any("fields", fields),
-	)
 	influxSrv.Write(cs.MeasurementUserTrack, fields, tags)
 
 	c.Created(nil)
