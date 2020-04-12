@@ -81,12 +81,12 @@ func init() {
 	)
 	// 获取书籍详情
 	g.GET(
-		"/v1/:id",
+		"/v1/{id}",
 		ctrl.detail,
 	)
 	// 更新书籍详情
 	g.PATCH(
-		"/v1/:id",
+		"/v1/{id}",
 		loadUserSession,
 		shouldBeAdmin,
 		ctrl.update,
@@ -108,31 +108,31 @@ func init() {
 
 	// 获取书籍最新更新信息（id可以以,分隔一次查询多本书籍）
 	g.GET(
-		"/v1/:id/latestes",
+		"/v1/{id}/latestes",
 		ctrl.listLatestes,
 	)
 	// 获取章节列表
 	g.GET(
-		"/v1/:id/chapters",
+		"/v1/{id}/chapters",
 		ctrl.listChapters,
 	)
 	// 更新章节内容
 	g.PATCH(
-		"/v1/:id/chapters/:chapterId",
+		"/v1/{id}/chapters/:chapterId",
 		loadUserSession,
 		shouldBeAdmin,
 		ctrl.updateChapter,
 	)
 	// 更新书籍封面
 	g.PATCH(
-		"/v1/:id/cover",
+		"/v1/{id}/cover",
 		loadUserSession,
 		shouldBeAdmin,
 		ctrl.updateCover,
 	)
 	// 获取书籍封面
 	g.GET(
-		"/v1/:id/cover",
+		"/v1/{id}/cover",
 		validateForNoCache,
 		ctrl.getCover,
 	)
@@ -157,7 +157,7 @@ func init() {
 	)
 	// 更新笔趣阁
 	g.PATCH(
-		"/biquge/v1/sync/:max",
+		"/biquge/v1/sync/{max}",
 		loadUserSession,
 		shouldBeAdmin,
 		ctrl.syncBiQuGe,

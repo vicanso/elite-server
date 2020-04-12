@@ -18,11 +18,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/vicanso/elton"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elite/validate"
+	"github.com/vicanso/elton"
 )
 
 type (
@@ -76,13 +76,13 @@ func init() {
 		ctrl.add,
 	)
 	g.PATCH(
-		"/v1/:configID",
+		"/v1/{configID}",
 		newTracker(cs.ActionConfigurationUpdate),
 		shouldBeAdmin,
 		ctrl.update,
 	)
 	g.DELETE(
-		"/v1/:configID",
+		"/v1/{configID}",
 		newTracker(cs.ActionConfigurationDelete),
 		shouldBeAdmin,
 		ctrl.delete,
