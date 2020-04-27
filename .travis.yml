@@ -15,7 +15,7 @@ before_script:
   - psql -c "GRANT ALL PRIVILEGES ON DATABASE elite to vicanso;" -U postgres
 
 script:
-  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.24.0
+  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest 
   - env GO111MODULE=on make lint && make test
 
 after_success:
