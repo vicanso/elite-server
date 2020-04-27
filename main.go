@@ -56,6 +56,8 @@ import (
 	eltonMid "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 var (
@@ -91,17 +93,17 @@ func main() {
 	}
 
 	logger := log.Default()
-	d := elton.New()
-	d.SignedKeys = service.GetSignedKeys()
+	e := elton.New()
+	e.SignedKeys = service.GetSignedKeys()
 
 	// 未处理的error才会触发
 	// 如果1分钟出现超过5次未处理异常
 	warnerException := warner.NewWarner(60*time.Second, 5)
 	warnerException.ResetOnWarn = true
-	warnerException.On(func(_ string, _ int64) {
+	warnerException.On(func(_ string, _ warner.Count) {
 		service.AlarmError("too many uncaught exception")
 	})
-	d.OnError(func(c *elton.Context, err error) {
+	e.OnError(func(c *elton.Context, err error) {
 		if !util.IsProduction() {
 			he, ok := err.(*hes.Error)
 			if ok {
@@ -125,7 +127,7 @@ func main() {
 	// 如果1分钟同一个IP出现60次404
 	warner404 := warner.NewWarner(60*time.Second, 60)
 	warner404.ResetOnWarn = true
-	warner404.On(func(ip string, createdAt int64) {
+	warner404.On(func(ip string, _ warner.Count) {
 		service.AlarmError("too many 404 request, client ip:" + ip)
 	})
 	go func() {
@@ -135,7 +137,7 @@ func main() {
 		}
 	}()
 
-	d.NotFoundHandler = func(resp http.ResponseWriter, req *http.Request) {
+	e.NotFoundHandler = func(resp http.ResponseWriter, req *http.Request) {
 		ip := elton.GetRealIP(req)
 		logger.Info("404",
 			zap.String("ip", ip),
@@ -155,12 +157,12 @@ func main() {
 	}
 
 	// 捕捉panic异常，避免程序崩溃
-	d.Use(eltonMid.NewRecover())
+	e.Use(eltonMid.NewRecover())
 
-	d.Use(middleware.NewEntry())
+	e.Use(middleware.NewEntry())
 
 	// 接口相关统计信息
-	d.Use(eltonMid.NewStats(eltonMid.StatsConfig{
+	e.Use(eltonMid.NewStats(eltonMid.StatsConfig{
 		OnStats: func(info *eltonMid.StatsInfo, c *elton.Context) {
 			// ping 的日志忽略
 			if info.URI == "/ping" {
@@ -198,43 +200,47 @@ func main() {
 	}))
 
 	// 错误处理，将错误转换为json响应
-	d.Use(eltonMid.NewError(eltonMid.ErrorConfig{
+	e.Use(eltonMid.NewError(eltonMid.ErrorConfig{
 		ResponseType: "json",
 	}))
 
 	// IP限制
-	d.Use(middleware.NewIPBlock())
+	e.Use(middleware.NewIPBlock())
 
 	// 根据应用配置限制路由
-	d.Use(middleware.NewRouterController())
+	e.Use(middleware.NewRouterController())
 
 	// 路由并发限制
 	routerLimitConfig := config.GetRouterConcurrentLimit()
 	if len(routerLimitConfig) != 0 {
-		d.Use(routerLimiter.New(routerLimiter.Config{
+		e.Use(routerLimiter.New(routerLimiter.Config{
 			Limiter: routerLimiter.NewLocalLimiter(routerLimitConfig),
 		}))
 	}
 
-	// 压缩响应数据（由pike来压缩数据）
-	// d.Use(compress.NewDefault())
-
 	// etag与fresh的处理
-	d.Use(eltonMid.NewDefaultFresh())
-	d.Use(eltonMid.NewDefaultETag())
+	e.Use(eltonMid.NewDefaultFresh())
+	e.Use(eltonMid.NewDefaultETag())
 
 	// 对响应数据 c.Body 转换为相应的json响应
-	d.Use(eltonMid.NewDefaultResponder())
+	e.Use(eltonMid.NewDefaultResponder())
 
 	// 读取读取body的数的，转换为json bytes
 	bodyParserConfig := eltonMid.BodyParserConfig{}
 	bodyParserConfig.AddDecoder(eltonMid.NewGzipDecoder())
 	bodyParserConfig.AddDecoder(eltonMid.NewJSONDecoder())
 	bodyParserConfig.Limit = 3 * 1024 * 1024
-	d.Use(eltonMid.NewBodyParser(bodyParserConfig))
+	e.Use(eltonMid.NewBodyParser(bodyParserConfig))
 
 	// 初始化路由
-	router.Init(d)
+	for _, g := range router.GetGroups() {
+		e.AddGroup(g)
+	}
+
+	// http1与http2均支持
+	e.Server = &http.Server{
+		Handler: h2c.NewHandler(e, &http2.Server{}),
+	}
 
 	err := dependServiceCheck()
 	if err != nil {
@@ -247,7 +253,7 @@ func main() {
 	logger.Info("start to linstening...",
 		zap.String("listen", config.GetListen()),
 	)
-	err = d.ListenAndServe(config.GetListen())
+	err = e.ListenAndServe(config.GetListen())
 	if err != nil {
 		panic(err)
 	}
