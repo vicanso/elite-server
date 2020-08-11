@@ -24,7 +24,8 @@ influxdb:
   uri: http://192.168.0.171:9991
   bucket: elite
   org: bigTree
-  token: INFLUXDB_TOKEN 
+  token: 0YPvPGbzqPSwdQGBmJzCbsty4hh8xGEZ09q2tdG_0l0aZfKbaQgqflLgvRYTh6o4m26gvODGVfmKnQNoRG6nUQ==
+ 
   batchSize: 10
 
 # session的相关配置
