@@ -56,11 +56,13 @@ type (
 
 	// Influxdb config
 	InfluxdbConfig struct {
-		Bucket    string `valid:"runelength(1|50)"`
-		Org       string `valid:"runelength(1|100)"`
-		URI       string `valid:"url"`
-		Token     string `valid:"ascii"`
-		BatchSize uint   `valid:"range(1|5000)"`
+		Bucket        string        `valid:"runelength(1|50)"`
+		Org           string        `valid:"runelength(1|100)"`
+		URI           string        `valid:"url"`
+		Token         string        `valid:"ascii"`
+		BatchSize     uint          `valid:"range(1|5000)"`
+		FlushInterval time.Duration `valid:"-"`
+		Disabled      bool          `valid:"-"`
 	}
 	// WslConfig wsl config
 	WslConfig struct {
@@ -136,6 +138,16 @@ func GetENV() string {
 // GetInt viper get int
 func GetInt(key string) int {
 	return viper.GetInt(key)
+}
+
+// GetUint viper get uint
+func GetUint(key string) uint {
+	return viper.GetUint(key)
+}
+
+// GetBool viper get bool
+func GetBool(key string) bool {
+	return viper.GetBool(key)
 }
 
 // GetIntDefault get int with default value
@@ -304,16 +316,14 @@ func GetMailConfig() MailConfig {
 // GetInfluxdbConfig get influxdb config
 func GetInfluxdbConfig() InfluxdbConfig {
 	prefix := "influxdb."
-	token := viper.GetString(prefix + "token")
-	if os.Getenv(token) != "" {
-		token = os.Getenv(token)
-	}
 	influxdbConfig := InfluxdbConfig{
-		URI:       viper.GetString(prefix + "uri"),
-		Bucket:    viper.GetString(prefix + "bucket"),
-		Org:       viper.GetString(prefix + "org"),
-		Token:     token,
-		BatchSize: viper.GetUint(prefix + "batchSize"),
+		URI:           GetString(prefix + "uri"),
+		Bucket:        GetString(prefix + "bucket"),
+		Org:           GetString(prefix + "org"),
+		Token:         GetString(prefix + "token"),
+		BatchSize:     GetUint(prefix + "batchSize"),
+		FlushInterval: GetDuration(prefix + "flushInterval"),
+		Disabled:      GetBool(prefix + "disabled"),
 	}
 	validatePanic(&influxdbConfig)
 	return influxdbConfig

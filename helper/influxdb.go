@@ -15,50 +15,78 @@
 package helper
 
 import (
-	"sync"
 	"time"
 
 	influxdb "github.com/influxdata/influxdb-client-go"
+	influxdbAPI "github.com/influxdata/influxdb-client-go/api"
 	"github.com/vicanso/elite/config"
+	"github.com/vicanso/elite/log"
+	"go.uber.org/zap"
 )
 
 var (
-	influxdbClient   influxdb.InfluxDBClient
 	defaultInfluxSrv *InfluxSrv
-
-	initDefaultInfluxSrv sync.Once
 )
 
 type (
 	InfluxSrv struct {
-		writer influxdb.WriteApi
+		client influxdb.Client
+		writer influxdbAPI.WriteApi
 	}
 )
 
 func init() {
 	influxbConfig := config.GetInfluxdbConfig()
+	if influxbConfig.Disabled {
+		defaultInfluxSrv = new(InfluxSrv)
+		return
+	}
 	opts := influxdb.DefaultOptions()
 	opts.SetBatchSize(influxbConfig.BatchSize)
-	influxdbClient = influxdb.NewClientWithOptions(influxbConfig.URI, influxbConfig.Token, opts)
+	if influxbConfig.FlushInterval > time.Millisecond {
+		v := influxbConfig.FlushInterval / time.Millisecond
+		opts.SetFlushInterval(uint(v))
+	}
+	log.Default().Info("new influxdb client",
+		zap.String("uri", influxbConfig.URI),
+		zap.String("org", influxbConfig.Org),
+		zap.String("bucket", influxbConfig.Bucket),
+		zap.Uint("batchSize", influxbConfig.BatchSize),
+		zap.Duration("interfal", influxbConfig.FlushInterval),
+	)
+	c := influxdb.NewClientWithOptions(influxbConfig.URI, influxbConfig.Token, opts)
+	writer := c.WriteApi(influxbConfig.Org, influxbConfig.Bucket)
+	defaultInfluxSrv = &InfluxSrv{
+		client: c,
+		writer: writer,
+	}
 }
 
 // GetInfluxSrv get default influx service
 func GetInfluxSrv() *InfluxSrv {
-	initDefaultInfluxSrv.Do(func() {
-		influxbConfig := config.GetInfluxdbConfig()
-		defaultInfluxSrv = &InfluxSrv{
-			writer: influxdbClient.WriteApi(influxbConfig.Org, influxbConfig.Bucket),
-		}
-		// defaultInfluxSrv = &InfluxSrv{
-		// 	BatchSize: influxbConfig.BatchSize,
-		// 	Bucket:    influxbConfig.Bucket,
-		// 	Org:       influxbConfig.Org,
-		// }
-	})
 	return defaultInfluxSrv
 }
 
 // Write write metric to influxdb
 func (srv *InfluxSrv) Write(measurement string, fields map[string]interface{}, tags map[string]string) {
-	defaultInfluxSrv.writer.WritePoint(influxdb.NewPoint(measurement, tags, fields, time.Now()))
+	if srv.writer == nil {
+		return
+	}
+	srv.writer.WritePoint(influxdb.NewPoint(measurement, tags, fields, time.Now()))
+}
+
+// Flush flush metric list
+func (srv *InfluxSrv) Flush() {
+	if srv.writer == nil {
+		return
+	}
+	srv.writer.Flush()
+}
+
+// Close flush the point to influxdb and close client
+func (srv *InfluxSrv) Close() {
+	if srv.client == nil {
+		return
+	}
+	srv.client.Close()
 }
