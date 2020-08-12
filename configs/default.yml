@@ -25,7 +25,6 @@ influxdb:
   bucket: elite
   org: bigTree
   token: 0YPvPGbzqPSwdQGBmJzCbsty4hh8xGEZ09q2tdG_0l0aZfKbaQgqflLgvRYTh6o4m26gvODGVfmKnQNoRG6nUQ==
- 
   batchSize: 10
 
 # session的相关配置
