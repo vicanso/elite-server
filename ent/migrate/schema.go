@@ -40,6 +40,35 @@ var (
 			},
 		},
 	}
+	// NovelSourcesColumns holds the columns for the "novel_sources" table.
+	NovelSourcesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString},
+		{Name: "author", Type: field.TypeString},
+		{Name: "source", Type: field.TypeInt},
+		{Name: "source_id", Type: field.TypeInt},
+	}
+	// NovelSourcesTable holds the schema information for the "novel_sources" table.
+	NovelSourcesTable = &schema.Table{
+		Name:        "novel_sources",
+		Columns:     NovelSourcesColumns,
+		PrimaryKey:  []*schema.Column{NovelSourcesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+		Indexes: []*schema.Index{
+			{
+				Name:    "novelsource_name_author",
+				Unique:  false,
+				Columns: []*schema.Column{NovelSourcesColumns[3], NovelSourcesColumns[4]},
+			},
+			{
+				Name:    "novelsource_source_source_id",
+				Unique:  true,
+				Columns: []*schema.Column{NovelSourcesColumns[5], NovelSourcesColumns[6]},
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -105,6 +134,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ConfigurationsTable,
+		NovelSourcesTable,
 		UsersTable,
 		UserLoginsTable,
 	}

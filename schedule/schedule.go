@@ -19,6 +19,7 @@ import (
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/log"
+	"github.com/vicanso/elite/novel"
 	"github.com/vicanso/elite/service"
 
 	"go.uber.org/zap"
@@ -32,6 +33,7 @@ func init() {
 	_, _ = c.AddFunc("@every 5m", redisStats)
 	_, _ = c.AddFunc("@every 10s", entStats)
 	c.Start()
+	syncNovelSource()
 }
 
 func redisCheck() {
@@ -75,4 +77,8 @@ func entCheck() {
 func entStats() {
 	stats := helper.EntGetStats()
 	helper.GetInfluxSrv().Write(cs.MeasurementEntStats, stats, nil)
+}
+
+func syncNovelSource() {
+	novel.SyncSource()
 }

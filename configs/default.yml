@@ -61,3 +61,9 @@ minio:
   accessKeyID: origin 
   secretAccessKey: test123456
   ssl: false
+
+# 抓取小说配置
+novel:
+  biquge:
+    baseURL: https://www.biquge.com.cn
+    timeout: 10s

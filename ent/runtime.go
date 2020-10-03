@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/vicanso/elite/ent/configuration"
+	"github.com/vicanso/elite/ent/novelsource"
 	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/ent/user"
 	"github.com/vicanso/elite/ent/userlogin"
@@ -48,6 +49,36 @@ func init() {
 	configurationDescData := configurationFields[3].Descriptor()
 	// configuration.DataValidator is a validator for the "data" field. It is called by the builders before save.
 	configuration.DataValidator = configurationDescData.Validators[0].(func(string) error)
+	novelsourceMixin := schema.NovelSource{}.Mixin()
+	novelsourceMixinFields0 := novelsourceMixin[0].Fields()
+	novelsourceFields := schema.NovelSource{}.Fields()
+	_ = novelsourceFields
+	// novelsourceDescCreatedAt is the schema descriptor for created_at field.
+	novelsourceDescCreatedAt := novelsourceMixinFields0[0].Descriptor()
+	// novelsource.DefaultCreatedAt holds the default value on creation for the created_at field.
+	novelsource.DefaultCreatedAt = novelsourceDescCreatedAt.Default.(func() time.Time)
+	// novelsourceDescUpdatedAt is the schema descriptor for updated_at field.
+	novelsourceDescUpdatedAt := novelsourceMixinFields0[1].Descriptor()
+	// novelsource.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	novelsource.DefaultUpdatedAt = novelsourceDescUpdatedAt.Default.(func() time.Time)
+	// novelsource.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	novelsource.UpdateDefaultUpdatedAt = novelsourceDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// novelsourceDescName is the schema descriptor for name field.
+	novelsourceDescName := novelsourceFields[0].Descriptor()
+	// novelsource.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	novelsource.NameValidator = novelsourceDescName.Validators[0].(func(string) error)
+	// novelsourceDescAuthor is the schema descriptor for author field.
+	novelsourceDescAuthor := novelsourceFields[1].Descriptor()
+	// novelsource.AuthorValidator is a validator for the "author" field. It is called by the builders before save.
+	novelsource.AuthorValidator = novelsourceDescAuthor.Validators[0].(func(string) error)
+	// novelsourceDescSource is the schema descriptor for source field.
+	novelsourceDescSource := novelsourceFields[2].Descriptor()
+	// novelsource.SourceValidator is a validator for the "source" field. It is called by the builders before save.
+	novelsource.SourceValidator = novelsourceDescSource.Validators[0].(func(int) error)
+	// novelsourceDescSourceID is the schema descriptor for source_id field.
+	novelsourceDescSourceID := novelsourceFields[3].Descriptor()
+	// novelsource.SourceIDValidator is a validator for the "source_id" field. It is called by the builders before save.
+	novelsource.SourceIDValidator = novelsourceDescSourceID.Validators[0].(func(int) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	userMixinFields1 := userMixin[1].Fields()

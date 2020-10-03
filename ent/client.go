@@ -10,6 +10,7 @@ import (
 	"github.com/vicanso/elite/ent/migrate"
 
 	"github.com/vicanso/elite/ent/configuration"
+	"github.com/vicanso/elite/ent/novelsource"
 	"github.com/vicanso/elite/ent/user"
 	"github.com/vicanso/elite/ent/userlogin"
 
@@ -24,6 +25,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Configuration is the client for interacting with the Configuration builders.
 	Configuration *ConfigurationClient
+	// NovelSource is the client for interacting with the NovelSource builders.
+	NovelSource *NovelSourceClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserLogin is the client for interacting with the UserLogin builders.
@@ -42,6 +45,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Configuration = NewConfigurationClient(c.config)
+	c.NovelSource = NewNovelSourceClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserLogin = NewUserLoginClient(c.config)
 }
@@ -77,6 +81,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:           ctx,
 		config:        cfg,
 		Configuration: NewConfigurationClient(cfg),
+		NovelSource:   NewNovelSourceClient(cfg),
 		User:          NewUserClient(cfg),
 		UserLogin:     NewUserLoginClient(cfg),
 	}, nil
@@ -95,6 +100,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		config:        cfg,
 		Configuration: NewConfigurationClient(cfg),
+		NovelSource:   NewNovelSourceClient(cfg),
 		User:          NewUserClient(cfg),
 		UserLogin:     NewUserLoginClient(cfg),
 	}, nil
@@ -126,6 +132,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Configuration.Use(hooks...)
+	c.NovelSource.Use(hooks...)
 	c.User.Use(hooks...)
 	c.UserLogin.Use(hooks...)
 }
@@ -216,6 +223,94 @@ func (c *ConfigurationClient) GetX(ctx context.Context, id int) *Configuration {
 // Hooks returns the client hooks.
 func (c *ConfigurationClient) Hooks() []Hook {
 	return c.hooks.Configuration
+}
+
+// NovelSourceClient is a client for the NovelSource schema.
+type NovelSourceClient struct {
+	config
+}
+
+// NewNovelSourceClient returns a client for the NovelSource from the given config.
+func NewNovelSourceClient(c config) *NovelSourceClient {
+	return &NovelSourceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `novelsource.Hooks(f(g(h())))`.
+func (c *NovelSourceClient) Use(hooks ...Hook) {
+	c.hooks.NovelSource = append(c.hooks.NovelSource, hooks...)
+}
+
+// Create returns a create builder for NovelSource.
+func (c *NovelSourceClient) Create() *NovelSourceCreate {
+	mutation := newNovelSourceMutation(c.config, OpCreate)
+	return &NovelSourceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of NovelSource entities.
+func (c *NovelSourceClient) CreateBulk(builders ...*NovelSourceCreate) *NovelSourceCreateBulk {
+	return &NovelSourceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for NovelSource.
+func (c *NovelSourceClient) Update() *NovelSourceUpdate {
+	mutation := newNovelSourceMutation(c.config, OpUpdate)
+	return &NovelSourceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NovelSourceClient) UpdateOne(ns *NovelSource) *NovelSourceUpdateOne {
+	mutation := newNovelSourceMutation(c.config, OpUpdateOne, withNovelSource(ns))
+	return &NovelSourceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NovelSourceClient) UpdateOneID(id int) *NovelSourceUpdateOne {
+	mutation := newNovelSourceMutation(c.config, OpUpdateOne, withNovelSourceID(id))
+	return &NovelSourceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for NovelSource.
+func (c *NovelSourceClient) Delete() *NovelSourceDelete {
+	mutation := newNovelSourceMutation(c.config, OpDelete)
+	return &NovelSourceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *NovelSourceClient) DeleteOne(ns *NovelSource) *NovelSourceDeleteOne {
+	return c.DeleteOneID(ns.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *NovelSourceClient) DeleteOneID(id int) *NovelSourceDeleteOne {
+	builder := c.Delete().Where(novelsource.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NovelSourceDeleteOne{builder}
+}
+
+// Query returns a query builder for NovelSource.
+func (c *NovelSourceClient) Query() *NovelSourceQuery {
+	return &NovelSourceQuery{config: c.config}
+}
+
+// Get returns a NovelSource entity by its id.
+func (c *NovelSourceClient) Get(ctx context.Context, id int) (*NovelSource, error) {
+	return c.Query().Where(novelsource.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NovelSourceClient) GetX(ctx context.Context, id int) *NovelSource {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *NovelSourceClient) Hooks() []Hook {
+	return c.hooks.NovelSource
 }
 
 // UserClient is a client for the User schema.

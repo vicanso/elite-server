@@ -147,6 +147,13 @@ type (
 		SecretAccessKey string `validate:"required,min=6"`
 		SSL             bool
 	}
+
+	// NovelConfig
+	NovelConfig struct {
+		Name    string        `validate:"required"`
+		BaseURL string        `validate:"required,url"`
+		Timeout time.Duration `validate:"required"`
+	}
 )
 
 // loadConfigX 加载配置，出错是则抛出panic
@@ -375,4 +382,21 @@ func GetMinioConfig() MinioConfig {
 	}
 	validateX(&minioConfig)
 	return minioConfig
+}
+
+// GetNovelConfigs 获取novel的抓取配置
+func GetNovelConfigs() []NovelConfig {
+	prefix := "novel."
+	keys := []string{
+		"biquge",
+	}
+	data := make([]NovelConfig, len(keys))
+	for index, name := range keys {
+		data[index] = NovelConfig{
+			Name:    name,
+			BaseURL: defaultViperX.GetString(prefix + name + ".baseURL"),
+			Timeout: defaultViperX.GetDuration(prefix + name + ".timeout"),
+		}
+	}
+	return data
 }

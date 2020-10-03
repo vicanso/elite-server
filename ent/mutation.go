@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/vicanso/elite/ent/configuration"
+	"github.com/vicanso/elite/ent/novelsource"
 	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/ent/user"
 	"github.com/vicanso/elite/ent/userlogin"
@@ -26,6 +27,7 @@ const (
 
 	// Node types.
 	TypeConfiguration = "Configuration"
+	TypeNovelSource   = "NovelSource"
 	TypeUser          = "User"
 	TypeUserLogin     = "UserLogin"
 )
@@ -797,6 +799,643 @@ func (m *ConfigurationMutation) ClearEdge(name string) error {
 // defined in the schema.
 func (m *ConfigurationMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Configuration edge %s", name)
+}
+
+// NovelSourceMutation represents an operation that mutate the NovelSources
+// nodes in the graph.
+type NovelSourceMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	created_at    *time.Time
+	updated_at    *time.Time
+	name          *string
+	author        *string
+	source        *int
+	addsource     *int
+	source_id     *int
+	addsource_id  *int
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*NovelSource, error)
+}
+
+var _ ent.Mutation = (*NovelSourceMutation)(nil)
+
+// novelsourceOption allows to manage the mutation configuration using functional options.
+type novelsourceOption func(*NovelSourceMutation)
+
+// newNovelSourceMutation creates new mutation for $n.Name.
+func newNovelSourceMutation(c config, op Op, opts ...novelsourceOption) *NovelSourceMutation {
+	m := &NovelSourceMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeNovelSource,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withNovelSourceID sets the id field of the mutation.
+func withNovelSourceID(id int) novelsourceOption {
+	return func(m *NovelSourceMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *NovelSource
+		)
+		m.oldValue = func(ctx context.Context) (*NovelSource, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().NovelSource.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withNovelSource sets the old NovelSource of the mutation.
+func withNovelSource(node *NovelSource) novelsourceOption {
+	return func(m *NovelSourceMutation) {
+		m.oldValue = func(context.Context) (*NovelSource, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m NovelSourceMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m NovelSourceMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the id value in the mutation. Note that, the id
+// is available only if it was provided to the builder.
+func (m *NovelSourceMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetCreatedAt sets the created_at field.
+func (m *NovelSourceMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the created_at value in the mutation.
+func (m *NovelSourceMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old created_at value of the NovelSource.
+// If the NovelSource object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *NovelSourceMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCreatedAt is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt reset all changes of the "created_at" field.
+func (m *NovelSourceMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the updated_at field.
+func (m *NovelSourceMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the updated_at value in the mutation.
+func (m *NovelSourceMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old updated_at value of the NovelSource.
+// If the NovelSource object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *NovelSourceMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUpdatedAt is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt reset all changes of the "updated_at" field.
+func (m *NovelSourceMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetName sets the name field.
+func (m *NovelSourceMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the name value in the mutation.
+func (m *NovelSourceMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old name value of the NovelSource.
+// If the NovelSource object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *NovelSourceMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldName is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName reset all changes of the "name" field.
+func (m *NovelSourceMutation) ResetName() {
+	m.name = nil
+}
+
+// SetAuthor sets the author field.
+func (m *NovelSourceMutation) SetAuthor(s string) {
+	m.author = &s
+}
+
+// Author returns the author value in the mutation.
+func (m *NovelSourceMutation) Author() (r string, exists bool) {
+	v := m.author
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAuthor returns the old author value of the NovelSource.
+// If the NovelSource object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *NovelSourceMutation) OldAuthor(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldAuthor is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldAuthor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAuthor: %w", err)
+	}
+	return oldValue.Author, nil
+}
+
+// ResetAuthor reset all changes of the "author" field.
+func (m *NovelSourceMutation) ResetAuthor() {
+	m.author = nil
+}
+
+// SetSource sets the source field.
+func (m *NovelSourceMutation) SetSource(i int) {
+	m.source = &i
+	m.addsource = nil
+}
+
+// Source returns the source value in the mutation.
+func (m *NovelSourceMutation) Source() (r int, exists bool) {
+	v := m.source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSource returns the old source value of the NovelSource.
+// If the NovelSource object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *NovelSourceMutation) OldSource(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSource is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSource: %w", err)
+	}
+	return oldValue.Source, nil
+}
+
+// AddSource adds i to source.
+func (m *NovelSourceMutation) AddSource(i int) {
+	if m.addsource != nil {
+		*m.addsource += i
+	} else {
+		m.addsource = &i
+	}
+}
+
+// AddedSource returns the value that was added to the source field in this mutation.
+func (m *NovelSourceMutation) AddedSource() (r int, exists bool) {
+	v := m.addsource
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSource reset all changes of the "source" field.
+func (m *NovelSourceMutation) ResetSource() {
+	m.source = nil
+	m.addsource = nil
+}
+
+// SetSourceID sets the source_id field.
+func (m *NovelSourceMutation) SetSourceID(i int) {
+	m.source_id = &i
+	m.addsource_id = nil
+}
+
+// SourceID returns the source_id value in the mutation.
+func (m *NovelSourceMutation) SourceID() (r int, exists bool) {
+	v := m.source_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSourceID returns the old source_id value of the NovelSource.
+// If the NovelSource object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *NovelSourceMutation) OldSourceID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSourceID is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSourceID: %w", err)
+	}
+	return oldValue.SourceID, nil
+}
+
+// AddSourceID adds i to source_id.
+func (m *NovelSourceMutation) AddSourceID(i int) {
+	if m.addsource_id != nil {
+		*m.addsource_id += i
+	} else {
+		m.addsource_id = &i
+	}
+}
+
+// AddedSourceID returns the value that was added to the source_id field in this mutation.
+func (m *NovelSourceMutation) AddedSourceID() (r int, exists bool) {
+	v := m.addsource_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSourceID reset all changes of the "source_id" field.
+func (m *NovelSourceMutation) ResetSourceID() {
+	m.source_id = nil
+	m.addsource_id = nil
+}
+
+// Op returns the operation name.
+func (m *NovelSourceMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (NovelSource).
+func (m *NovelSourceMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during
+// this mutation. Note that, in order to get all numeric
+// fields that were in/decremented, call AddedFields().
+func (m *NovelSourceMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.created_at != nil {
+		fields = append(fields, novelsource.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, novelsource.FieldUpdatedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, novelsource.FieldName)
+	}
+	if m.author != nil {
+		fields = append(fields, novelsource.FieldAuthor)
+	}
+	if m.source != nil {
+		fields = append(fields, novelsource.FieldSource)
+	}
+	if m.source_id != nil {
+		fields = append(fields, novelsource.FieldSourceID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name.
+// The second boolean value indicates that this field was
+// not set, or was not define in the schema.
+func (m *NovelSourceMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case novelsource.FieldCreatedAt:
+		return m.CreatedAt()
+	case novelsource.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case novelsource.FieldName:
+		return m.Name()
+	case novelsource.FieldAuthor:
+		return m.Author()
+	case novelsource.FieldSource:
+		return m.Source()
+	case novelsource.FieldSourceID:
+		return m.SourceID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *NovelSourceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case novelsource.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case novelsource.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case novelsource.FieldName:
+		return m.OldName(ctx)
+	case novelsource.FieldAuthor:
+		return m.OldAuthor(ctx)
+	case novelsource.FieldSource:
+		return m.OldSource(ctx)
+	case novelsource.FieldSourceID:
+		return m.OldSourceID(ctx)
+	}
+	return nil, fmt.Errorf("unknown NovelSource field %s", name)
+}
+
+// SetField sets the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *NovelSourceMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case novelsource.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case novelsource.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case novelsource.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case novelsource.FieldAuthor:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAuthor(v)
+		return nil
+	case novelsource.FieldSource:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSource(v)
+		return nil
+	case novelsource.FieldSourceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSourceID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown NovelSource field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented
+// or decremented during this mutation.
+func (m *NovelSourceMutation) AddedFields() []string {
+	var fields []string
+	if m.addsource != nil {
+		fields = append(fields, novelsource.FieldSource)
+	}
+	if m.addsource_id != nil {
+		fields = append(fields, novelsource.FieldSourceID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was in/decremented
+// from a field with the given name. The second value indicates
+// that this field was not set, or was not define in the schema.
+func (m *NovelSourceMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case novelsource.FieldSource:
+		return m.AddedSource()
+	case novelsource.FieldSourceID:
+		return m.AddedSourceID()
+	}
+	return nil, false
+}
+
+// AddField adds the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *NovelSourceMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case novelsource.FieldSource:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSource(v)
+		return nil
+	case novelsource.FieldSourceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSourceID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown NovelSource numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared
+// during this mutation.
+func (m *NovelSourceMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicates if this field was
+// cleared in this mutation.
+func (m *NovelSourceMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value for the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *NovelSourceMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown NovelSource nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation regarding the
+// given field name. It returns an error if the field is not
+// defined in the schema.
+func (m *NovelSourceMutation) ResetField(name string) error {
+	switch name {
+	case novelsource.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case novelsource.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case novelsource.FieldName:
+		m.ResetName()
+		return nil
+	case novelsource.FieldAuthor:
+		m.ResetAuthor()
+		return nil
+	case novelsource.FieldSource:
+		m.ResetSource()
+		return nil
+	case novelsource.FieldSourceID:
+		m.ResetSourceID()
+		return nil
+	}
+	return fmt.Errorf("unknown NovelSource field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this
+// mutation.
+func (m *NovelSourceMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all ids (to other nodes) that were added for
+// the given edge name.
+func (m *NovelSourceMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this
+// mutation.
+func (m *NovelSourceMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all ids (to other nodes) that were removed for
+// the given edge name.
+func (m *NovelSourceMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this
+// mutation.
+func (m *NovelSourceMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean indicates if this edge was
+// cleared in this mutation.
+func (m *NovelSourceMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value for the given name. It returns an
+// error if the edge name is not defined in the schema.
+func (m *NovelSourceMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown NovelSource unique edge %s", name)
+}
+
+// ResetEdge resets all changes in the mutation regarding the
+// given edge name. It returns an error if the edge is not
+// defined in the schema.
+func (m *NovelSourceMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown NovelSource edge %s", name)
 }
 
 // UserMutation represents an operation that mutate the Users

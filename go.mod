@@ -3,6 +3,7 @@ module github.com/vicanso/elite
 go 1.15
 
 require (
+	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/disintegration/imaging v1.6.2
 	github.com/dustin/go-humanize v1.0.0
 	github.com/facebook/ent v0.4.3
