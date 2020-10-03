@@ -17,7 +17,6 @@
 package novel
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/vicanso/elite/config"
@@ -51,8 +50,8 @@ type (
 		SourceID    int
 		Source      int
 	}
-	// NovelChapter 小说章节
-	NovelChapter struct {
+	// Chapter 小说章节
+	Chapter struct {
 		Title string
 		NO    int
 		URL   string
@@ -89,8 +88,8 @@ func getNovelConfig(name string) (conf config.NovelConfig) {
 // SyncSource 同步小说
 func SyncSource() (err error) {
 	// NewBiQuGe().GetChapterContent("/book/15517/3997542.html")
-	fmt.Println(NewBiQuGe().GetDetail(8349))
-	return
+	// fmt.Println(NewBiQuGe().GetDetail(8349))
+	// return
 	redisSrv := new(helper.Redis)
 	// 确保只有一个实例在更新
 	ok, done, err := redisSrv.LockWithDone("novel-sync-source", time.Hour)

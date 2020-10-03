@@ -16,12 +16,13 @@ package controller
 
 import (
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vicanso/elton"
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/service"
+	"github.com/vicanso/elton"
 )
 
 func TestCommonCtrl(t *testing.T) {
@@ -49,7 +50,7 @@ func TestCommonCtrl(t *testing.T) {
 		assert.Nil(err)
 		info, ok := c.Body.(*applicationInfoResp)
 		assert.True(ok)
-		assert.Equal("go1.15", info.GO)
+		assert.True(strings.HasPrefix(info.GO, "go1.15"))
 		assert.Equal("public, max-age=60", c.Header().Get(elton.HeaderCacheControl))
 	})
 

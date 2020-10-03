@@ -15,6 +15,8 @@
 package schedule
 
 import (
+	"os"
+
 	"github.com/robfig/cron/v3"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/helper"
@@ -32,8 +34,11 @@ func init() {
 	_, _ = c.AddFunc("@every 1m", configRefresh)
 	_, _ = c.AddFunc("@every 5m", redisStats)
 	_, _ = c.AddFunc("@every 10s", entStats)
+	if os.Getenv("SYNC_SOURCE") != "" {
+		_, _ = c.AddFunc("@every 12h", syncNovelSource)
+		go syncNovelSource()
+	}
 	c.Start()
-	syncNovelSource()
 }
 
 func redisCheck() {

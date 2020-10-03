@@ -150,7 +150,7 @@ func (bqg *biQuGe) GetCover(id int) (img image.Image, err error) {
 }
 
 // GetChapters 获取小说章节列表
-func (bqg *biQuGe) GetChapters(id int) (chpaters []*NovelChapter, err error) {
+func (bqg *biQuGe) GetChapters(id int) (chpaters []*Chapter, err error) {
 	data, err := bqg.getDetail(id)
 	if err != nil {
 		return
@@ -161,12 +161,12 @@ func (bqg *biQuGe) GetChapters(id int) (chpaters []*NovelChapter, err error) {
 	}
 	items := doc.Find("#list dd")
 	max := items.Length()
-	chpaters = make([]*NovelChapter, max)
+	chpaters = make([]*Chapter, max)
 	for i := 0; i < max; i++ {
 		item := items.Eq(i)
 		title := item.Text()
 		href, _ := item.Find("a").Attr("href")
-		chpaters[i] = &NovelChapter{
+		chpaters[i] = &Chapter{
 			Title: title,
 			NO:    i,
 			URL:   href,
