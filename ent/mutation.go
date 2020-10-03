@@ -816,6 +816,7 @@ type NovelSourceMutation struct {
 	addsource     *int
 	source_id     *int
 	addsource_id  *int
+	description   *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*NovelSource, error)
@@ -1162,6 +1163,43 @@ func (m *NovelSourceMutation) ResetSourceID() {
 	m.addsource_id = nil
 }
 
+// SetDescription sets the description field.
+func (m *NovelSourceMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the description value in the mutation.
+func (m *NovelSourceMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old description value of the NovelSource.
+// If the NovelSource object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *NovelSourceMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDescription is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription reset all changes of the "description" field.
+func (m *NovelSourceMutation) ResetDescription() {
+	m.description = nil
+}
+
 // Op returns the operation name.
 func (m *NovelSourceMutation) Op() Op {
 	return m.op
@@ -1176,7 +1214,7 @@ func (m *NovelSourceMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *NovelSourceMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
 		fields = append(fields, novelsource.FieldCreatedAt)
 	}
@@ -1194,6 +1232,9 @@ func (m *NovelSourceMutation) Fields() []string {
 	}
 	if m.source_id != nil {
 		fields = append(fields, novelsource.FieldSourceID)
+	}
+	if m.description != nil {
+		fields = append(fields, novelsource.FieldDescription)
 	}
 	return fields
 }
@@ -1215,6 +1256,8 @@ func (m *NovelSourceMutation) Field(name string) (ent.Value, bool) {
 		return m.Source()
 	case novelsource.FieldSourceID:
 		return m.SourceID()
+	case novelsource.FieldDescription:
+		return m.Description()
 	}
 	return nil, false
 }
@@ -1236,6 +1279,8 @@ func (m *NovelSourceMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldSource(ctx)
 	case novelsource.FieldSourceID:
 		return m.OldSourceID(ctx)
+	case novelsource.FieldDescription:
+		return m.OldDescription(ctx)
 	}
 	return nil, fmt.Errorf("unknown NovelSource field %s", name)
 }
@@ -1286,6 +1331,13 @@ func (m *NovelSourceMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSourceID(v)
+		return nil
+	case novelsource.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
 		return nil
 	}
 	return fmt.Errorf("unknown NovelSource field %s", name)
@@ -1381,6 +1433,9 @@ func (m *NovelSourceMutation) ResetField(name string) error {
 		return nil
 	case novelsource.FieldSourceID:
 		m.ResetSourceID()
+		return nil
+	case novelsource.FieldDescription:
+		m.ResetDescription()
 		return nil
 	}
 	return fmt.Errorf("unknown NovelSource field %s", name)

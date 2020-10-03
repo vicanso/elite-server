@@ -112,12 +112,14 @@ func (bqg *biQuGe) GetDetail(id int) (novel Novel, err error) {
 	if len(authorInfos) != 2 {
 		return
 	}
+	desc := strings.TrimSpace(doc.Find("#maininfo #intro").Text())
 
 	novel = Novel{
-		Name:     name,
-		Author:   authorInfos[1],
-		Source:   NovelSourceBiQuGe,
-		SourceID: id,
+		Name:        name,
+		Author:      authorInfos[1],
+		Description: desc,
+		Source:      NovelSourceBiQuGe,
+		SourceID:    id,
 	}
 	return
 }

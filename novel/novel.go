@@ -17,6 +17,7 @@
 package novel
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/vicanso/elite/config"
@@ -44,10 +45,11 @@ const (
 type (
 	// Novel 小说
 	Novel struct {
-		Name     string
-		Author   string
-		SourceID int
-		Source   int
+		Name        string
+		Author      string
+		Description string
+		SourceID    int
+		Source      int
 	}
 	// NovelChapter 小说章节
 	NovelChapter struct {
@@ -66,6 +68,7 @@ func (novel *Novel) AddToSource() (source *ent.NovelSource, err error) {
 		SetAuthor(novel.Author).
 		SetSource(novel.Source).
 		SetSourceID(novel.SourceID).
+		SetDescription(novel.Description).
 		Save(ctx)
 	if err != nil {
 		return
@@ -86,7 +89,8 @@ func getNovelConfig(name string) (conf config.NovelConfig) {
 // SyncSource 同步小说
 func SyncSource() (err error) {
 	// NewBiQuGe().GetChapterContent("/book/15517/3997542.html")
-	// NewBiQuGe().GetCover(8349)
+	fmt.Println(NewBiQuGe().GetDetail(8349))
+	return
 	redisSrv := new(helper.Redis)
 	// 确保只有一个实例在更新
 	ok, done, err := redisSrv.LockWithDone("novel-sync-source", time.Hour)

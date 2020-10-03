@@ -72,6 +72,12 @@ func (nsc *NovelSourceCreate) SetSourceID(i int) *NovelSourceCreate {
 	return nsc
 }
 
+// SetDescription sets the description field.
+func (nsc *NovelSourceCreate) SetDescription(s string) *NovelSourceCreate {
+	nsc.mutation.SetDescription(s)
+	return nsc
+}
+
 // Mutation returns the NovelSourceMutation object of the builder.
 func (nsc *NovelSourceCreate) Mutation() *NovelSourceMutation {
 	return nsc.mutation
@@ -174,6 +180,9 @@ func (nsc *NovelSourceCreate) check() error {
 			return &ValidationError{Name: "source_id", err: fmt.Errorf("ent: validator failed for field \"source_id\": %w", err)}
 		}
 	}
+	if _, ok := nsc.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New("ent: missing required field \"description\"")}
+	}
 	return nil
 }
 
@@ -248,6 +257,14 @@ func (nsc *NovelSourceCreate) createSpec() (*NovelSource, *sqlgraph.CreateSpec) 
 			Column: novelsource.FieldSourceID,
 		})
 		_node.SourceID = value
+	}
+	if value, ok := nsc.mutation.Description(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: novelsource.FieldDescription,
+		})
+		_node.Description = value
 	}
 	return _node, _spec
 }
