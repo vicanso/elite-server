@@ -17,6 +17,7 @@ package novel
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -136,12 +137,66 @@ func (bqg *biQuGe) GetCover(id int) (img image.Image, err error) {
 	}
 	// 少于10KB的封面认为无封面
 	if len(resp.Data) < 10*1024 {
+		err = errors.New("cover not found")
 		return
 	}
 	img, err = jpeg.Decode(bytes.NewReader(resp.Data))
 	if err != nil {
 		return
 	}
+	return
+}
+
+// GetChapters 获取小说章节列表
+func (bqg *biQuGe) GetChapters(id int) (chpaters []*NovelChapter, err error) {
+	data, err := bqg.getDetail(id)
+	if err != nil {
+		return
+	}
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
+	if err != nil {
+		return
+	}
+	items := doc.Find("#list dd")
+	max := items.Length()
+	chpaters = make([]*NovelChapter, max)
+	for i := 0; i < max; i++ {
+		item := items.Eq(i)
+		title := item.Text()
+		href, _ := item.Find("a").Attr("href")
+		chpaters[i] = &NovelChapter{
+			Title: title,
+			NO:    i,
+			URL:   href,
+		}
+	}
+	return
+}
+
+// GetChapterContent 获取小说章节内容
+func (bqg *biQuGe) GetChapterContent(url string) (content string, err error) {
+	resp, err := bqg.ins.Get(url)
+	if err != nil {
+		return
+	}
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(resp.Data))
+	if err != nil {
+		return
+	}
+	html, err := doc.Find("#content").Html()
+	if err != nil {
+		return
+	}
+	arr := strings.Split(html, "<br/>")
+	data := make([]string, 0, len(arr))
+	for _, item := range arr {
+		value := strings.TrimSpace(item)
+		if value == "" {
+			continue
+		}
+		data = append(data, item)
+	}
+	content = strings.Join(data, "\n")
 	return
 }
 

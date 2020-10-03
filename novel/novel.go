@@ -41,12 +41,21 @@ const (
 	NovelSourceBiQuGe = iota + 1
 )
 
-type Novel struct {
-	Name     string
-	Author   string
-	SourceID int
-	Source   int
-}
+type (
+	// Novel 小说
+	Novel struct {
+		Name     string
+		Author   string
+		SourceID int
+		Source   int
+	}
+	// NovelChapter 小说章节
+	NovelChapter struct {
+		Title string
+		NO    int
+		URL   string
+	}
+)
 
 // AddToSource 添加至小说源
 func (novel *Novel) AddToSource() (source *ent.NovelSource, err error) {
@@ -76,7 +85,7 @@ func getNovelConfig(name string) (conf config.NovelConfig) {
 
 // SyncSource 同步小说
 func SyncSource() (err error) {
-	// NewBiQuGe().GetCover(11125)
+	// NewBiQuGe().GetChapterContent("/book/15517/3997542.html")
 	// NewBiQuGe().GetCover(8349)
 	redisSrv := new(helper.Redis)
 	// 确保只有一个实例在更新
