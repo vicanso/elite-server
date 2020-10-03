@@ -38,8 +38,6 @@ func (NovelSource) Fields() []ent.Field {
 			NonNegative().
 			Immutable().
 			Comment("小说来源ID"),
-		field.String("description").
-			Comment("小说描述"),
 	}
 }
 

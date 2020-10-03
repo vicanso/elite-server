@@ -27,12 +27,6 @@ func (nsu *NovelSourceUpdate) Where(ps ...predicate.NovelSource) *NovelSourceUpd
 	return nsu
 }
 
-// SetDescription sets the description field.
-func (nsu *NovelSourceUpdate) SetDescription(s string) *NovelSourceUpdate {
-	nsu.mutation.SetDescription(s)
-	return nsu
-}
-
 // Mutation returns the NovelSourceMutation object of the builder.
 func (nsu *NovelSourceUpdate) Mutation() *NovelSourceMutation {
 	return nsu.mutation
@@ -123,13 +117,6 @@ func (nsu *NovelSourceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: novelsource.FieldUpdatedAt,
 		})
 	}
-	if value, ok := nsu.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: novelsource.FieldDescription,
-		})
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, nsu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{novelsource.Label}
@@ -146,12 +133,6 @@ type NovelSourceUpdateOne struct {
 	config
 	hooks    []Hook
 	mutation *NovelSourceMutation
-}
-
-// SetDescription sets the description field.
-func (nsuo *NovelSourceUpdateOne) SetDescription(s string) *NovelSourceUpdateOne {
-	nsuo.mutation.SetDescription(s)
-	return nsuo
 }
 
 // Mutation returns the NovelSourceMutation object of the builder.
@@ -240,13 +221,6 @@ func (nsuo *NovelSourceUpdateOne) sqlSave(ctx context.Context) (_node *NovelSour
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: novelsource.FieldUpdatedAt,
-		})
-	}
-	if value, ok := nsuo.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: novelsource.FieldDescription,
 		})
 	}
 	_node = &NovelSource{config: nsuo.config}

@@ -28,8 +28,6 @@ type NovelSource struct {
 	Source int `json:"source,omitempty"`
 	// SourceID holds the value of the "source_id" field.
 	SourceID int `json:"sourceID,omitempty"`
-	// Description holds the value of the "description" field.
-	Description string `json:"description,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -42,7 +40,6 @@ func (*NovelSource) scanValues() []interface{} {
 		&sql.NullString{}, // author
 		&sql.NullInt64{},  // source
 		&sql.NullInt64{},  // source_id
-		&sql.NullString{}, // description
 	}
 }
 
@@ -88,11 +85,6 @@ func (ns *NovelSource) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		ns.SourceID = int(value.Int64)
 	}
-	if value, ok := values[6].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field description", values[6])
-	} else if value.Valid {
-		ns.Description = value.String
-	}
 	return nil
 }
 
@@ -131,8 +123,6 @@ func (ns *NovelSource) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ns.Source))
 	builder.WriteString(", source_id=")
 	builder.WriteString(fmt.Sprintf("%v", ns.SourceID))
-	builder.WriteString(", description=")
-	builder.WriteString(ns.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

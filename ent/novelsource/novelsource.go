@@ -23,8 +23,6 @@ const (
 	FieldSource = "source"
 	// FieldSourceID holds the string denoting the source_id field in the database.
 	FieldSourceID = "source_id"
-	// FieldDescription holds the string denoting the description field in the database.
-	FieldDescription = "description"
 
 	// Table holds the table name of the novelsource in the database.
 	Table = "novel_sources"
@@ -39,7 +37,6 @@ var Columns = []string{
 	FieldAuthor,
 	FieldSource,
 	FieldSourceID,
-	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
