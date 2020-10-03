@@ -234,6 +234,30 @@ func (f ConfigurationMutationRuleFunc) EvalMutation(ctx context.Context, m ent.M
 	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.ConfigurationMutation", m)
 }
 
+// The NovelQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type NovelQueryRuleFunc func(context.Context, *ent.NovelQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f NovelQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.NovelQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.NovelQuery", q)
+}
+
+// The NovelMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type NovelMutationRuleFunc func(context.Context, *ent.NovelMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f NovelMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.NovelMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.NovelMutation", m)
+}
+
 // The NovelSourceQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type NovelSourceQueryRuleFunc func(context.Context, *ent.NovelSourceQuery) error

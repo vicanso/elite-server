@@ -48,10 +48,7 @@ type biQuGe struct {
 
 // NewBiQuGe 初始化biquge小说网站实例
 func NewBiQuGe() *biQuGe {
-	conf := getNovelConfig(novelBiQuGeName)
-	if conf.Name == "" {
-		panic("get biquge's config fail")
-	}
+	conf := getConfig(novelBiQuGeName)
 	ins := helper.NewInstance(conf.Name, conf.BaseURL, conf.Timeout)
 	return &biQuGe{
 		ins:   ins,
@@ -112,14 +109,14 @@ func (bqg *biQuGe) GetDetail(id int) (novel Novel, err error) {
 	if len(authorInfos) != 2 {
 		return
 	}
-	desc := strings.TrimSpace(doc.Find("#maininfo #intro").Text())
+	summary := strings.TrimSpace(doc.Find("#maininfo #intro").Text())
 
 	novel = Novel{
-		Name:        name,
-		Author:      authorInfos[1],
-		Description: desc,
-		Source:      NovelSourceBiQuGe,
-		SourceID:    id,
+		Name:     name,
+		Author:   authorInfos[1],
+		Summary:  summary,
+		Source:   NovelSourceBiQuGe,
+		SourceID: id,
 	}
 	return
 }

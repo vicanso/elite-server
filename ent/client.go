@@ -10,6 +10,7 @@ import (
 	"github.com/vicanso/elite/ent/migrate"
 
 	"github.com/vicanso/elite/ent/configuration"
+	"github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/ent/novelsource"
 	"github.com/vicanso/elite/ent/user"
 	"github.com/vicanso/elite/ent/userlogin"
@@ -25,6 +26,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Configuration is the client for interacting with the Configuration builders.
 	Configuration *ConfigurationClient
+	// Novel is the client for interacting with the Novel builders.
+	Novel *NovelClient
 	// NovelSource is the client for interacting with the NovelSource builders.
 	NovelSource *NovelSourceClient
 	// User is the client for interacting with the User builders.
@@ -45,6 +48,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Configuration = NewConfigurationClient(c.config)
+	c.Novel = NewNovelClient(c.config)
 	c.NovelSource = NewNovelSourceClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserLogin = NewUserLoginClient(c.config)
@@ -81,6 +85,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:           ctx,
 		config:        cfg,
 		Configuration: NewConfigurationClient(cfg),
+		Novel:         NewNovelClient(cfg),
 		NovelSource:   NewNovelSourceClient(cfg),
 		User:          NewUserClient(cfg),
 		UserLogin:     NewUserLoginClient(cfg),
@@ -100,6 +105,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		config:        cfg,
 		Configuration: NewConfigurationClient(cfg),
+		Novel:         NewNovelClient(cfg),
 		NovelSource:   NewNovelSourceClient(cfg),
 		User:          NewUserClient(cfg),
 		UserLogin:     NewUserLoginClient(cfg),
@@ -132,6 +138,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Configuration.Use(hooks...)
+	c.Novel.Use(hooks...)
 	c.NovelSource.Use(hooks...)
 	c.User.Use(hooks...)
 	c.UserLogin.Use(hooks...)
@@ -223,6 +230,94 @@ func (c *ConfigurationClient) GetX(ctx context.Context, id int) *Configuration {
 // Hooks returns the client hooks.
 func (c *ConfigurationClient) Hooks() []Hook {
 	return c.hooks.Configuration
+}
+
+// NovelClient is a client for the Novel schema.
+type NovelClient struct {
+	config
+}
+
+// NewNovelClient returns a client for the Novel from the given config.
+func NewNovelClient(c config) *NovelClient {
+	return &NovelClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `novel.Hooks(f(g(h())))`.
+func (c *NovelClient) Use(hooks ...Hook) {
+	c.hooks.Novel = append(c.hooks.Novel, hooks...)
+}
+
+// Create returns a create builder for Novel.
+func (c *NovelClient) Create() *NovelCreate {
+	mutation := newNovelMutation(c.config, OpCreate)
+	return &NovelCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Novel entities.
+func (c *NovelClient) CreateBulk(builders ...*NovelCreate) *NovelCreateBulk {
+	return &NovelCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Novel.
+func (c *NovelClient) Update() *NovelUpdate {
+	mutation := newNovelMutation(c.config, OpUpdate)
+	return &NovelUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NovelClient) UpdateOne(n *Novel) *NovelUpdateOne {
+	mutation := newNovelMutation(c.config, OpUpdateOne, withNovel(n))
+	return &NovelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NovelClient) UpdateOneID(id int) *NovelUpdateOne {
+	mutation := newNovelMutation(c.config, OpUpdateOne, withNovelID(id))
+	return &NovelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Novel.
+func (c *NovelClient) Delete() *NovelDelete {
+	mutation := newNovelMutation(c.config, OpDelete)
+	return &NovelDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *NovelClient) DeleteOne(n *Novel) *NovelDeleteOne {
+	return c.DeleteOneID(n.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *NovelClient) DeleteOneID(id int) *NovelDeleteOne {
+	builder := c.Delete().Where(novel.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NovelDeleteOne{builder}
+}
+
+// Query returns a query builder for Novel.
+func (c *NovelClient) Query() *NovelQuery {
+	return &NovelQuery{config: c.config}
+}
+
+// Get returns a Novel entity by its id.
+func (c *NovelClient) Get(ctx context.Context, id int) (*Novel, error) {
+	return c.Query().Where(novel.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NovelClient) GetX(ctx context.Context, id int) *Novel {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *NovelClient) Hooks() []Hook {
+	return c.hooks.Novel
 }
 
 // NovelSourceClient is a client for the NovelSource schema.

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/vicanso/elite/ent/configuration"
+	"github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/ent/novelsource"
 	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/ent/user"
@@ -49,6 +50,38 @@ func init() {
 	configurationDescData := configurationFields[3].Descriptor()
 	// configuration.DataValidator is a validator for the "data" field. It is called by the builders before save.
 	configuration.DataValidator = configurationDescData.Validators[0].(func(string) error)
+	novelMixin := schema.Novel{}.Mixin()
+	novelMixinFields0 := novelMixin[0].Fields()
+	novelFields := schema.Novel{}.Fields()
+	_ = novelFields
+	// novelDescCreatedAt is the schema descriptor for created_at field.
+	novelDescCreatedAt := novelMixinFields0[0].Descriptor()
+	// novel.DefaultCreatedAt holds the default value on creation for the created_at field.
+	novel.DefaultCreatedAt = novelDescCreatedAt.Default.(func() time.Time)
+	// novelDescUpdatedAt is the schema descriptor for updated_at field.
+	novelDescUpdatedAt := novelMixinFields0[1].Descriptor()
+	// novel.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	novel.DefaultUpdatedAt = novelDescUpdatedAt.Default.(func() time.Time)
+	// novel.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	novel.UpdateDefaultUpdatedAt = novelDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// novelDescName is the schema descriptor for name field.
+	novelDescName := novelFields[0].Descriptor()
+	// novel.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	novel.NameValidator = novelDescName.Validators[0].(func(string) error)
+	// novelDescAuthor is the schema descriptor for author field.
+	novelDescAuthor := novelFields[1].Descriptor()
+	// novel.AuthorValidator is a validator for the "author" field. It is called by the builders before save.
+	novel.AuthorValidator = novelDescAuthor.Validators[0].(func(string) error)
+	// novelDescSource is the schema descriptor for source field.
+	novelDescSource := novelFields[2].Descriptor()
+	// novel.SourceValidator is a validator for the "source" field. It is called by the builders before save.
+	novel.SourceValidator = novelDescSource.Validators[0].(func(int) error)
+	// novelDescStatus is the schema descriptor for status field.
+	novelDescStatus := novelFields[3].Descriptor()
+	// novel.DefaultStatus holds the default value on creation for the status field.
+	novel.DefaultStatus = novelDescStatus.Default.(int)
+	// novel.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	novel.StatusValidator = novelDescStatus.Validators[0].(func(int) error)
 	novelsourceMixin := schema.NovelSource{}.Mixin()
 	novelsourceMixinFields0 := novelsourceMixin[0].Fields()
 	novelsourceFields := schema.NovelSource{}.Fields()

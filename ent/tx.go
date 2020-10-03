@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Configuration is the client for interacting with the Configuration builders.
 	Configuration *ConfigurationClient
+	// Novel is the client for interacting with the Novel builders.
+	Novel *NovelClient
 	// NovelSource is the client for interacting with the NovelSource builders.
 	NovelSource *NovelSourceClient
 	// User is the client for interacting with the User builders.
@@ -156,6 +158,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Configuration = NewConfigurationClient(tx.config)
+	tx.Novel = NewNovelClient(tx.config)
 	tx.NovelSource = NewNovelSourceClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserLogin = NewUserLoginClient(tx.config)

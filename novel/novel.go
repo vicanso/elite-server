@@ -21,7 +21,10 @@ import (
 
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/ent"
+	"github.com/vicanso/elite/ent/novel"
+	"github.com/vicanso/elite/ent/novelsource"
 	"github.com/vicanso/elite/helper"
+	"github.com/vicanso/hes"
 	"golang.org/x/net/context"
 )
 
@@ -29,6 +32,18 @@ var novelConfigs = config.GetNovelConfigs()
 
 var (
 	getEntClient = helper.EntGetClient
+)
+
+const (
+	errNovelCategory = "novel"
+)
+
+var (
+	errNovelSourceNotFound = &hes.Error{
+		Message:    "无法找到该小说的源",
+		StatusCode: 400,
+		Category:   errNovelCategory,
+	}
 )
 
 const (
@@ -44,11 +59,11 @@ const (
 type (
 	// Novel 小说
 	Novel struct {
-		Name        string
-		Author      string
-		Description string
-		SourceID    int
-		Source      int
+		Name     string
+		Author   string
+		Summary  string
+		SourceID int
+		Source   int
 	}
 	// Chapter 小说章节
 	Chapter struct {
@@ -56,7 +71,21 @@ type (
 		NO    int
 		URL   string
 	}
+	QueryParams struct {
+		Name   string
+		Author string
+	}
 )
+
+// getConfig 获取对应的novel配置
+func getConfig(name string) (conf config.NovelConfig) {
+	for _, item := range novelConfigs {
+		if item.Name == name {
+			conf = item
+		}
+	}
+	return
+}
 
 // AddToSource 添加至小说源
 func (novel *Novel) AddToSource() (source *ent.NovelSource, err error) {
@@ -74,14 +103,46 @@ func (novel *Novel) AddToSource() (source *ent.NovelSource, err error) {
 	return
 }
 
-// getNovelConfig 获取对应的novel配置
-func getNovelConfig(name string) (conf config.NovelConfig) {
-	for _, item := range novelConfigs {
-		if item.Name == name {
-			conf = item
-		}
-	}
+// Add 添加小说
+func (novel *Novel) Add() (result *ent.Novel, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	result, err = getEntClient().Novel.Create().
+		SetName(novel.Name).
+		SetAuthor(novel.Author).
+		SetSource(novel.Source).
+		SetSummary(novel.Summary).
+		Save(ctx)
 	return
+}
+
+// FirstNovel 查询第一条符合条件的小说
+func (params *QueryParams) FirstNovel() (*ent.Novel, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	query := getEntClient().Novel.Query()
+	if params.Name != "" {
+		query = query.Where(novel.NameEQ(params.Name))
+	}
+	if params.Author != "" {
+		query = query.Where(novel.AuthorEQ(params.Author))
+	}
+	return query.First(ctx)
+}
+
+// FirstNovelSOurce 获取第一个符合的小说源
+func (params *QueryParams) FirstNovelSource() (*ent.NovelSource, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	query := getEntClient().NovelSource.Query()
+	if params.Name != "" {
+		query = query.Where(novelsource.NameEQ(params.Name))
+	}
+	if params.Author != "" {
+		query = query.Where(novelsource.AuthorEQ(params.Author))
+	}
+	query = query.Order(ent.Asc("source"))
+	return query.First(ctx)
 }
 
 // SyncSource 同步小说
@@ -99,5 +160,37 @@ func SyncSource() (err error) {
 	if err != nil {
 		return
 	}
+	return
+}
+
+// Publish 发布小说
+func Publish(params QueryParams) (novel *ent.Novel, err error) {
+	novel, err = params.FirstNovel()
+	if ent.IsNotFound(err) {
+		err = nil
+	}
+	if err != nil || novel != nil {
+		return
+	}
+	novelSource, err := params.FirstNovelSource()
+	if err != nil {
+		return
+	}
+	if novelSource == nil {
+		err = errNovelSourceNotFound
+		return
+	}
+	// TODO 支持更多的小说源
+	result, err := NewBiQuGe().GetDetail(novelSource.SourceID)
+	if err != nil {
+		return
+	}
+
+	// 添加小说
+	novel, err = result.Add()
+	if err != nil {
+		return
+	}
+
 	return
 }

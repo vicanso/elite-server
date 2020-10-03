@@ -15,8 +15,8 @@
 package util
 
 import (
-	"github.com/vicanso/elton"
 	"github.com/vicanso/elite/config"
+	"github.com/vicanso/elton"
 )
 
 var sessionConfig = config.GetSessionConfig()

@@ -9,6 +9,9 @@ import (
 // Configuration is the predicate function for configuration builders.
 type Configuration func(*sql.Selector)
 
+// Novel is the predicate function for novel builders.
+type Novel func(*sql.Selector)
+
 // NovelSource is the predicate function for novelsource builders.
 type NovelSource func(*sql.Selector)
 
