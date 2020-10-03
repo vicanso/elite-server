@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,37 +24,23 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	logger = log.Default()
-)
-
 func init() {
-	// go func() {
-	// 	err := new(service.LongzuSrv).Sync()
-	// 	if err != nil {
-	// 		log.Default().Error("sync longzu fail",
-	// 			zap.Error(err),
-	// 		)
-	// 	} else {
-	// 		log.Default().Info("sync longzu success")
-	// 	}
-	// }()
 	c := cron.New()
 	_, _ = c.AddFunc("@every 5m", redisCheck)
+	_, _ = c.AddFunc("@every 5m", entCheck)
 	_, _ = c.AddFunc("@every 1m", configRefresh)
-	_, _ = c.AddFunc("@every 10m", novelBasicInfoRefresh)
-	_, _ = c.AddFunc("00 00 * * *", resetNovelSearchHotKeywords)
-	_, _ = c.AddFunc("@every 2h", updateNovelUnfinished)
+	_, _ = c.AddFunc("@every 5m", redisStats)
+	_, _ = c.AddFunc("@every 10s", entStats)
 	c.Start()
 }
 
 func redisCheck() {
 	err := helper.RedisPing()
 	if err != nil {
-		logger.Error("redis check fail",
+		log.Default().Error("redis check fail",
 			zap.Error(err),
 		)
-		service.AlarmError("redis check fail")
+		service.AlarmError("redis check fail, " + err.Error())
 	}
 }
 
@@ -62,38 +48,31 @@ func configRefresh() {
 	configSrv := new(service.ConfigurationSrv)
 	err := configSrv.Refresh()
 	if err != nil {
-		logger.Error("config refresh fail",
+		log.Default().Error("config refresh fail",
 			zap.Error(err),
 		)
-		service.AlarmError("config refresh fail")
+		service.AlarmError("config refresh fail, " + err.Error())
 	}
 }
 
-func novelBasicInfoRefresh() {
-	err := new(service.NovelSrv).RefreshAllBasicInfo()
+func redisStats() {
+	// 统计中除了redis数据库的统计，还有当前实例的统计指标，因此所有实例都会写入统计
+	stats := helper.RedisStats()
+	helper.GetInfluxSrv().Write(cs.MeasurementRedisStats, stats, nil)
+}
+
+func entCheck() {
+	err := helper.EntPing()
 	if err != nil {
-		logger.Error("novel basic info refresh fail",
+		log.Default().Error("ent check fail",
 			zap.Error(err),
 		)
+		service.AlarmError("ent check fail, " + err.Error())
 	}
 }
 
-func resetNovelSearchHotKeywords() {
-	_, err := helper.RedisGetClient().ZRemRangeByRank(cs.NovelSearchHotKeyWords, 0, -1).Result()
-	if err != nil {
-		logger.Error("reset novel search hot key words fail",
-			zap.Error(err),
-		)
-	}
-}
-
-func updateNovelUnfinished() {
-	logger.Info("start to update unfinished")
-	err := new(service.NovelSrv).UpdateUnfinished()
-	if err != nil {
-		logger.Error("novel update unfinished fail",
-			zap.Error(err),
-		)
-	}
-	logger.Info("update unfinished novel done")
+// entStats ent的性能统计
+func entStats() {
+	stats := helper.EntGetStats()
+	helper.GetInfluxSrv().Write(cs.MeasurementEntStats, stats, nil)
 }

@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,24 @@
 package cs
 
 const (
-	MeasurementHTTPRequest = "http-request"
-	MeasurementPG          = "pg-stats"
-	MeasurementRedis       = "redis-stats"
-	MeasurementHTTP        = "http-stats"
-	MeasurementUserTrack   = "user-track"
+	// MeasurementHTTPRequest http request统计
+	MeasurementHTTPRequest = "httpRequest"
+	// MeasurementRedisStats redis性能统计
+	MeasurementRedisStats = "redisStats"
+	// MeasurementHTTPStats http性能统计
+	MeasurementHTTPStats = "httpStats"
+	// MeasurementEntStats ent性能统计
+	MeasurementEntStats = "entStats"
+	// MeasurementEntOP ent的操作记录
+	MeasurementEntOP = "entOP"
+	// MeasurementHTTPError http响应出错统计
+	MeasurementHTTPError = "httpError"
+	// MeasurementUserTracker 用户行为记录
+	MeasurementUserTracker = "userTracker"
+	// MeasurementUserLogin 用户登录
+	MeasurementUserLogin = "userLogin"
+	// MeasurementUserAddTrack 添加用户跟踪
+	MeasurementUserAddTrack = "userAddTrack"
+	// MeasurementException 异常
+	MeasurementException = "exception"
 )

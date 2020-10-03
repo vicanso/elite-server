@@ -20,25 +20,23 @@ import (
 	"time"
 
 	"github.com/vicanso/elton"
+	"github.com/vicanso/elton/middleware"
 	"github.com/vicanso/elite/helper"
-	"github.com/vicanso/elite/log"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
-
-	concurrentLimiter "github.com/vicanso/elton-concurrent-limiter"
 )
 
 const (
-	concurrentLimitKeyPrefix = "mid-concurrent-limit"
-	ipLimitKeyPrefix         = "mid-ip-limit"
-	errorLimitKeyPrefix      = "mid-error-limit"
-	errLimitCategory         = "request-limit"
+	concurrentLimitKeyPrefix = "midConcurrentLimit"
+	ipLimitKeyPrefix         = "midIPLimit"
+	errorLimitKeyPrefix      = "midErrorLimit"
+	errLimitCategory         = "requestLimit"
 )
 
 var (
 	errTooFrequently = &hes.Error{
 		StatusCode: http.StatusBadRequest,
-		Message:    "request to frequently",
+		Message:    "请求过于频繁，请稍候再试！",
 		Category:   errLimitCategory,
 	}
 	redisSrv = new(helper.Redis)
@@ -50,7 +48,7 @@ type (
 )
 
 // createConcurrentLimitLock 创建并发限制的lock函数
-func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) concurrentLimiter.Lock {
+func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) middleware.ConcurrentLimiterLock {
 	return func(key string, _ *elton.Context) (success bool, done func(), err error) {
 		k := concurrentLimitKeyPrefix + "-" + prefix + "-" + key
 		done = nil
@@ -59,7 +57,7 @@ func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) 
 			done = func() {
 				err := redisDone()
 				if err != nil {
-					log.Default().Error("redis done fail",
+					logger.Error("redis done fail",
 						zap.String("key", k),
 						zap.Error(err),
 					)
@@ -72,15 +70,25 @@ func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) 
 	}
 }
 
-// NewConcurrentLimit create a concurrent limit
+// NewConcurrentLimit 创建并发限制的中间件
 func NewConcurrentLimit(keys []string, ttl time.Duration, prefix string) elton.Handler {
-	return concurrentLimiter.New(concurrentLimiter.Config{
-		Lock: createConcurrentLimitLock(prefix, ttl, false),
-		Keys: keys,
+	return middleware.NewConcurrentLimiter(middleware.ConcurrentLimiterConfig{
+		NotAllowEmpty: true,
+		Lock:          createConcurrentLimitLock(prefix, ttl, false),
+		Keys:          keys,
 	})
 }
 
-// NewIPLimit create a limit middleware by ip address
+// NewConcurrentLimitWithDone 创建并发限制中间件，且带done函数
+func NewConcurrentLimitWithDone(keys []string, ttl time.Duration, prefix string) elton.Handler {
+	return middleware.NewConcurrentLimiter(middleware.ConcurrentLimiterConfig{
+		NotAllowEmpty: true,
+		Lock:          createConcurrentLimitLock(prefix, ttl, true),
+		Keys:          keys,
+	})
+}
+
+// NewIPLimit 创建IP限制中间件
 func NewIPLimit(maxCount int64, ttl time.Duration, prefix string) elton.Handler {
 	return func(c *elton.Context) (err error) {
 		key := ipLimitKeyPrefix + "-" + prefix + "-" + c.RealIP()
@@ -96,7 +104,7 @@ func NewIPLimit(maxCount int64, ttl time.Duration, prefix string) elton.Handler 
 	}
 }
 
-// NewErrorLimit create a error limit middleware
+// NewErrorLimit 创建出错限制中间件
 func NewErrorLimit(maxCount int64, ttl time.Duration, fn KeyGenerator) elton.Handler {
 	return func(c *elton.Context) (err error) {
 		key := errorLimitKeyPrefix + "-" + fn(c)
@@ -105,7 +113,8 @@ func NewErrorLimit(maxCount int64, ttl time.Duration, fn KeyGenerator) elton.Han
 			return
 		}
 		count, _ := strconv.Atoi(result)
-		if int64(count) > maxCount {
+		// 因为count是处理完才inc，因此增加等于的判断
+		if int64(count) >= maxCount {
 			err = errTooFrequently
 			return
 		}

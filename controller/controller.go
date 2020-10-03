@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,51 +16,74 @@ package controller
 
 import (
 	"net/http"
+	"regexp"
 	"strconv"
+	"strings"
 
-	"github.com/vicanso/elite/helper"
-	"github.com/vicanso/elite/validate"
-
+	"github.com/iancoleman/strcase"
+	"github.com/vicanso/elton"
+	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/elite/cs"
+	"github.com/vicanso/elite/ent"
+	"github.com/vicanso/elite/ent/schema"
+	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/middleware"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elite/util"
-	"github.com/vicanso/elton"
 	"github.com/vicanso/hes"
-
-	jsoniter "github.com/json-iterator/go"
 	"go.uber.org/zap"
+)
 
-	eltonMid "github.com/vicanso/elton/middleware"
+type (
+	// listParams 公共的列表查询参数
+	listParams struct {
+		Limit  string `json:"limit,omitempty" validate:"xLimit"`
+		Offset string `json:"offset,omitempty" validate:"omitempty,xOffset"`
+		Fields string `json:"fields,omitempty" validate:"omitempty,xFields"`
+		Order  string `json:"order,omitempty" validate:"omitempty,xOrder"`
+	}
 )
 
 var (
-	errShouldLogin  = hes.New("should login first")
-	errLoginAlready = hes.New("login already, please logout first")
-	errForbidden    = &hes.Error{
+	errShouldLogin = &hes.Error{
+		Message:    "请先登录",
+		StatusCode: http.StatusBadRequest,
+		Category:   errUserCategory,
+	}
+	errLoginAlready = &hes.Error{
+		Message:    "已是登录状态，请先退出登录",
+		StatusCode: http.StatusBadRequest,
+		Category:   errUserCategory,
+	}
+	errForbidden = &hes.Error{
 		StatusCode: http.StatusForbidden,
-		Message:    "acccess forbidden",
+		Message:    "禁止使用该功能",
+		Category:   errUserCategory,
 	}
 )
 
 var (
 	logger       = log.Default()
+	getEntClient = helper.EntGetClient
 	now          = util.NowString
-	getTrackID   = util.GetTrackID
-	standardJSON = jsoniter.ConfigCompatibleWithStandardLibrary
 
-	// 服务列表
-	// 配置服务
-	configSrv = new(service.ConfigurationSrv)
-	// 用户服务
-	userSrv = new(service.UserSrv)
-	// novel服务
-	novelSrv = new(service.NovelSrv)
-	// biQuGeSrv 笔趣阁服务
-	biQuGeSrv = new(service.BiQuGeSrv)
-	// influx服务
-	influxSrv *helper.InfluxSrv
+	getUserSession = service.NewUserSession
+	// 加载用户session
+	loadUserSession = elton.Compose(sessionInterceptor, middleware.NewSession())
+	// 判断用户是否登录
+	shouldBeLogined = checkLogin
+	// 判断用户是否未登录
+	shouldBeAnonymous = checkAnonymous
+	// 判断用户是否admin权限
+	shouldBeAdmin = newCheckRolesMiddleware([]string{
+		schema.UserRoleSu,
+		schema.UserRoleAdmin,
+	})
+	// shouldBeSu 判断用户是否su权限
+	shouldBeSu = newCheckRolesMiddleware([]string{
+		schema.UserRoleSu,
+	})
 
 	// 创建新的并发控制中间件
 	newConcurrentLimit = middleware.NewConcurrentLimit
@@ -69,45 +92,129 @@ var (
 	// 创建出错限制中间件
 	newErrorLimit = middleware.NewErrorLimit
 
-	getUserSession = service.NewUserSession
-	// 加载用户session
-	loadUserSession = middleware.NewSession()
-	// 判断用户是否登录
-	shouldLogined = elton.Compose(loadUserSession, checkLogin)
-	// 判断用户是否未登录
-	shouldAnonymous = elton.Compose(loadUserSession, checkAnonymous)
-	// 判断用户是否admin权限
-	shouldBeAdmin = elton.Compose(loadUserSession, isAdmin)
-
 	// 图形验证码校验
-	captchaValidate elton.Handler
+	captchaValidate = newMagicalCaptchaValidate()
+	// 获取influx service
+	getInfluxSrv = helper.GetInfluxSrv
+	// 文件服务
+	fileSrv = new(service.FileSrv)
 )
 
-func init() {
-	magicalValue := ""
-	if !util.IsProduction() {
-		magicalValue = cs.MagicalCaptcha
-	}
-	captchaValidate = middleware.ValidateCaptch(magicalValue)
-	influxSrv = helper.GetInfluxSrv()
+// GetLimit 获取limit的值
+func (params *listParams) GetLimit() int {
+	limit, _ := strconv.Atoi(params.Limit)
+	return limit
 }
 
+// GetOffset 获取offset的值
+func (params *listParams) GetOffset() int {
+	offset, _ := strconv.Atoi(params.Offset)
+	return offset
+}
+
+// GetOrders 获取排序的函数列表
+func (params *listParams) GetOrders() []ent.OrderFunc {
+	if params.Order == "" {
+		return nil
+	}
+	arr := strings.Split(params.Order, ",")
+	funcs := make([]ent.OrderFunc, len(arr))
+	for index, item := range arr {
+		if item[0] == '-' {
+			funcs[index] = ent.Desc(strcase.ToSnake(item[1:]))
+		} else {
+			funcs[index] = ent.Asc(strcase.ToSnake(item))
+		}
+	}
+	return funcs
+}
+
+// GetFields 获取选择的字段
+func (params *listParams) GetFields() []string {
+	if params.Fields == "" {
+		return nil
+	}
+	arr := strings.Split(params.Fields, ",")
+	result := make([]string, len(arr))
+	for index, item := range arr {
+		result[index] = strcase.ToSnake(item)
+	}
+	return result
+}
+
+func newMagicalCaptchaValidate() elton.Handler {
+	magicValue := ""
+	if !util.IsProduction() {
+		magicValue = "0145"
+	}
+	return middleware.ValidateCaptcha(magicValue)
+}
+
+// isLogined 判断是否登录状态
+func isLogined(c *elton.Context) bool {
+	us := service.NewUserSession(c)
+	return us.IsLogined()
+}
+
+// checkLogin 校验是否登录中间件
+func checkLogin(c *elton.Context) (err error) {
+	if !isLogined(c) {
+		err = errShouldLogin
+		return
+	}
+	return c.Next()
+}
+
+// checkAnonymous 判断是匿名状态
+func checkAnonymous(c *elton.Context) (err error) {
+	if isLogined(c) {
+		err = errLoginAlready
+		return
+	}
+	return c.Next()
+}
+
+// newCheckRolesMiddleware 创建用户角色校验中间件
+func newCheckRolesMiddleware(validRoles []string) elton.Handler {
+	return func(c *elton.Context) (err error) {
+		if !isLogined(c) {
+			err = errShouldLogin
+			return
+		}
+		us := service.NewUserSession(c)
+		userInfo, err := us.GetInfo()
+		if err != nil {
+			return
+		}
+		valid := util.ContainsAny(validRoles, userInfo.Roles)
+		if valid {
+			return c.Next()
+		}
+		err = errForbidden
+		return
+	}
+}
+
+// newTracker 初始化用户行为跟踪中间件
 func newTracker(action string) elton.Handler {
-	return eltonMid.NewTracker(eltonMid.TrackerConfig{
-		OnTrack: func(info *eltonMid.TrackerInfo, c *elton.Context) {
+	return M.NewTracker(M.TrackerConfig{
+		Mask: regexp.MustCompile(`(?i)password`),
+		OnTrack: func(info *M.TrackerInfo, c *elton.Context) {
 			account := ""
 			us := service.NewUserSession(c)
-			if us != nil {
-				account = us.GetAccount()
+			if us != nil && us.IsLogined() {
+				account = us.MustGetInfo().Account
 			}
+			ip := c.RealIP()
+			sid := util.GetSessionID(c)
 			fields := make([]zap.Field, 0, 10)
 			fields = append(
 				fields,
 				zap.String("action", action),
 				zap.String("cid", info.CID),
 				zap.String("account", account),
-				zap.String("ip", c.RealIP()),
-				zap.String("sid", util.GetSessionID(c)),
+				zap.String("ip", ip),
+				zap.String("sid", sid),
 				zap.Int("result", info.Result),
 			)
 			if info.Query != nil {
@@ -123,94 +230,39 @@ func newTracker(action string) elton.Handler {
 				fields = append(fields, zap.Error(info.Err))
 			}
 			logger.Info("tracker", fields...)
+			getInfluxSrv().Write(cs.MeasurementUserTracker, map[string]interface{}{
+				"cid":     info.CID,
+				"account": account,
+				"ip":      ip,
+				"sid":     sid,
+			}, map[string]string{
+				"action": action,
+				"result": strconv.Itoa(info.Result),
+			})
 		},
 	})
 }
 
-func isLogin(c *elton.Context) bool {
-	us := service.NewUserSession(c)
-	if us == nil || us.GetAccount() == "" {
-		return false
-	}
-	return true
-}
-
-func checkLogin(c *elton.Context) (err error) {
-	if !isLogin(c) {
-		err = errShouldLogin
+// getIDFromParams get id form context params
+func getIDFromParams(c *elton.Context) (id int, err error) {
+	id, err = strconv.Atoi(c.Param("id"))
+	if err != nil {
+		he := hes.Wrap(err)
+		he.Category = "parseInt"
+		err = he
 		return
 	}
-	return c.Next()
-}
-
-func checkAnonymous(c *elton.Context) (err error) {
-	if isLogin(c) {
-		err = errLoginAlready
-		return
-	}
-	return c.Next()
-}
-
-// validateForNoCache 校验请求参数是否带有no cache，如果有，则设置为no cache
-func validateForNoCache(c *elton.Context) (err error) {
-	setNoCache := c.QueryParam("nocache") == "true"
-	err = c.Next()
-	if setNoCache {
-		c.NoCache()
-	}
-	return err
-}
-
-// func newCheckRoles(validRoles []string) elton.Handler {
-// 	return func(c *elton.Context) (err error) {
-// 		if !isLogin(c) {
-// 			err = errShouldLogin
-// 			return
-// 		}
-// 		us := service.NewUserSession(c)
-// 		roles := us.GetRoles()
-// 		valid := util.UserRoleIsValid(validRoles, roles)
-// 		if valid {
-// 			return c.Next()
-// 		}
-// 		err = errForbidden
-// 		return
-// 	}
-// }
-
-func isAdmin(c *elton.Context) (err error) {
-	if !isLogin(c) {
-		err = errShouldLogin
-		return
-	}
-	us := service.NewUserSession(c)
-	if us.IsAdmin() {
-		return c.Next()
-	}
-	err = errForbidden
 	return
 }
 
-func getDbQueryParams(c *elton.Context) (params *helper.DbParams, err error) {
-	query := c.Query()
-	params = &helper.DbParams{
-		Fields: query["fields"],
-		Order:  query["order"],
+// sessionInterceptor session的拦截
+func sessionInterceptor(c *elton.Context) error {
+	message, ok := service.GetSessionInterceptorMessage()
+	// 如果有配置拦截信息，则以出错返回
+	if ok {
+		he := hes.New(message)
+		he.Category = "sessionInterceptor"
+		return he
 	}
-	limit := query["limit"]
-	if limit != "" {
-		params.Limit, err = strconv.Atoi(limit)
-		if err != nil {
-			return
-		}
-	}
-	offset := query["offset"]
-	if offset != "" {
-		params.Offset, err = strconv.Atoi(offset)
-		if err != nil {
-			return
-		}
-	}
-	err = validate.Do(params, nil)
-	return
+	return c.Next()
 }

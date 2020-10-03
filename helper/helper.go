@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,19 +14,15 @@
 
 package helper
 
-import (
-	jsoniter "github.com/json-iterator/go"
-	"github.com/vicanso/elite/log"
-	"github.com/vicanso/elite/util"
-)
+import "github.com/vicanso/elite/log"
 
 var (
-	logger       = log.Default()
-	standardJSON = jsoniter.ConfigCompatibleWithStandardLibrary
-	isProduction = util.IsProduction
+	logger = log.Default()
 )
+
+type ContextKey string
 
 const (
 	// 记录命令开始时间
-	startedAtKey = "startedAt"
+	startedAtKey ContextKey = "startedAt"
 )

@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,47 +15,40 @@
 package service
 
 import (
-	"time"
-
 	"github.com/vicanso/elton"
-
-	"github.com/vicanso/go-axios"
-
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/helper"
+	"github.com/vicanso/go-axios"
 )
 
-var (
-	// LocationIns location http instance
-	LocationIns *axios.Instance
-)
-
-const (
-	locationService = "location"
-)
+var locationIns = newLocationInstance()
 
 // 相关的URL
 const (
 	locationURL = "/ip-locations/json/:ip"
 )
 
-// Location location
-type Location struct {
-	IP string `json:"ip,omitempty"`
-	// IP the country of location
-	Country  string `json:"country,omitempty"`
-	Province string `json:"province,omitempty"`
-	City     string `json:"city,omitempty"`
-	ISP      string `json:"isp,omitempty"`
+// newLocationInstance 初始化location的实例
+func newLocationInstance() *axios.Instance {
+	locationConfig := config.GetLocationConfig()
+	return helper.NewInstance(locationConfig.Name, locationConfig.BaseURL, locationConfig.Timeout)
 }
 
-func init() {
-	locationBaseURL := config.GetString("location.baseURL")
-	LocationIns = helper.NewInstance(locationService, locationBaseURL, 5*time.Second)
+// Location location
+type Location struct {
+	IP string `json:"ip"`
+	// Country 国家
+	Country string `json:"country"`
+	// Province 省
+	Province string `json:"province"`
+	// City 市
+	City string `json:"city"`
+	// ISP 网络接入商
+	ISP string `json:"isp"`
 }
 
 // GetLocationByIP get location by ip
-func GetLocationByIP(ip string, c *elton.Context) (lo *Location, err error) {
+func GetLocationByIP(ip string, c *elton.Context) (lo Location, err error) {
 	conf := &axios.Config{
 		URL: locationURL,
 		Params: map[string]string{
@@ -63,12 +56,8 @@ func GetLocationByIP(ip string, c *elton.Context) (lo *Location, err error) {
 		},
 	}
 	helper.AttachWithContext(conf, c)
-	resp, err := LocationIns.Request(conf)
-	if err != nil {
-		return
-	}
-	lo = &Location{}
-	err = resp.JSON(lo)
+	lo = Location{}
+	err = locationIns.EnhanceRequest(conf, &lo)
 	if err != nil {
 		return
 	}

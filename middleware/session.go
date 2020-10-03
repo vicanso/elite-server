@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,10 +24,6 @@ import (
 
 // NewSession new session middleware
 func NewSession() elton.Handler {
-	client := helper.RedisGetClient()
-	if client == nil {
-		panic("session store need redis client")
-	}
 	store := &helper.RedisSessionStore{
 		Prefix: "ss-",
 	}

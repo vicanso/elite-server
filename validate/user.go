@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,40 +14,17 @@
 
 package validate
 
-import (
-	"github.com/asaskevich/govalidator"
-
-	"github.com/vicanso/elite/cs"
-)
-
 func init() {
-	// 账号
-	Add("xUserAccount", func(i interface{}, _ interface{}) bool {
-		return checkASCIIStringLength(i, 4, 10)
-	})
-	Add("xUserPassword", func(i interface{}, _ interface{}) bool {
-		return checkASCIIStringLength(i, 44, 44)
-	})
-	Add("xUserAccountKeyword", func(i interface{}, _ interface{}) bool {
-		return checkASCIIStringLength(i, 1, 10)
-	})
-	Add("xUserRole", func(i interface{}, _ interface{}) bool {
-		value, ok := i.(string)
-		if !ok {
-			return false
-		}
-		return govalidator.IsIn(value, cs.UserRoleSu, cs.UserRoleAdmin)
-	})
-	Add("xUserRoles", func(i interface{}, _ interface{}) bool {
-		values, ok := i.([]string)
-		if !ok {
-			return false
-		}
-		for _, value := range values {
-			if !govalidator.IsIn(value, cs.UserRoleSu, cs.UserRoleAdmin) {
-				return false
-			}
-		}
-		return true
-	})
+	// 用户账号
+	AddAlias("xUserAccount", "ascii,min=2,max=10")
+	// 用户密码
+	AddAlias("xUserPassword", "ascii,len=44")
+	// 用户名称
+	AddAlias("xUserName", "min=1,max=20")
+	// 用户邮箱
+	AddAlias("xUserEmail", "email")
+	// 用户角色
+	AddAlias("xUserRole", "ascii,min=1,max=10")
+	// 用户分组
+	AddAlias("xUserGroup", "ascii,min=1,max=10")
 }

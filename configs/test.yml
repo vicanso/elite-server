@@ -1,1 +1,3 @@
-# test 测试环境使用的相关配置
+# postgres postgres配置
+postgres:
+  uri: postgresql://vicanso:A123456@127.0.0.1:5433/elite

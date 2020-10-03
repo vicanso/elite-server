@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@ package service
 
 import (
 	"runtime"
-	"sync/atomic"
+
+	"go.uber.org/atomic"
 )
 
 type (
-	// Performance performance
+	// Performance 应用性能指标
 	Performance struct {
 		GoMaxProcs   int    `json:"goMaxProcs,omitempty"`
 		Concurrency  uint32 `json:"concurrency,omitempty"`
@@ -32,15 +33,15 @@ type (
 )
 
 var (
-	concurrency uint32
+	concurrency atomic.Uint32
 )
 
-// GetPerformance get performance
-func GetPerformance() *Performance {
+// GetPerformance 获取应用性能指标
+func GetPerformance() Performance {
 	var mb uint64 = 1024 * 1024
 	m := &runtime.MemStats{}
 	runtime.ReadMemStats(m)
-	return &Performance{
+	return Performance{
 		GoMaxProcs:   runtime.GOMAXPROCS(0),
 		Concurrency:  GetConcurrency(),
 		Sys:          int(m.Sys / mb),
@@ -50,17 +51,17 @@ func GetPerformance() *Performance {
 	}
 }
 
-// IncreaseConcurrency increase concurrency count
+// IncreaseConcurrency 当前并发请求+1
 func IncreaseConcurrency() uint32 {
-	return atomic.AddUint32(&concurrency, 1)
+	return concurrency.Inc()
 }
 
-// DecreaseConcurrency decrease concurrency count
+// DecreaseConcurrency 当前并发请求-1
 func DecreaseConcurrency() uint32 {
-	return atomic.AddUint32(&concurrency, ^uint32(0))
+	return concurrency.Dec()
 }
 
-// GetConcurrency get concurrency
+// GetConcurrency 获取当前并发请求
 func GetConcurrency() uint32 {
-	return atomic.LoadUint32(&concurrency)
+	return concurrency.Load()
 }

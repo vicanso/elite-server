@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,45 +15,36 @@
 package log
 
 import (
-	"fmt"
-
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/vicanso/elite/util"
 )
 
-var (
-	defaultLogger *zap.Logger
-)
+var defaultLogger = newLoggerX()
 
-type (
-	pgLogger struct {
+// newLoggerX 初始化logger
+func newLoggerX() *zap.Logger {
+
+	if util.IsDevelopment() {
+		c := zap.NewDevelopmentConfig()
+		l, err := c.Build()
+		if err != nil {
+			panic(err)
+		}
+		return l
 	}
-)
-
-func (l *pgLogger) Print(v ...interface{}) {
-	Default().Info("pg log",
-		zap.String("message", fmt.Sprint(v...)),
-	)
-}
-
-func init() {
 	c := zap.NewProductionConfig()
-	c.DisableCaller = true
 	c.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	// 只针对panic 以上的日志增加stack trace
 	l, err := c.Build(zap.AddStacktrace(zap.DPanicLevel))
 	if err != nil {
 		panic(err)
 	}
-	defaultLogger = l
+	return l
 }
 
-// Default get default logger
+// Default 获取默认的logger
 func Default() *zap.Logger {
 	return defaultLogger
-}
-
-// PGLogger pg logger
-func PGLogger() *pgLogger {
-	return new(pgLogger)
 }

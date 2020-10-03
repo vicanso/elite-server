@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,190 +12,265 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// 应用相关配置，包括IP拦截、路由mock、路由并发限制等配置信息
+
 package controller
 
 import (
-	"strconv"
+	"context"
+	"net/http"
 	"time"
 
-	"github.com/vicanso/elite/cs"
-	"github.com/vicanso/elite/router"
-	"github.com/vicanso/elite/service"
-	"github.com/vicanso/elite/validate"
 	"github.com/vicanso/elton"
+	"github.com/vicanso/elite/cs"
+	"github.com/vicanso/elite/ent"
+	"github.com/vicanso/elite/ent/configuration"
+	confSchema "github.com/vicanso/elite/ent/configuration"
+	"github.com/vicanso/elite/ent/schema"
+	"github.com/vicanso/elite/router"
+	"github.com/vicanso/elite/validate"
+	"github.com/vicanso/hes"
 )
 
 type (
-	configurationCtrl      struct{}
-	addConfigurationParams struct {
-		Name      string     `json:"name,omitempty" valid:"xConfigName"`
-		Category  string     `json:"category,omitempty" valid:"xConfigCategory,optional"`
-		Status    int        `json:"status,omitempty" valid:"xConfigStatus"`
-		Data      string     `json:"data,omitempty" valid:"xConfigData"`
-		BeginDate *time.Time `json:"beginDate,omitempty" valid:"-"`
-		EndDate   *time.Time `json:"endDate,omitempty" valid:"-"`
+	configurationCtrl struct{}
+
+	// configurationListResp 配置列表响应
+	configurationListResp struct {
+		Configurations []*ent.Configuration `json:"configurations,omitempty"`
+		Count          int                  `json:"count,omitempty"`
 	}
-	updateConfigurationParams struct {
-		Status    int        `json:"status,omitempty" valid:"xConfigStatus,optional"`
-		Category  string     `json:"category,omitempty" valid:"xConfigCategory,optional"`
-		Data      string     `json:"data,omitempty" valid:"xConfigData,optional"`
-		BeginDate *time.Time `json:"beginDate" valid:"-"`
-		EndDate   *time.Time `json:"endDate" valid:"-"`
+
+	// configurationAddParams 添加配置参数
+	configurationAddParams struct {
+		Name      string              `json:"name,omitempty" validate:"required,xConfigurationName"`
+		Category  confSchema.Category `json:"category,omitempty" validate:"required,xConfigurationCategory"`
+		Status    schema.Status       `json:"status,omitempty" validate:"required,xStatus"`
+		Data      string              `json:"data,omitempty" validate:"required,xConfigurationData"`
+		StartedAt *time.Time          `json:"startedAt,omitempty"`
+		EndedAt   *time.Time          `json:"endedAt,omitempty"`
 	}
-	listConfigurationParmas struct {
-		Name     string `json:"name,omitempty" valid:"xConfigName,optional"`
-		Category string `json:"category,omitempty" valid:"xConfigCategory,optional"`
+	// configurationUpdateParams 更新配置参数
+	configurationUpdateParams struct {
+		Status    schema.Status       `json:"status,omitempty" validate:"omitempty,xStatus"`
+		Category  confSchema.Category `json:"category,omitempty" validate:"omitempty,xConfigurationCategory"`
+		Data      string              `json:"data,omitempty" validate:"omitempty,xConfigurationData"`
+		StartedAt *time.Time          `json:"startedAt,omitempty"`
+		EndedAt   *time.Time          `json:"endedAt,omitempty"`
+	}
+
+	// configurationListParmas 配置查询参数
+	configurationListParmas struct {
+		listParams
+
+		Name     string              `json:"name,omitempty" validate:"omitempty,xConfigurationName"`
+		Category confSchema.Category `json:"category,omitempty" validate:"omitempty,xConfigurationCategory"`
+	}
+)
+
+const (
+	errConfigurationCategory = "configuration"
+)
+
+var (
+	errConfigurationExists = &hes.Error{
+		Message:    "该配置已存在",
+		StatusCode: http.StatusBadRequest,
+		Category:   errConfigurationCategory,
 	}
 )
 
 func init() {
-	// TODO 增加用户权限判断
-	g := router.NewGroup("/configurations", loadUserSession)
+	g := router.NewGroup("/configurations", loadUserSession, shouldBeSu)
 	ctrl := configurationCtrl{}
 
+	// 查询配置
 	g.GET(
 		"/v1",
-		shouldBeAdmin,
 		ctrl.list,
 	)
-	g.GET(
-		"/v1/available",
-		shouldBeAdmin,
-		ctrl.listAvailable,
-	)
-	g.GET(
-		"/v1/unavailable",
-		shouldBeAdmin,
-		ctrl.listUnavailable,
-	)
 
+	// 添加配置
 	g.POST(
 		"/v1",
 		newTracker(cs.ActionConfigurationAdd),
-		shouldBeAdmin,
 		ctrl.add,
 	)
+
+	// 更新配置
 	g.PATCH(
-		"/v1/{configID}",
+		"/v1/{id}",
 		newTracker(cs.ActionConfigurationUpdate),
-		shouldBeAdmin,
 		ctrl.update,
 	)
-	g.DELETE(
-		"/v1/{configID}",
-		newTracker(cs.ActionConfigurationDelete),
-		shouldBeAdmin,
-		ctrl.delete,
+
+	// 查询单个配置
+	g.GET(
+		"/v1/{id}",
+		ctrl.findByID,
 	)
 }
 
-// list configuration
-func (ctrl configurationCtrl) list(c *elton.Context) (err error) {
-	params := &listConfigurationParmas{}
-	err = validate.Do(params, c.Query())
+// validateBeforeSave 保存前校验
+func (params *configurationAddParams) validateBeforeSave(ctx context.Context) (err error) {
+	exists, err := getEntClient().Configuration.Query().
+		Where(configuration.Name(params.Name)).
+		Exist(ctx)
 	if err != nil {
 		return
 	}
-	result, err := configSrv.List(service.ConfigurationQueryParmas{
-		Name:     params.Name,
-		Category: params.Category,
-	})
-	if err != nil {
+	if exists {
+		err = errConfigurationExists
 		return
-	}
-	c.Body = map[string]interface{}{
-		"configs": result,
 	}
 	return
 }
 
-// listAvailable list available config
-func (ctrl configurationCtrl) listAvailable(c *elton.Context) (err error) {
-	result, err := configSrv.Available()
+// save 保存配置
+func (params *configurationAddParams) save(ctx context.Context, owner string) (configuration *ent.Configuration, err error) {
+	err = params.validateBeforeSave(ctx)
 	if err != nil {
 		return
 	}
-	c.Body = map[string]interface{}{
-		"configs": result,
-	}
-	return
+	return getEntClient().Configuration.Create().
+		SetName(params.Name).
+		SetStatus(params.Status).
+		SetCategory(params.Category).
+		SetData(params.Data).
+		SetOwner(owner).
+		SetStartedAt(*params.StartedAt).
+		SetEndedAt(*params.EndedAt).
+		Save(ctx)
 }
 
-// listUnavailable list unavailable config
-func (ctrl configurationCtrl) listUnavailable(c *elton.Context) (err error) {
-	result, err := configSrv.Unavailable()
-	if err != nil {
-		return
+// where 将查询条件中的参数转换为对应的where条件
+func (params *configurationListParmas) where(query *ent.ConfigurationQuery) *ent.ConfigurationQuery {
+	if params.Name != "" {
+		query = query.Where(configuration.Name(params.Name))
 	}
-	c.Body = map[string]interface{}{
-		"configs": result,
+	if params.Category != "" {
+		query = query.Where(configuration.CategoryEQ(params.Category))
 	}
-	return
+	return query
 }
 
-// add configuration
-func (ctrl configurationCtrl) add(c *elton.Context) (err error) {
-	params := &addConfigurationParams{}
-	err = validate.Do(params, c.RequestBody)
+// queryAll 查询配置列表
+func (params *configurationListParmas) queryAll(ctx context.Context) (configurations []*ent.Configuration, err error) {
+	query := getEntClient().Configuration.Query()
+
+	query = query.Limit(params.GetLimit()).
+		Offset(params.GetOffset()).
+		Order(params.GetOrders()...)
+	query = params.where(query)
+
+	return query.All(ctx)
+}
+
+// count 计算总数
+func (params *configurationListParmas) count(ctx context.Context) (count int, err error) {
+	query := getEntClient().Configuration.Query()
+
+	query = params.where(query)
+
+	return query.Count(ctx)
+}
+
+// update 更新配置信息
+func (params *configurationUpdateParams) updateOneID(ctx context.Context, id int) (configuration *ent.Configuration, err error) {
+	updateOne := getEntClient().Configuration.
+		UpdateOneID(id)
+	if params.StartedAt != nil {
+		updateOne = updateOne.SetStartedAt(*params.StartedAt)
+	}
+	if params.EndedAt != nil {
+		updateOne = updateOne.SetEndedAt(*params.EndedAt)
+	}
+
+	if params.Status != 0 {
+		updateOne = updateOne.SetStatus(params.Status)
+	}
+	if params.Category != "" {
+		updateOne = updateOne.SetCategory(params.Category)
+	}
+	if params.Data != "" {
+		updateOne = updateOne.SetData(params.Data)
+	}
+	return updateOne.Save(ctx)
+}
+
+// add 添加配置
+func (*configurationCtrl) add(c *elton.Context) (err error) {
+	params := configurationAddParams{}
+	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
 		return
 	}
 	us := getUserSession(c)
-	conf := &service.Configuration{
-		Name:      params.Name,
-		Category:  params.Category,
-		Status:    params.Status,
-		Data:      params.Data,
-		Owner:     us.GetAccount(),
-		BeginDate: params.BeginDate,
-		EndDate:   params.EndDate,
-	}
-	err = configSrv.Add(conf)
+	configuration, err := params.save(c.Context(), us.MustGetInfo().Account)
 	if err != nil {
 		return
 	}
-	c.Created(conf)
+	c.Created(configuration)
 	return
 }
 
-// update configuration
-func (ctrl configurationCtrl) update(c *elton.Context) (err error) {
-	id, err := strconv.Atoi(c.Param("configID"))
+// list 查询配置列表
+func (*configurationCtrl) list(c *elton.Context) (err error) {
+	params := configurationListParmas{}
+	err = validate.Do(&params, c.Query())
 	if err != nil {
 		return
 	}
-	params := &updateConfigurationParams{}
-	err = validate.Do(params, c.RequestBody)
+	count := -1
+	if params.GetOffset() == 0 {
+		count, err = params.count(c.Context())
+		if err != nil {
+			return
+		}
+	}
+	configurations, err := params.queryAll(c.Context())
 	if err != nil {
 		return
 	}
-	err = configSrv.Update(service.Configuration{
-		ID: uint(id),
-	}, service.Configuration{
-		Status:    params.Status,
-		Data:      params.Data,
-		Category:  params.Category,
-		BeginDate: params.BeginDate,
-		EndDate:   params.EndDate,
-	})
-	if err != nil {
-		return
+	c.Body = &configurationListResp{
+		Count:          count,
+		Configurations: configurations,
 	}
-
-	c.NoContent()
 	return
 }
 
-// delete configuration
-func (ctrl configurationCtrl) delete(c *elton.Context) (err error) {
-	id, err := strconv.Atoi(c.Param("configID"))
+// update 更新配置信息
+func (*configurationCtrl) update(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
 	if err != nil {
 		return
 	}
-	err = configSrv.DeleteByID(uint(id))
+	params := configurationUpdateParams{}
+	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
 		return
 	}
-	c.NoContent()
+	configuration, err := params.updateOneID(c.Context(), id)
+	if err != nil {
+		return
+	}
+
+	c.Body = configuration
+	return
+}
+
+// findByID 通过id查询
+func (*configurationCtrl) findByID(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	configuration, err := getEntClient().Configuration.Query().
+		Where(configuration.ID(id)).
+		First(c.Context())
+	if err != nil {
+		return
+	}
+	c.Body = configuration
 	return
 }

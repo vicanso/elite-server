@@ -1,50 +1,41 @@
-app: elite
-requestLimit: 1024
-# apiPrefix: /api
-listen: ":7001"
+# 系统基本配置
+basic:
+  name: elite
+  # 系统并发限制
+  requestLimit: 1000
+  listen: :7001
 
-# cookie track key
-track: jt
-
-
-# redis 配置(pass从env中获取pass这个配置为密码，如果未配置则为空)
-redis: redis://127.0.0.1:6379
-
-# postgres 配置 (pass从env中获取pass这个配置为密码，如果未配置则为空)
-postgres:
-  host: 127.0.0.1
-  port: 5432
-  user: vicanso 
-  dbname: elite
-  password: A123456
-  sslmode: disable
-
-# influxdb 配置
-influxdb:
-  uri: http://192.168.0.171:9991
-  bucket: elite
-  org: bigTree
-  token: 0YPvPGbzqPSwdQGBmJzCbsty4hh8xGEZ09q2tdG_0l0aZfKbaQgqflLgvRYTh6o4m26gvODGVfmKnQNoRG6nUQ==
-  batchSize: 10
-
-# session的相关配置
+# 用户session的配置
 session:
   path: /
   key: elite
-  ttl: 24h
-
-# key for sign cookie
-keys:
+  ttl: 240h
+  # 用于加密session cookie 
+  keys:
   - cuttlefish
   - secret
+  trackKey: jt
 
-location:
-  baseURL: http://172.18.109.188:7200/
+# redis 配置
+redis:
+  # 可以配置为下面的形式，则从env中获取REDIS_URI对应的字符串来当redis连接串
+  # uri: REDIS_URI
+  # uri: redis://:pass@127.0.0.1:6379/?db=0&slow=200ms&maxProcessing=1000
+  uri: redis://127.0.0.1:6379/?db=0&slow=200ms&maxProcessing=1000
 
-# router limit
-routerLimit:
-  # 限制路由访问并发数
-  GET /users/v1/me/login: 50
+# postgres postgres配置
+postgres:
+  uri: postgresql://vicanso:A123456@127.0.0.1:5432/elite
+
+# influxdb 配置
+influxdb:
+  uri: http://127.0.0.1:9999
+  bucket: elite 
+  org: bigTree
+  token: vEne4wbhYbMOxU6rO2LhIp5ImN5Hah0GA5U35wP-Lq-xMVURCV0NUlVre1g_zLbiSI7JCRM1mRtULGdo4jL1oA==
+  batchSize: 100
+  flushInterval: 10s
+  disabled: false 
 
 # mail相关配置
 mail:
@@ -55,13 +46,18 @@ mail:
 
 # 告警接收邮件列表
 alarm:
-  receiver:
+  receivers:
   - tree.xie@outlook.com
 
-# 卫斯理
-wsl:
-  baseURL: https://wsl520.com
+# 定位相关配置
+location:
+  name: location
+  timeout: 3s
+  baseURL: https://ip.npmtrend.com
 
-# tiny服务
-tiny:
-  baseURL: http://127.0.0.1:6001
+# minio配置
+minio:
+  endpoint: 127.0.0.1:9000
+  accessKeyID: origin 
+  secretAccessKey: test123456
+  ssl: false

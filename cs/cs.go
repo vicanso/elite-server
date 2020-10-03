@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,18 +19,6 @@ const (
 	CID = "cid"
 	// UserSession user session
 	UserSession = "userSession"
-
-	// UserRoleSu super user
-	UserRoleSu = "su"
-	// UserRoleAdmin admin user
-	UserRoleAdmin = "admin"
-)
-
-const (
-	// ConfigEnabled config enabled
-	ConfigEnabled = iota + 1
-	// ConfigDiabled config disabled
-	ConfigDiabled
 )
 
 const (

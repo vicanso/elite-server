@@ -1,4 +1,4 @@
-// Copyright 2019 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,34 +20,34 @@ import (
 	influxdb "github.com/influxdata/influxdb-client-go"
 	influxdbAPI "github.com/influxdata/influxdb-client-go/api"
 	"github.com/vicanso/elite/config"
-	"github.com/vicanso/elite/log"
 	"go.uber.org/zap"
-)
-
-var (
-	defaultInfluxSrv *InfluxSrv
 )
 
 type (
 	InfluxSrv struct {
 		client influxdb.Client
-		writer influxdbAPI.WriteApi
+		writer influxdbAPI.WriteAPI
 	}
 )
 
-func init() {
+var defaultInfluxSrv = newInfluxSrvX()
+
+// newInfluxSrvX 创建新的influx服务
+func newInfluxSrvX() *InfluxSrv {
 	influxdbConfig := config.GetInfluxdbConfig()
 	if influxdbConfig.Disabled {
-		defaultInfluxSrv = new(InfluxSrv)
-		return
+
+		return new(InfluxSrv)
 	}
 	opts := influxdb.DefaultOptions()
+	// 设置批量提交的大小
 	opts.SetBatchSize(influxdbConfig.BatchSize)
+	// 如果定时提交间隔大于1秒，则设定定时提交间隔
 	if influxdbConfig.FlushInterval > time.Millisecond {
 		v := influxdbConfig.FlushInterval / time.Millisecond
 		opts.SetFlushInterval(uint(v))
 	}
-	log.Default().Info("new influxdb client",
+	logger.Info("new influxdb client",
 		zap.String("uri", influxdbConfig.URI),
 		zap.String("org", influxdbConfig.Org),
 		zap.String("bucket", influxdbConfig.Bucket),
@@ -56,35 +56,46 @@ func init() {
 		zap.Duration("interval", influxdbConfig.FlushInterval),
 	)
 	c := influxdb.NewClientWithOptions(influxdbConfig.URI, influxdbConfig.Token, opts)
-	writer := c.WriteApi(influxdbConfig.Org, influxdbConfig.Bucket)
-	defaultInfluxSrv = &InfluxSrv{
+	writer := c.WriteAPI(influxdbConfig.Org, influxdbConfig.Bucket)
+	newInfluxdbErrorLogger(writer)
+	return &InfluxSrv{
 		client: c,
 		writer: writer,
 	}
 }
 
-// GetInfluxSrv get default influx service
+// newInfluxdbErrorLogger 创建读取出错日志处理，需要注意此功能需要启用新的goroutine
+func newInfluxdbErrorLogger(writer influxdbAPI.WriteAPI) {
+	go func() {
+		for err := range writer.Errors() {
+			logger.Error("influxdb write fail",
+				zap.Error(err),
+			)
+		}
+	}()
+}
+
+// GetInfluxSrv 获取默认的influxdb服务
 func GetInfluxSrv() *InfluxSrv {
 	return defaultInfluxSrv
 }
 
-// Write write metric to influxdb
-func (srv *InfluxSrv) Write(measurement string, fields map[string]interface{}, tags map[string]string) {
+// Write 写入数据
+func (srv *InfluxSrv) Write(measurement string, fields map[string]interface{}, tags map[string]string, ts ...time.Time) {
 	if srv.writer == nil {
 		return
 	}
-	srv.writer.WritePoint(influxdb.NewPoint(measurement, tags, fields, time.Now()))
-}
-
-// Flush flush metric list
-func (srv *InfluxSrv) Flush() {
-	if srv.writer == nil {
-		return
+	var now time.Time
+	if len(ts) != 0 {
+		now = ts[0]
+	} else {
+		now = time.Now()
 	}
-	srv.writer.Flush()
+
+	srv.writer.WritePoint(influxdb.NewPoint(measurement, tags, fields, now))
 }
 
-// Close flush the point to influxdb and close client
+// Close 关闭当前client
 func (srv *InfluxSrv) Close() {
 	if srv.client == nil {
 		return
