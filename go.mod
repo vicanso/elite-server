@@ -35,6 +35,7 @@ require (
 	github.com/vicanso/go-axios v0.1.13
 	github.com/vicanso/hes v0.2.3
 	github.com/vicanso/ips v1.0.1
+	github.com/vicanso/lru-ttl v0.1.1
 	github.com/vicanso/viperx v0.1.3
 	go.uber.org/atomic v1.7.0
 	go.uber.org/automaxprocs v1.3.0

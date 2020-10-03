@@ -21,9 +21,9 @@ import (
 	"time"
 
 	"github.com/tidwall/gjson"
-	"github.com/vicanso/elton"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/util"
+	"github.com/vicanso/elton"
 	"github.com/vicanso/go-axios"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
@@ -50,7 +50,7 @@ func getHTTPStats(serviceName string, resp *axios.Response) (map[string]string, 
 		zap.String("cid", id),
 		zap.String("method", conf.Method),
 		zap.String("route", conf.Route),
-		zap.String("url", conf.URL),
+		zap.String("url", conf.Request.URL.RequestURI()),
 		zap.Any("query", conf.Query),
 		zap.Int("status", resp.Status),
 		zap.String("addr", addr),

@@ -17,10 +17,12 @@
 package novel
 
 import (
-	"fmt"
+	"time"
 
 	"github.com/vicanso/elite/config"
+	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/helper"
+	"golang.org/x/net/context"
 )
 
 var novelConfigs = config.GetNovelConfigs()
@@ -46,6 +48,22 @@ type Novel struct {
 	Source   int
 }
 
+// AddToSource 添加至小说源
+func (novel *Novel) AddToSource() (source *ent.NovelSource, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	source, err = getEntClient().NovelSource.Create().
+		SetName(novel.Name).
+		SetAuthor(novel.Author).
+		SetSource(novel.Source).
+		SetSourceID(novel.SourceID).
+		Save(ctx)
+	if err != nil {
+		return
+	}
+	return
+}
+
 // getNovelConfig 获取对应的novel配置
 func getNovelConfig(name string) (conf config.NovelConfig) {
 	for _, item := range novelConfigs {
@@ -57,7 +75,22 @@ func getNovelConfig(name string) (conf config.NovelConfig) {
 }
 
 // SyncSource 同步小说
-func SyncSource() {
+func SyncSource() (err error) {
+	// NewBiQuGe().GetCover(11125)
+	// NewBiQuGe().GetCover(8349)
+	redisSrv := new(helper.Redis)
+	// 确保只有一个实例在更新
+	ok, done, err := redisSrv.LockWithDone("novel-sync-source", time.Hour)
+	if err != nil || !ok {
+		return
+	}
+	defer func() {
+		_ = done()
+	}()
 	biQuGe := NewBiQuGe()
-	fmt.Println(biQuGe.GetDetail(1))
+	err = biQuGe.Sync()
+	if err != nil {
+		return
+	}
+	return
 }

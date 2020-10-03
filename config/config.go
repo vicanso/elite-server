@@ -153,6 +153,7 @@ type (
 		Name    string        `validate:"required"`
 		BaseURL string        `validate:"required,url"`
 		Timeout time.Duration `validate:"required"`
+		Max     int           `validate:"required"`
 	}
 )
 
@@ -396,6 +397,7 @@ func GetNovelConfigs() []NovelConfig {
 			Name:    name,
 			BaseURL: defaultViperX.GetString(prefix + name + ".baseURL"),
 			Timeout: defaultViperX.GetDuration(prefix + name + ".timeout"),
+			Max:     defaultViperX.GetInt(prefix + name + ".max"),
 		}
 	}
 	return data

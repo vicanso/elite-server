@@ -79,6 +79,12 @@ func entStats() {
 	helper.GetInfluxSrv().Write(cs.MeasurementEntStats, stats, nil)
 }
 
+// syncNovelSource 同步小说源
 func syncNovelSource() {
-	novel.SyncSource()
+	err := novel.SyncSource()
+	if err != nil {
+		log.Default().Error("sync novel source fail",
+			zap.Error(err),
+		)
+	}
 }

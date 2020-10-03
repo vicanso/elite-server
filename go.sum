@@ -110,6 +110,7 @@ github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0/go.mod h1:E/TSTwGw
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/groupcache v0.0.0-20190129154638-5b532d6fd5ef/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=
 github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=
+github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e h1:1r7pUrabqp18hOBcwBwiTsbnFeTZHV9eER/QT5JVZxY=
 github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
 github.com/golang/mock v1.2.0/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
@@ -478,6 +479,8 @@ github.com/vicanso/keygrip v0.1.0/go.mod h1:cI05iOjY00NJ7oH2Z9Zdm9eJPUkpoex3XnEu
 github.com/vicanso/keygrip v1.0.0/go.mod h1:cI05iOjY00NJ7oH2Z9Zdm9eJPUkpoex3XnEubK78nho=
 github.com/vicanso/keygrip v1.0.1 h1:pbMM8jicd7Bh3SLops0b3rkDONH+XUCm5zpiwSf26DM=
 github.com/vicanso/keygrip v1.0.1/go.mod h1:cI05iOjY00NJ7oH2Z9Zdm9eJPUkpoex3XnEubK78nho=
+github.com/vicanso/lru-ttl v0.1.1 h1:SMARnTOYOO/QkePIMKhehvgMXsgFaRd1UoDc8oPcPNU=
+github.com/vicanso/lru-ttl v0.1.1/go.mod h1:dRnNXabzjLe/r9RsSZjfLw0kGr3iJeVOSwAuUS0i/Lk=
 github.com/vicanso/viperx v0.1.3 h1:bOIDp7mC0P1fFj5H4ucFa5lj0qM6RGIRc+w7DFTsQRM=
 github.com/vicanso/viperx v0.1.3/go.mod h1:ToWIooE0Fhx+10jDLASClGGDMtkeTpgRoYSyrzWcFGs=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=

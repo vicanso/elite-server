@@ -67,3 +67,4 @@ novel:
   biquge:
     baseURL: https://www.biquge.com.cn
     timeout: 10s
+    max: 50000
