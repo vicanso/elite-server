@@ -173,6 +173,9 @@ func Publish(params QueryParams) (novel *ent.Novel, err error) {
 		return
 	}
 	novelSource, err := params.FirstNovelSource()
+	if ent.IsNotFound(err) {
+		err = nil
+	}
 	if err != nil {
 		return
 	}
