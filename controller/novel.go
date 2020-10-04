@@ -22,6 +22,8 @@ import (
 	"strings"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/vicanso/elite/ent"
+	entNovel "github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/novel"
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/service"
@@ -37,10 +39,22 @@ const eliteConverBucket = "elite-covers"
 type (
 	novelCtrl struct{}
 
+	// novelListResp 小说列表响应
+	novelListResp struct {
+		Novels []*ent.Novel `json:"novels,omitempty"`
+		Count  int          `json:"count,omitempty"`
+	}
+
 	// novelAddParams 添加小说参数
 	novelAddParams struct {
 		Name   string `json:"name,omitempty" validate:"required,xNovelName"`
 		Author string `json:"author,omitempty" validate:"required,xNovelAuthor"`
+	}
+	// novelListParams 小说查询参数
+	novelListParams struct {
+		listParams
+
+		Keyword string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
 	}
 )
 
@@ -49,12 +63,72 @@ func init() {
 
 	g := router.NewGroup("/novels")
 
+	// 添加小说
 	g.POST(
 		"/v1",
 		loadUserSession,
 		shouldBeAdmin,
 		ctrl.add,
 	)
+	// 小说查询
+	g.GET(
+		"/v1",
+		ctrl.list,
+	)
+}
+
+// where 将查询条件中的参数转换为对应的where条件
+func (params *novelListParams) where(query *ent.NovelQuery) *ent.NovelQuery {
+	if params.Keyword != "" {
+		query = query.Where(entNovel.Or(entNovel.NameContains(params.Keyword), entNovel.AuthorContains(params.Keyword)))
+	}
+
+	return query
+}
+
+// queryAll 查询小说列表
+func (params *novelListParams) queryAll(ctx context.Context) (novels []*ent.Novel, err error) {
+	query := getEntClient().Novel.Query()
+
+	query = query.Limit(params.GetLimit()).
+		Offset(params.GetOffset()).
+		Order(params.GetOrders()...)
+	query = params.where(query)
+	return query.All(ctx)
+}
+
+// count 计算总数
+func (params *novelListParams) count(ctx context.Context) (count int, err error) {
+	query := getEntClient().Novel.Query()
+	query = params.where(query)
+
+	return query.Count(ctx)
+}
+
+// list 查询小说列表
+func (*novelCtrl) list(c *elton.Context) (err error) {
+	params := novelListParams{}
+	err = validate.Do(&params, c.Query())
+	if err != nil {
+		return
+	}
+	count := -1
+	if params.GetOffset() == 0 {
+		count, err = params.count(c.Context())
+		if err != nil {
+			return
+		}
+	}
+	novels, err := params.queryAll(c.Context())
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge("5m")
+	c.Body = &novelListResp{
+		Novels: novels,
+		Count:  count,
+	}
+	return
 }
 
 // add 添加小说
