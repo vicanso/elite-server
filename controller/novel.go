@@ -36,7 +36,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const eliteConverBucket = "elite-covers"
+const eliteCoverBucket = "elite-covers"
 
 type (
 	novelCtrl struct{}
@@ -97,6 +97,11 @@ func init() {
 	g.GET(
 		"/v1/{id}/chapters/{no}",
 		ctrl.getChapterContent,
+	)
+	// 小说封面
+	g.GET(
+		"/v1/{id}/cover",
+		ctrl.getCover,
 	)
 }
 
@@ -208,7 +213,7 @@ func (*novelCtrl) add(c *elton.Context) (err error) {
 			fileType := strings.Split(contentType, "/")[1]
 			name := util.GenUlid() + "." + fileType
 			_, err = fileSrv.Upload(context.Background(), service.UploadParams{
-				Bucket: eliteConverBucket,
+				Bucket: eliteCoverBucket,
 				Name:   name,
 				Reader: bytes.NewReader(resp.Data),
 				Size:   int64(len(resp.Data)),
@@ -292,5 +297,29 @@ func (*novelCtrl) getChapterContent(c *elton.Context) (err error) {
 	}
 	c.CacheMaxAge("10m")
 	c.Body = result
+	return
+}
+
+// getCover 获取小说封面
+func (*novelCtrl) getCover(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	cover, err := novelSrv.GetCover(id)
+	if err != nil {
+		return
+	}
+	// TODO 后续优化cover压缩，支持webp
+	data, header, err := fileSrv.GetData(c.Context(), eliteCoverBucket, cover)
+	if err != nil {
+		return
+	}
+	for key, values := range header {
+		for _, value := range values {
+			c.AddHeader(key, value)
+		}
+	}
+	c.Body = data
 	return
 }

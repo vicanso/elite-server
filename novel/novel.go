@@ -37,6 +37,8 @@ var (
 
 const (
 	errNovelCategory = "novel"
+
+	defaultQueryTimeout = 3 * time.Second
 )
 
 var (
@@ -103,7 +105,7 @@ func getConfig(name string) (conf config.NovelConfig) {
 
 // AddToSource 添加至小说源
 func (novel *Novel) AddToSource() (source *ent.NovelSource, err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
 	defer cancel()
 	source, err = getEntClient().NovelSource.Create().
 		SetName(novel.Name).
@@ -119,7 +121,7 @@ func (novel *Novel) AddToSource() (source *ent.NovelSource, err error) {
 
 // Add 添加小说
 func (novel *Novel) Add() (result *ent.Novel, err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
 	defer cancel()
 	result, err = getEntClient().Novel.Create().
 		SetName(novel.Name).
@@ -133,7 +135,7 @@ func (novel *Novel) Add() (result *ent.Novel, err error) {
 
 // FirstNovel 查询第一条符合条件的小说
 func (params *QueryParams) FirstNovel() (*ent.Novel, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
 	defer cancel()
 	query := getEntClient().Novel.Query()
 	if params.Name != "" {
@@ -147,7 +149,7 @@ func (params *QueryParams) FirstNovel() (*ent.Novel, error) {
 
 // FirstNovelSOurce 获取第一个符合的小说源
 func (params *QueryParams) FirstNovelSource() (*ent.NovelSource, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
 	defer cancel()
 	query := getEntClient().NovelSource.Query()
 	if params.Name != "" {
@@ -183,7 +185,7 @@ func (*Srv) SyncSource() (err error) {
 
 // GetFetcherByID 根据小说id获取其fetcher
 func (srv *Srv) GetFetcherByID(id int) (fetcher Fetcher, err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
 	defer cancel()
 	result, err := getEntClient().Novel.Query().
 		Where(novel.IDEQ(id)).
@@ -259,7 +261,7 @@ func (srv *Srv) UpdateChapters(id int) (err error) {
 	if err != nil {
 		return
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
 	defer cancel()
 	currentCount, err := getEntClient().Chapter.Query().
 		Where(chapter.NovelEQ(id)).
@@ -288,7 +290,7 @@ func (srv *Srv) UpdateChapters(id int) (err error) {
 
 // GetChapterContent 获取小说章节内容
 func (srv *Srv) GetChapterContent(id, no int) (result *ent.Chapter, err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*defaultQueryTimeout)
 	defer cancel()
 	result, err = getEntClient().Chapter.Query().
 		Where(chapter.NovelEQ(id)).
@@ -315,6 +317,19 @@ func (srv *Srv) GetChapterContent(id, no int) (result *ent.Chapter, err error) {
 	if err != nil {
 		return
 	}
+	return
+}
 
+// GetCover 获取小说封面
+func (*Srv) GetCover(id int) (cover string, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
+	defer cancel()
+	result, err := getEntClient().Novel.Query().
+		Where(novel.IDEQ(id)).
+		First(ctx)
+	if err != nil {
+		return
+	}
+	cover = result.Cover
 	return
 }
