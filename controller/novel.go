@@ -253,7 +253,7 @@ func (*novelCtrl) listChapter(c *elton.Context) (err error) {
 		}
 	}
 	// 如果章节总数为0，则fetch数据
-	if count == 0 || true {
+	if count == 0 {
 		err = novelSrv.UpdateChapters(id)
 		if err != nil {
 			return

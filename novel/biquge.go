@@ -45,6 +45,10 @@ type biQuGe struct {
 	max   int
 	cache *lruttl.Cache
 }
+type biQuGeNovel struct {
+	biQuGe *biQuGe
+	id     int
+}
 
 // NewBiQuGe 初始化biquge小说网站实例
 func NewBiQuGe() *biQuGe {
@@ -54,6 +58,26 @@ func NewBiQuGe() *biQuGe {
 		ins:   ins,
 		max:   conf.Max,
 		cache: lruttl.New(50, 5*time.Minute),
+	}
+}
+
+func (n *biQuGeNovel) GetDetail() (novel Novel, err error) {
+	return n.biQuGe.GetDetail(n.id)
+}
+
+func (n *biQuGeNovel) GetChapters() (chpaters []*Chapter, err error) {
+	return n.biQuGe.GetChapters(n.id)
+}
+
+func (n *biQuGeNovel) GetChapterContent(no int) (content string, err error) {
+	return n.biQuGe.GetChapterContent(n.id, no)
+}
+
+// NewFetcher 新建fetcher
+func (bgq *biQuGe) NewFetcher(id int) Fetcher {
+	return &biQuGeNovel{
+		id:     id,
+		biQuGe: bgq,
 	}
 }
 
@@ -174,8 +198,17 @@ func (bqg *biQuGe) GetChapters(id int) (chpaters []*Chapter, err error) {
 }
 
 // GetChapterContent 获取小说章节内容
-func (bqg *biQuGe) GetChapterContent(url string) (content string, err error) {
-	resp, err := bqg.ins.Get(url)
+func (bqg *biQuGe) GetChapterContent(id, no int) (content string, err error) {
+	chapters, err := bqg.GetChapters(id)
+	if err != nil {
+		return
+	}
+	if len(chapters) >= no {
+		err = errors.New("该章节已超出最新章节")
+		return
+	}
+
+	resp, err := bqg.ins.Get(chapters[no].URL)
 	if err != nil {
 		return
 	}

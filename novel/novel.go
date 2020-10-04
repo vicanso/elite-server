@@ -45,11 +45,6 @@ var (
 		StatusCode: 400,
 		Category:   errNovelCategory,
 	}
-	errNovelNotExists = &hes.Error{
-		Message:    "小说不存在，请先添加该小说",
-		StatusCode: 400,
-		Category:   errNovelCategory,
-	}
 )
 
 const (
@@ -67,6 +62,12 @@ const (
 
 type (
 	Srv struct{}
+	// Fetcher 小说拉取的interface
+	Fetcher interface {
+		GetDetail() (novel Novel, err error)
+		GetChapters() (chpaters []*Chapter, err error)
+		GetChapterContent(no int) (content string, err error)
+	}
 	// Novel 小说
 	Novel struct {
 		Name     string
@@ -180,16 +181,25 @@ func (*Srv) SyncSource() (err error) {
 	return
 }
 
-// Publish 发布小说
-func (*Srv) Publish(params QueryParams) (novel *ent.Novel, err error) {
-
-	novel, err = params.FirstNovel()
-	if ent.IsNotFound(err) {
-		err = nil
-	}
-	if err != nil || novel != nil {
+// GetFetcherByID 根据小说id获取其fetcher
+func (srv *Srv) GetFetcherByID(id int) (fetcher Fetcher, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	result, err := getEntClient().Novel.Query().
+		Where(novel.IDEQ(id)).
+		First(ctx)
+	if err != nil {
 		return
 	}
+	return srv.GetFetcher(QueryParams{
+		Author: result.Author,
+		Name:   result.Name,
+		Source: result.Source,
+	})
+}
+
+// GetFetcher 获取fetcher
+func (*Srv) GetFetcher(params QueryParams) (fetcher Fetcher, err error) {
 	novelSource, err := params.FirstNovelSource()
 	if ent.IsNotFound(err) {
 		err = nil
@@ -201,8 +211,26 @@ func (*Srv) Publish(params QueryParams) (novel *ent.Novel, err error) {
 		err = errNovelSourceNotFound
 		return
 	}
-	// TODO 支持更多的小说源
-	result, err := NewBiQuGe().GetDetail(novelSource.SourceID)
+	// TODO 后续添更多的源
+	fetcher = NewBiQuGe().NewFetcher(novelSource.SourceID)
+	return
+}
+
+// Publish 发布小说
+func (srv *Srv) Publish(params QueryParams) (novel *ent.Novel, err error) {
+
+	novel, err = params.FirstNovel()
+	if ent.IsNotFound(err) {
+		err = nil
+	}
+	if err != nil || novel != nil {
+		return
+	}
+	fetcher, err := srv.GetFetcher(params)
+	if err != nil {
+		return
+	}
+	result, err := fetcher.GetDetail()
 	if err != nil {
 		return
 	}
@@ -224,29 +252,15 @@ func (*Srv) Publish(params QueryParams) (novel *ent.Novel, err error) {
 }
 
 // UpdateChapters 拉取小说章节
-func (*Srv) UpdateChapters(id int) (err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	result, err := getEntClient().Novel.Query().
-		Where(novel.IDEQ(id)).
-		First(ctx)
-	if err != nil {
-		return
-	}
-	params := QueryParams{
-		Author: result.Author,
-		Name:   result.Name,
-		Source: result.Source,
-	}
-	novelSource, err := params.FirstNovelSource()
-	if err != nil {
-		return
-	}
+func (srv *Srv) UpdateChapters(id int) (err error) {
+	fetcher, err := srv.GetFetcherByID(id)
 	// TODO 支持更多的小说源
-	chapters, err := NewBiQuGe().GetChapters(novelSource.SourceID)
+	chapters, err := fetcher.GetChapters()
 	if err != nil {
 		return
 	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 	currentCount, err := getEntClient().Chapter.Query().
 		Where(chapter.NovelEQ(id)).
 		Count(ctx)
