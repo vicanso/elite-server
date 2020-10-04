@@ -80,6 +80,12 @@ func (nc *NovelCreate) SetNillableStatus(i *int) *NovelCreate {
 	return nc
 }
 
+// SetCover sets the cover field.
+func (nc *NovelCreate) SetCover(s string) *NovelCreate {
+	nc.mutation.SetCover(s)
+	return nc
+}
+
 // SetSummary sets the summary field.
 func (nc *NovelCreate) SetSummary(s string) *NovelCreate {
 	nc.mutation.SetSummary(s)
@@ -192,6 +198,9 @@ func (nc *NovelCreate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
 		}
 	}
+	if _, ok := nc.mutation.Cover(); !ok {
+		return &ValidationError{Name: "cover", err: errors.New("ent: missing required field \"cover\"")}
+	}
 	if _, ok := nc.mutation.Summary(); !ok {
 		return &ValidationError{Name: "summary", err: errors.New("ent: missing required field \"summary\"")}
 	}
@@ -269,6 +278,14 @@ func (nc *NovelCreate) createSpec() (*Novel, *sqlgraph.CreateSpec) {
 			Column: novel.FieldStatus,
 		})
 		_node.Status = value
+	}
+	if value, ok := nc.mutation.Cover(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: novel.FieldCover,
+		})
+		_node.Cover = value
 	}
 	if value, ok := nc.mutation.Summary(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

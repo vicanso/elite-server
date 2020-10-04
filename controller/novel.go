@@ -17,11 +17,22 @@
 package controller
 
 import (
+	"bytes"
+	"context"
+	"strings"
+
+	"github.com/minio/minio-go/v7"
 	"github.com/vicanso/elite/novel"
 	"github.com/vicanso/elite/router"
+	"github.com/vicanso/elite/service"
+	"github.com/vicanso/elite/util"
 	"github.com/vicanso/elite/validate"
 	"github.com/vicanso/elton"
+	"github.com/vicanso/go-axios"
+	"go.uber.org/zap"
 )
+
+const eliteConverBucket = "elite-covers"
 
 type (
 	novelCtrl struct{}
@@ -53,13 +64,55 @@ func (*novelCtrl) add(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	result, err := novel.Publish(novel.QueryParams{
+	queryParmas := novel.QueryParams{
 		Name:   params.Name,
 		Author: params.Author,
-	})
+	}
+	result, err := novelSrv.Publish(queryParmas)
 	if err != nil {
 		return
 	}
+	// 更新封面
+	go func() {
+		// 如果是绝对地址（外网），则下载图片并保存
+		if strings.HasPrefix(result.Cover, "http") {
+			resp, err := axios.Get(result.Cover)
+			if err != nil {
+				logger.Error("get cover fail",
+					zap.String("name", params.Name),
+				)
+				return
+			}
+			contentType := resp.Headers.Get("Content-Type")
+			fileType := strings.Split(contentType, "/")[1]
+			name := util.GenUlid() + "." + fileType
+			_, err = fileSrv.Upload(context.Background(), service.UploadParams{
+				Bucket: eliteConverBucket,
+				Name:   name,
+				Reader: bytes.NewReader(resp.Data),
+				Size:   int64(len(resp.Data)),
+				Opts: minio.PutObjectOptions{
+					ContentType: contentType,
+				},
+			})
+			if err != nil {
+				logger.Error("upload cover fail",
+					zap.String("name", params.Name),
+				)
+				return
+			}
+			_, err = result.Update().
+				SetCover(name).Save(context.Background())
+			if err != nil {
+				logger.Error("update cover fail",
+					zap.String("name", params.Name),
+				)
+				return
+			}
+
+		}
+	}()
+
 	c.Created(result)
 	return
 }

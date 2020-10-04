@@ -28,6 +28,8 @@ type Novel struct {
 	Source int `json:"source,omitempty"`
 	// Status holds the value of the "status" field.
 	Status int `json:"status,omitempty"`
+	// Cover holds the value of the "cover" field.
+	Cover string `json:"cover,omitempty"`
 	// Summary holds the value of the "summary" field.
 	Summary string `json:"summary,omitempty"`
 }
@@ -42,6 +44,7 @@ func (*Novel) scanValues() []interface{} {
 		&sql.NullString{}, // author
 		&sql.NullInt64{},  // source
 		&sql.NullInt64{},  // status
+		&sql.NullString{}, // cover
 		&sql.NullString{}, // summary
 	}
 }
@@ -89,7 +92,12 @@ func (n *Novel) assignValues(values ...interface{}) error {
 		n.Status = int(value.Int64)
 	}
 	if value, ok := values[6].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field summary", values[6])
+		return fmt.Errorf("unexpected type %T for field cover", values[6])
+	} else if value.Valid {
+		n.Cover = value.String
+	}
+	if value, ok := values[7].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field summary", values[7])
 	} else if value.Valid {
 		n.Summary = value.String
 	}
@@ -131,6 +139,8 @@ func (n *Novel) String() string {
 	builder.WriteString(fmt.Sprintf("%v", n.Source))
 	builder.WriteString(", status=")
 	builder.WriteString(fmt.Sprintf("%v", n.Status))
+	builder.WriteString(", cover=")
+	builder.WriteString(n.Cover)
 	builder.WriteString(", summary=")
 	builder.WriteString(n.Summary)
 	builder.WriteByte(')')

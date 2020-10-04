@@ -21,16 +21,17 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
-	"github.com/vicanso/elton"
-	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/middleware"
+	"github.com/vicanso/elite/novel"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elite/util"
+	"github.com/vicanso/elton"
+	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
 )
@@ -97,7 +98,9 @@ var (
 	// 获取influx service
 	getInfluxSrv = helper.GetInfluxSrv
 	// 文件服务
-	fileSrv = new(service.FileSrv)
+	fileSrv = &service.FileSrv{}
+	// 小说服务
+	novelSrv = &novel.Srv{}
 )
 
 // GetLimit 获取limit的值

@@ -49,6 +49,7 @@ var (
 		{Name: "author", Type: field.TypeString},
 		{Name: "source", Type: field.TypeInt},
 		{Name: "status", Type: field.TypeInt, Default: 1},
+		{Name: "cover", Type: field.TypeString},
 		{Name: "summary", Type: field.TypeString},
 	}
 	// NovelsTable holds the schema information for the "novels" table.

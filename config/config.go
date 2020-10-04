@@ -390,6 +390,7 @@ func GetNovelConfigs() []NovelConfig {
 	prefix := "novel."
 	keys := []string{
 		"biquge",
+		"qidian",
 	}
 	data := make([]NovelConfig, len(keys))
 	for index, name := range keys {

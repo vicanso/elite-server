@@ -818,6 +818,7 @@ type NovelMutation struct {
 	addsource     *int
 	status        *int
 	addstatus     *int
+	cover         *string
 	summary       *string
 	clearedFields map[string]struct{}
 	done          bool
@@ -1165,6 +1166,43 @@ func (m *NovelMutation) ResetStatus() {
 	m.addstatus = nil
 }
 
+// SetCover sets the cover field.
+func (m *NovelMutation) SetCover(s string) {
+	m.cover = &s
+}
+
+// Cover returns the cover value in the mutation.
+func (m *NovelMutation) Cover() (r string, exists bool) {
+	v := m.cover
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCover returns the old cover value of the Novel.
+// If the Novel object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *NovelMutation) OldCover(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCover is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCover requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCover: %w", err)
+	}
+	return oldValue.Cover, nil
+}
+
+// ResetCover reset all changes of the "cover" field.
+func (m *NovelMutation) ResetCover() {
+	m.cover = nil
+}
+
 // SetSummary sets the summary field.
 func (m *NovelMutation) SetSummary(s string) {
 	m.summary = &s
@@ -1216,7 +1254,7 @@ func (m *NovelMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *NovelMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.created_at != nil {
 		fields = append(fields, novel.FieldCreatedAt)
 	}
@@ -1234,6 +1272,9 @@ func (m *NovelMutation) Fields() []string {
 	}
 	if m.status != nil {
 		fields = append(fields, novel.FieldStatus)
+	}
+	if m.cover != nil {
+		fields = append(fields, novel.FieldCover)
 	}
 	if m.summary != nil {
 		fields = append(fields, novel.FieldSummary)
@@ -1258,6 +1299,8 @@ func (m *NovelMutation) Field(name string) (ent.Value, bool) {
 		return m.Source()
 	case novel.FieldStatus:
 		return m.Status()
+	case novel.FieldCover:
+		return m.Cover()
 	case novel.FieldSummary:
 		return m.Summary()
 	}
@@ -1281,6 +1324,8 @@ func (m *NovelMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldSource(ctx)
 	case novel.FieldStatus:
 		return m.OldStatus(ctx)
+	case novel.FieldCover:
+		return m.OldCover(ctx)
 	case novel.FieldSummary:
 		return m.OldSummary(ctx)
 	}
@@ -1333,6 +1378,13 @@ func (m *NovelMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStatus(v)
+		return nil
+	case novel.FieldCover:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCover(v)
 		return nil
 	case novel.FieldSummary:
 		v, ok := value.(string)
@@ -1435,6 +1487,9 @@ func (m *NovelMutation) ResetField(name string) error {
 		return nil
 	case novel.FieldStatus:
 		m.ResetStatus()
+		return nil
+	case novel.FieldCover:
+		m.ResetCover()
 		return nil
 	case novel.FieldSummary:
 		m.ResetSummary()

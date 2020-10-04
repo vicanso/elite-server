@@ -48,6 +48,12 @@ func (nu *NovelUpdate) AddStatus(i int) *NovelUpdate {
 	return nu
 }
 
+// SetCover sets the cover field.
+func (nu *NovelUpdate) SetCover(s string) *NovelUpdate {
+	nu.mutation.SetCover(s)
+	return nu
+}
+
 // SetSummary sets the summary field.
 func (nu *NovelUpdate) SetSummary(s string) *NovelUpdate {
 	nu.mutation.SetSummary(s)
@@ -174,6 +180,13 @@ func (nu *NovelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: novel.FieldStatus,
 		})
 	}
+	if value, ok := nu.mutation.Cover(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: novel.FieldCover,
+		})
+	}
 	if value, ok := nu.mutation.Summary(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -217,6 +230,12 @@ func (nuo *NovelUpdateOne) SetNillableStatus(i *int) *NovelUpdateOne {
 // AddStatus adds i to status.
 func (nuo *NovelUpdateOne) AddStatus(i int) *NovelUpdateOne {
 	nuo.mutation.AddStatus(i)
+	return nuo
+}
+
+// SetCover sets the cover field.
+func (nuo *NovelUpdateOne) SetCover(s string) *NovelUpdateOne {
+	nuo.mutation.SetCover(s)
 	return nuo
 }
 
@@ -342,6 +361,13 @@ func (nuo *NovelUpdateOne) sqlSave(ctx context.Context) (_node *Novel, err error
 			Type:   field.TypeInt,
 			Value:  value,
 			Column: novel.FieldStatus,
+		})
+	}
+	if value, ok := nuo.mutation.Cover(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: novel.FieldCover,
 		})
 	}
 	if value, ok := nuo.mutation.Summary(); ok {

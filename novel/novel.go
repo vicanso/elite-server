@@ -17,6 +17,7 @@
 package novel
 
 import (
+	"image"
 	"time"
 
 	"github.com/vicanso/elite/config"
@@ -44,19 +45,28 @@ var (
 		StatusCode: 400,
 		Category:   errNovelCategory,
 	}
+	errNovelNotExists = &hes.Error{
+		Message:    "小说不存在，请先添加该小说",
+		StatusCode: 400,
+		Category:   errNovelCategory,
+	}
 )
 
 const (
 	novelBiQuGeName = "biquge"
+	novelQiDianName = "qidian"
 )
 
 // 小说来源
 const (
 	// NovelSourceBiQuGe biquge source
 	NovelSourceBiQuGe = iota + 1
+	// NovelSourceQiDian qidian source
+	NovelSourceQiDian
 )
 
 type (
+	Srv struct{}
 	// Novel 小说
 	Novel struct {
 		Name     string
@@ -64,6 +74,7 @@ type (
 		Summary  string
 		SourceID int
 		Source   int
+		CoverURL string
 	}
 	// Chapter 小说章节
 	Chapter struct {
@@ -71,9 +82,11 @@ type (
 		NO    int
 		URL   string
 	}
+	// QueryParams 查询参数
 	QueryParams struct {
 		Name   string
 		Author string
+		Source int
 	}
 )
 
@@ -112,6 +125,7 @@ func (novel *Novel) Add() (result *ent.Novel, err error) {
 		SetAuthor(novel.Author).
 		SetSource(novel.Source).
 		SetSummary(novel.Summary).
+		SetCover(novel.CoverURL).
 		Save(ctx)
 	return
 }
@@ -141,12 +155,15 @@ func (params *QueryParams) FirstNovelSource() (*ent.NovelSource, error) {
 	if params.Author != "" {
 		query = query.Where(novelsource.AuthorEQ(params.Author))
 	}
+	if params.Source != 0 {
+		query = query.Where(novelsource.SourceEQ(params.Source))
+	}
 	query = query.Order(ent.Asc("source"))
 	return query.First(ctx)
 }
 
 // SyncSource 同步小说
-func SyncSource() (err error) {
+func (*Srv) SyncSource() (err error) {
 	redisSrv := new(helper.Redis)
 	// 确保只有一个实例在更新
 	ok, done, err := redisSrv.LockWithDone("novel-sync-source", time.Hour)
@@ -164,7 +181,8 @@ func SyncSource() (err error) {
 }
 
 // Publish 发布小说
-func Publish(params QueryParams) (novel *ent.Novel, err error) {
+func (*Srv) Publish(params QueryParams) (novel *ent.Novel, err error) {
+
 	novel, err = params.FirstNovel()
 	if ent.IsNotFound(err) {
 		err = nil
@@ -188,12 +206,33 @@ func Publish(params QueryParams) (novel *ent.Novel, err error) {
 	if err != nil {
 		return
 	}
+	// 如果从qidian中能获取，则替换简介
+	qiDianResult, _ := NewQiDian().Search(params.Name, params.Author)
+	if qiDianResult.SourceID != 0 {
+		result.Summary = qiDianResult.Summary
+		if qiDianResult.CoverURL != "" {
+			result.CoverURL = qiDianResult.CoverURL
+		}
+	}
 
 	// 添加小说
 	novel, err = result.Add()
 	if err != nil {
 		return
 	}
-
 	return
+}
+
+// GetCover 获取小说封面
+func (*Srv) GetCover(params QueryParams) (img image.Image, err error) {
+	novel, err := params.FirstNovel()
+	if err != nil {
+		return
+	}
+	params.Source = novel.Source
+	novelSource, err := params.FirstNovelSource()
+	if err != nil {
+		return
+	}
+	return NewBiQuGe().GetCover(novelSource.SourceID)
 }

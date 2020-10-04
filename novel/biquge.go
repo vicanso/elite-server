@@ -117,20 +117,21 @@ func (bqg *biQuGe) GetDetail(id int) (novel Novel, err error) {
 		Summary:  summary,
 		Source:   NovelSourceBiQuGe,
 		SourceID: id,
+		CoverURL: bqg.getCoverURL(id),
 	}
 	return
 }
 
+func (bqg *biQuGe) getCoverURL(id int) string {
+	prefix := strconv.Itoa(id / 1000)
+	url := strings.ReplaceAll(biQuGeCoverURL, ":id", strconv.Itoa(id))
+	url = strings.ReplaceAll(url, ":prefix", prefix)
+	return bqg.ins.Config.BaseURL + url
+}
+
 // GetCover 获取封面
 func (bqg *biQuGe) GetCover(id int) (img image.Image, err error) {
-	conf := &axios.Config{
-		URL: biQuGeCoverURL,
-		Params: map[string]string{
-			"id":     strconv.Itoa(id),
-			"prefix": strconv.Itoa(id / 1000),
-		},
-	}
-	resp, err := bqg.ins.Request(conf)
+	resp, err := bqg.ins.Get(bqg.getCoverURL(id))
 	if err != nil {
 		return
 	}

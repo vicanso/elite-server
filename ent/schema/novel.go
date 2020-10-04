@@ -53,6 +53,9 @@ func (Novel) Fields() []ent.Field {
 				return nil
 			}).
 			Comment("小说状态"),
+		field.String("cover").
+			Optional().
+			Comment("小说封面"),
 		field.String("summary").
 			Comment("小说简介"),
 	}

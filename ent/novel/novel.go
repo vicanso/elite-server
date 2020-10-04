@@ -23,6 +23,8 @@ const (
 	FieldSource = "source"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldCover holds the string denoting the cover field in the database.
+	FieldCover = "cover"
 	// FieldSummary holds the string denoting the summary field in the database.
 	FieldSummary = "summary"
 
@@ -39,6 +41,7 @@ var Columns = []string{
 	FieldAuthor,
 	FieldSource,
 	FieldStatus,
+	FieldCover,
 	FieldSummary,
 }
 

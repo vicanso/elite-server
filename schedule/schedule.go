@@ -86,7 +86,8 @@ func entStats() {
 
 // syncNovelSource 同步小说源
 func syncNovelSource() {
-	err := novel.SyncSource()
+	srv := novel.Srv{}
+	err := srv.SyncSource()
 	if err != nil {
 		log.Default().Error("sync novel source fail",
 			zap.Error(err),

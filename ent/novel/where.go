@@ -134,6 +134,13 @@ func Status(v int) predicate.Novel {
 	})
 }
 
+// Cover applies equality check predicate on the "cover" field. It's identical to CoverEQ.
+func Cover(v string) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCover), v))
+	})
+}
+
 // Summary applies equality check predicate on the "summary" field. It's identical to SummaryEQ.
 func Summary(v string) predicate.Novel {
 	return predicate.Novel(func(s *sql.Selector) {
@@ -664,6 +671,117 @@ func StatusLT(v int) predicate.Novel {
 func StatusLTE(v int) predicate.Novel {
 	return predicate.Novel(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldStatus), v))
+	})
+}
+
+// CoverEQ applies the EQ predicate on the "cover" field.
+func CoverEQ(v string) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCover), v))
+	})
+}
+
+// CoverNEQ applies the NEQ predicate on the "cover" field.
+func CoverNEQ(v string) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCover), v))
+	})
+}
+
+// CoverIn applies the In predicate on the "cover" field.
+func CoverIn(vs ...string) predicate.Novel {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Novel(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCover), v...))
+	})
+}
+
+// CoverNotIn applies the NotIn predicate on the "cover" field.
+func CoverNotIn(vs ...string) predicate.Novel {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Novel(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCover), v...))
+	})
+}
+
+// CoverGT applies the GT predicate on the "cover" field.
+func CoverGT(v string) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCover), v))
+	})
+}
+
+// CoverGTE applies the GTE predicate on the "cover" field.
+func CoverGTE(v string) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCover), v))
+	})
+}
+
+// CoverLT applies the LT predicate on the "cover" field.
+func CoverLT(v string) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCover), v))
+	})
+}
+
+// CoverLTE applies the LTE predicate on the "cover" field.
+func CoverLTE(v string) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCover), v))
+	})
+}
+
+// CoverContains applies the Contains predicate on the "cover" field.
+func CoverContains(v string) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldCover), v))
+	})
+}
+
+// CoverHasPrefix applies the HasPrefix predicate on the "cover" field.
+func CoverHasPrefix(v string) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldCover), v))
+	})
+}
+
+// CoverHasSuffix applies the HasSuffix predicate on the "cover" field.
+func CoverHasSuffix(v string) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldCover), v))
+	})
+}
+
+// CoverEqualFold applies the EqualFold predicate on the "cover" field.
+func CoverEqualFold(v string) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldCover), v))
+	})
+}
+
+// CoverContainsFold applies the ContainsFold predicate on the "cover" field.
+func CoverContainsFold(v string) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldCover), v))
 	})
 }
 
