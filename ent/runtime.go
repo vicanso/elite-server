@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 
+	"github.com/vicanso/elite/ent/chapter"
 	"github.com/vicanso/elite/ent/configuration"
 	"github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/ent/novelsource"
@@ -17,6 +18,20 @@ import (
 // code (default values, validators or hooks) and stitches it
 // to their package variables.
 func init() {
+	chapterMixin := schema.Chapter{}.Mixin()
+	chapterMixinFields0 := chapterMixin[0].Fields()
+	chapterFields := schema.Chapter{}.Fields()
+	_ = chapterFields
+	// chapterDescCreatedAt is the schema descriptor for created_at field.
+	chapterDescCreatedAt := chapterMixinFields0[0].Descriptor()
+	// chapter.DefaultCreatedAt holds the default value on creation for the created_at field.
+	chapter.DefaultCreatedAt = chapterDescCreatedAt.Default.(func() time.Time)
+	// chapterDescUpdatedAt is the schema descriptor for updated_at field.
+	chapterDescUpdatedAt := chapterMixinFields0[1].Descriptor()
+	// chapter.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	chapter.DefaultUpdatedAt = chapterDescUpdatedAt.Default.(func() time.Time)
+	// chapter.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	chapter.UpdateDefaultUpdatedAt = chapterDescUpdatedAt.UpdateDefault.(func() time.Time)
 	configurationMixin := schema.Configuration{}.Mixin()
 	configurationMixinFields0 := configurationMixin[0].Fields()
 	configurationMixinFields1 := configurationMixin[1].Fields()

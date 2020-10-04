@@ -8,6 +8,31 @@ import (
 )
 
 var (
+	// ChaptersColumns holds the columns for the "chapters" table.
+	ChaptersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "novel", Type: field.TypeInt},
+		{Name: "no", Type: field.TypeInt},
+		{Name: "title", Type: field.TypeString},
+		{Name: "content", Type: field.TypeString, Nullable: true},
+		{Name: "word_count", Type: field.TypeInt, Nullable: true},
+	}
+	// ChaptersTable holds the schema information for the "chapters" table.
+	ChaptersTable = &schema.Table{
+		Name:        "chapters",
+		Columns:     ChaptersColumns,
+		PrimaryKey:  []*schema.Column{ChaptersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+		Indexes: []*schema.Index{
+			{
+				Name:    "chapter_novel_no",
+				Unique:  true,
+				Columns: []*schema.Column{ChaptersColumns[3], ChaptersColumns[4]},
+			},
+		},
+	}
 	// ConfigurationsColumns holds the columns for the "configurations" table.
 	ConfigurationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -49,7 +74,7 @@ var (
 		{Name: "author", Type: field.TypeString},
 		{Name: "source", Type: field.TypeInt},
 		{Name: "status", Type: field.TypeInt, Default: 1},
-		{Name: "cover", Type: field.TypeString},
+		{Name: "cover", Type: field.TypeString, Nullable: true},
 		{Name: "summary", Type: field.TypeString},
 	}
 	// NovelsTable holds the schema information for the "novels" table.
@@ -159,6 +184,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		ChaptersTable,
 		ConfigurationsTable,
 		NovelsTable,
 		NovelSourcesTable,

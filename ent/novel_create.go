@@ -86,6 +86,14 @@ func (nc *NovelCreate) SetCover(s string) *NovelCreate {
 	return nc
 }
 
+// SetNillableCover sets the cover field if the given value is not nil.
+func (nc *NovelCreate) SetNillableCover(s *string) *NovelCreate {
+	if s != nil {
+		nc.SetCover(*s)
+	}
+	return nc
+}
+
 // SetSummary sets the summary field.
 func (nc *NovelCreate) SetSummary(s string) *NovelCreate {
 	nc.mutation.SetSummary(s)
@@ -197,9 +205,6 @@ func (nc *NovelCreate) check() error {
 		if err := novel.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
 		}
-	}
-	if _, ok := nc.mutation.Cover(); !ok {
-		return &ValidationError{Name: "cover", err: errors.New("ent: missing required field \"cover\"")}
 	}
 	if _, ok := nc.mutation.Summary(); !ok {
 		return &ValidationError{Name: "summary", err: errors.New("ent: missing required field \"summary\"")}

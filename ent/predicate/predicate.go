@@ -6,6 +6,9 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 )
 
+// Chapter is the predicate function for chapter builders.
+type Chapter func(*sql.Selector)
+
 // Configuration is the predicate function for configuration builders.
 type Configuration func(*sql.Selector)
 

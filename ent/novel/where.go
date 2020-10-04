@@ -771,6 +771,20 @@ func CoverHasSuffix(v string) predicate.Novel {
 	})
 }
 
+// CoverIsNil applies the IsNil predicate on the "cover" field.
+func CoverIsNil() predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldCover)))
+	})
+}
+
+// CoverNotNil applies the NotNil predicate on the "cover" field.
+func CoverNotNil() predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldCover)))
+	})
+}
+
 // CoverEqualFold applies the EqualFold predicate on the "cover" field.
 func CoverEqualFold(v string) predicate.Novel {
 	return predicate.Novel(func(s *sql.Selector) {

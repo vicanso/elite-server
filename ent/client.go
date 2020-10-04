@@ -9,6 +9,7 @@ import (
 
 	"github.com/vicanso/elite/ent/migrate"
 
+	"github.com/vicanso/elite/ent/chapter"
 	"github.com/vicanso/elite/ent/configuration"
 	"github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/ent/novelsource"
@@ -24,6 +25,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Chapter is the client for interacting with the Chapter builders.
+	Chapter *ChapterClient
 	// Configuration is the client for interacting with the Configuration builders.
 	Configuration *ConfigurationClient
 	// Novel is the client for interacting with the Novel builders.
@@ -47,6 +50,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Chapter = NewChapterClient(c.config)
 	c.Configuration = NewConfigurationClient(c.config)
 	c.Novel = NewNovelClient(c.config)
 	c.NovelSource = NewNovelSourceClient(c.config)
@@ -84,6 +88,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:           ctx,
 		config:        cfg,
+		Chapter:       NewChapterClient(cfg),
 		Configuration: NewConfigurationClient(cfg),
 		Novel:         NewNovelClient(cfg),
 		NovelSource:   NewNovelSourceClient(cfg),
@@ -104,6 +109,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := config{driver: &txDriver{tx: tx, drv: c.driver}, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
 		config:        cfg,
+		Chapter:       NewChapterClient(cfg),
 		Configuration: NewConfigurationClient(cfg),
 		Novel:         NewNovelClient(cfg),
 		NovelSource:   NewNovelSourceClient(cfg),
@@ -115,7 +121,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Configuration.
+//		Chapter.
 //		Query().
 //		Count(ctx)
 //
@@ -137,11 +143,100 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Chapter.Use(hooks...)
 	c.Configuration.Use(hooks...)
 	c.Novel.Use(hooks...)
 	c.NovelSource.Use(hooks...)
 	c.User.Use(hooks...)
 	c.UserLogin.Use(hooks...)
+}
+
+// ChapterClient is a client for the Chapter schema.
+type ChapterClient struct {
+	config
+}
+
+// NewChapterClient returns a client for the Chapter from the given config.
+func NewChapterClient(c config) *ChapterClient {
+	return &ChapterClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `chapter.Hooks(f(g(h())))`.
+func (c *ChapterClient) Use(hooks ...Hook) {
+	c.hooks.Chapter = append(c.hooks.Chapter, hooks...)
+}
+
+// Create returns a create builder for Chapter.
+func (c *ChapterClient) Create() *ChapterCreate {
+	mutation := newChapterMutation(c.config, OpCreate)
+	return &ChapterCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Chapter entities.
+func (c *ChapterClient) CreateBulk(builders ...*ChapterCreate) *ChapterCreateBulk {
+	return &ChapterCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Chapter.
+func (c *ChapterClient) Update() *ChapterUpdate {
+	mutation := newChapterMutation(c.config, OpUpdate)
+	return &ChapterUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ChapterClient) UpdateOne(ch *Chapter) *ChapterUpdateOne {
+	mutation := newChapterMutation(c.config, OpUpdateOne, withChapter(ch))
+	return &ChapterUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ChapterClient) UpdateOneID(id int) *ChapterUpdateOne {
+	mutation := newChapterMutation(c.config, OpUpdateOne, withChapterID(id))
+	return &ChapterUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Chapter.
+func (c *ChapterClient) Delete() *ChapterDelete {
+	mutation := newChapterMutation(c.config, OpDelete)
+	return &ChapterDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ChapterClient) DeleteOne(ch *Chapter) *ChapterDeleteOne {
+	return c.DeleteOneID(ch.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ChapterClient) DeleteOneID(id int) *ChapterDeleteOne {
+	builder := c.Delete().Where(chapter.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ChapterDeleteOne{builder}
+}
+
+// Query returns a query builder for Chapter.
+func (c *ChapterClient) Query() *ChapterQuery {
+	return &ChapterQuery{config: c.config}
+}
+
+// Get returns a Chapter entity by its id.
+func (c *ChapterClient) Get(ctx context.Context, id int) (*Chapter, error) {
+	return c.Query().Where(chapter.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ChapterClient) GetX(ctx context.Context, id int) *Chapter {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ChapterClient) Hooks() []Hook {
+	return c.hooks.Chapter
 }
 
 // ConfigurationClient is a client for the Configuration schema.

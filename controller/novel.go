@@ -19,10 +19,12 @@ package controller
 import (
 	"bytes"
 	"context"
+	"strconv"
 	"strings"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/vicanso/elite/ent"
+	"github.com/vicanso/elite/ent/chapter"
 	entNovel "github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/novel"
 	"github.com/vicanso/elite/router"
@@ -44,6 +46,11 @@ type (
 		Novels []*ent.Novel `json:"novels,omitempty"`
 		Count  int          `json:"count,omitempty"`
 	}
+	// novelChapterListResp 小说章节列表响应
+	novelChapterListResp struct {
+		Chapters []*ent.Chapter `json:"chapters,omitempty"`
+		Count    int            `json:"count,omitempty"`
+	}
 
 	// novelAddParams 添加小说参数
 	novelAddParams struct {
@@ -55,6 +62,12 @@ type (
 		listParams
 
 		Keyword string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
+	}
+	// novelChpaterListParams 章节查询参数
+	novelChpaterListParams struct {
+		listParams
+
+		ID int `json:"id,omitempty"`
 	}
 )
 
@@ -74,6 +87,11 @@ func init() {
 	g.GET(
 		"/v1",
 		ctrl.list,
+	)
+	// 小说章节查询
+	g.GET(
+		"/v1/{id}/chapters",
+		ctrl.listChapter,
 	)
 }
 
@@ -102,6 +120,30 @@ func (params *novelListParams) count(ctx context.Context) (count int, err error)
 	query := getEntClient().Novel.Query()
 	query = params.where(query)
 
+	return query.Count(ctx)
+}
+
+// where 将查询条件转换为where
+func (params *novelChpaterListParams) where(query *ent.ChapterQuery) *ent.ChapterQuery {
+	// id, _ := strconv.Atoi(params.ID)
+	query = query.Where(chapter.NovelEQ(params.ID))
+	return query
+}
+
+// queryAll 查询小说章节
+func (params *novelChpaterListParams) queryAll(ctx context.Context) (chapters []*ent.Chapter, err error) {
+	query := getEntClient().Chapter.Query()
+	query = query.Limit(params.GetLimit()).
+		Offset(params.GetOffset()).
+		Order(params.GetOrders()...)
+	query = params.where(query)
+	return query.All(ctx)
+}
+
+// count 计算章节总数
+func (params *novelChpaterListParams) count(ctx context.Context) (count int, err error) {
+	query := getEntClient().Chapter.Query()
+	query = params.where(query)
 	return query.Count(ctx)
 }
 
@@ -188,5 +230,43 @@ func (*novelCtrl) add(c *elton.Context) (err error) {
 	}()
 
 	c.Created(result)
+	return
+}
+
+// listChapter 获取小说章节
+func (*novelCtrl) listChapter(c *elton.Context) (err error) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return
+	}
+	params := novelChpaterListParams{}
+	err = validate.Do(&params, c.Query())
+	if err != nil {
+		return
+	}
+	params.ID = id
+	count := -1
+	if params.GetOffset() == 0 {
+		count, err = params.count(c.Context())
+		if err != nil {
+			return
+		}
+	}
+	// 如果章节总数为0，则fetch数据
+	if count == 0 || true {
+		err = novelSrv.UpdateChapters(id)
+		if err != nil {
+			return
+		}
+	}
+	chapters, err := params.queryAll(c.Context())
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge("5m")
+	c.Body = &novelChapterListResp{
+		Count:    count,
+		Chapters: chapters,
+	}
 	return
 }

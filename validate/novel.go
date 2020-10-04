@@ -17,4 +17,5 @@ package validate
 func init() {
 	AddAlias("xNovelName", "min=1,max=30")
 	AddAlias("xNovelAuthor", "min=1,max=20")
+	AddAlias("xNovelID", "number")
 }

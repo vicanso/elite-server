@@ -17,16 +17,16 @@
 package novel
 
 import (
-	"image"
+	"context"
 	"time"
 
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/ent"
+	"github.com/vicanso/elite/ent/chapter"
 	"github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/ent/novelsource"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/hes"
-	"golang.org/x/net/context"
 )
 
 var novelConfigs = config.GetNovelConfigs()
@@ -223,16 +223,52 @@ func (*Srv) Publish(params QueryParams) (novel *ent.Novel, err error) {
 	return
 }
 
-// GetCover 获取小说封面
-func (*Srv) GetCover(params QueryParams) (img image.Image, err error) {
-	novel, err := params.FirstNovel()
+// UpdateChapters 拉取小说章节
+func (*Srv) UpdateChapters(id int) (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	result, err := getEntClient().Novel.Query().
+		Where(novel.IDEQ(id)).
+		First(ctx)
 	if err != nil {
 		return
 	}
-	params.Source = novel.Source
+	params := QueryParams{
+		Author: result.Author,
+		Name:   result.Name,
+		Source: result.Source,
+	}
 	novelSource, err := params.FirstNovelSource()
 	if err != nil {
 		return
 	}
-	return NewBiQuGe().GetCover(novelSource.SourceID)
+	// TODO 支持更多的小说源
+	chapters, err := NewBiQuGe().GetChapters(novelSource.SourceID)
+	if err != nil {
+		return
+	}
+	currentCount, err := getEntClient().Chapter.Query().
+		Where(chapter.NovelEQ(id)).
+		Count(ctx)
+	if err != nil {
+		return
+	}
+	// 如果所有章节都已更新
+	if len(chapters) <= currentCount {
+		return
+	}
+	chapters = chapters[currentCount:]
+	bulk := make([]*ent.ChapterCreate, len(chapters))
+	for i, item := range chapters {
+		bulk[i] = getEntClient().Chapter.Create().
+			SetTitle(item.Title).
+			SetNo(item.NO).
+			SetNovel(id)
+	}
+	_, err = getEntClient().Chapter.CreateBulk(bulk...).Save(ctx)
+	if err != nil {
+		return
+	}
+
+	return
 }

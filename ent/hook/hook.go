@@ -9,6 +9,19 @@ import (
 	"github.com/vicanso/elite/ent"
 )
 
+// The ChapterFunc type is an adapter to allow the use of ordinary
+// function as Chapter mutator.
+type ChapterFunc func(context.Context, *ent.ChapterMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ChapterFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ChapterMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ChapterMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The ConfigurationFunc type is an adapter to allow the use of ordinary
 // function as Configuration mutator.
 type ConfigurationFunc func(context.Context, *ent.ConfigurationMutation) (ent.Value, error)

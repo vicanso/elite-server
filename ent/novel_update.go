@@ -54,6 +54,20 @@ func (nu *NovelUpdate) SetCover(s string) *NovelUpdate {
 	return nu
 }
 
+// SetNillableCover sets the cover field if the given value is not nil.
+func (nu *NovelUpdate) SetNillableCover(s *string) *NovelUpdate {
+	if s != nil {
+		nu.SetCover(*s)
+	}
+	return nu
+}
+
+// ClearCover clears the value of cover.
+func (nu *NovelUpdate) ClearCover() *NovelUpdate {
+	nu.mutation.ClearCover()
+	return nu
+}
+
 // SetSummary sets the summary field.
 func (nu *NovelUpdate) SetSummary(s string) *NovelUpdate {
 	nu.mutation.SetSummary(s)
@@ -187,6 +201,12 @@ func (nu *NovelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: novel.FieldCover,
 		})
 	}
+	if nu.mutation.CoverCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: novel.FieldCover,
+		})
+	}
 	if value, ok := nu.mutation.Summary(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -236,6 +256,20 @@ func (nuo *NovelUpdateOne) AddStatus(i int) *NovelUpdateOne {
 // SetCover sets the cover field.
 func (nuo *NovelUpdateOne) SetCover(s string) *NovelUpdateOne {
 	nuo.mutation.SetCover(s)
+	return nuo
+}
+
+// SetNillableCover sets the cover field if the given value is not nil.
+func (nuo *NovelUpdateOne) SetNillableCover(s *string) *NovelUpdateOne {
+	if s != nil {
+		nuo.SetCover(*s)
+	}
+	return nuo
+}
+
+// ClearCover clears the value of cover.
+func (nuo *NovelUpdateOne) ClearCover() *NovelUpdateOne {
+	nuo.mutation.ClearCover()
 	return nuo
 }
 
@@ -367,6 +401,12 @@ func (nuo *NovelUpdateOne) sqlSave(ctx context.Context) (_node *Novel, err error
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: novel.FieldCover,
+		})
+	}
+	if nuo.mutation.CoverCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: novel.FieldCover,
 		})
 	}

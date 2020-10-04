@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/vicanso/elite/ent/chapter"
 	"github.com/vicanso/elite/ent/configuration"
 	"github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/ent/novelsource"
@@ -27,12 +28,780 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeChapter       = "Chapter"
 	TypeConfiguration = "Configuration"
 	TypeNovel         = "Novel"
 	TypeNovelSource   = "NovelSource"
 	TypeUser          = "User"
 	TypeUserLogin     = "UserLogin"
 )
+
+// ChapterMutation represents an operation that mutate the Chapters
+// nodes in the graph.
+type ChapterMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	created_at    *time.Time
+	updated_at    *time.Time
+	novel         *int
+	addnovel      *int
+	no            *int
+	addno         *int
+	title         *string
+	content       *string
+	word_count    *int
+	addword_count *int
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Chapter, error)
+}
+
+var _ ent.Mutation = (*ChapterMutation)(nil)
+
+// chapterOption allows to manage the mutation configuration using functional options.
+type chapterOption func(*ChapterMutation)
+
+// newChapterMutation creates new mutation for $n.Name.
+func newChapterMutation(c config, op Op, opts ...chapterOption) *ChapterMutation {
+	m := &ChapterMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeChapter,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withChapterID sets the id field of the mutation.
+func withChapterID(id int) chapterOption {
+	return func(m *ChapterMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Chapter
+		)
+		m.oldValue = func(ctx context.Context) (*Chapter, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Chapter.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withChapter sets the old Chapter of the mutation.
+func withChapter(node *Chapter) chapterOption {
+	return func(m *ChapterMutation) {
+		m.oldValue = func(context.Context) (*Chapter, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ChapterMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ChapterMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the id value in the mutation. Note that, the id
+// is available only if it was provided to the builder.
+func (m *ChapterMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetCreatedAt sets the created_at field.
+func (m *ChapterMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the created_at value in the mutation.
+func (m *ChapterMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old created_at value of the Chapter.
+// If the Chapter object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ChapterMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCreatedAt is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt reset all changes of the "created_at" field.
+func (m *ChapterMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the updated_at field.
+func (m *ChapterMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the updated_at value in the mutation.
+func (m *ChapterMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old updated_at value of the Chapter.
+// If the Chapter object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ChapterMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUpdatedAt is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt reset all changes of the "updated_at" field.
+func (m *ChapterMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetNovel sets the novel field.
+func (m *ChapterMutation) SetNovel(i int) {
+	m.novel = &i
+	m.addnovel = nil
+}
+
+// Novel returns the novel value in the mutation.
+func (m *ChapterMutation) Novel() (r int, exists bool) {
+	v := m.novel
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNovel returns the old novel value of the Chapter.
+// If the Chapter object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ChapterMutation) OldNovel(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldNovel is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldNovel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNovel: %w", err)
+	}
+	return oldValue.Novel, nil
+}
+
+// AddNovel adds i to novel.
+func (m *ChapterMutation) AddNovel(i int) {
+	if m.addnovel != nil {
+		*m.addnovel += i
+	} else {
+		m.addnovel = &i
+	}
+}
+
+// AddedNovel returns the value that was added to the novel field in this mutation.
+func (m *ChapterMutation) AddedNovel() (r int, exists bool) {
+	v := m.addnovel
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNovel reset all changes of the "novel" field.
+func (m *ChapterMutation) ResetNovel() {
+	m.novel = nil
+	m.addnovel = nil
+}
+
+// SetNo sets the no field.
+func (m *ChapterMutation) SetNo(i int) {
+	m.no = &i
+	m.addno = nil
+}
+
+// No returns the no value in the mutation.
+func (m *ChapterMutation) No() (r int, exists bool) {
+	v := m.no
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNo returns the old no value of the Chapter.
+// If the Chapter object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ChapterMutation) OldNo(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldNo is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldNo requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNo: %w", err)
+	}
+	return oldValue.No, nil
+}
+
+// AddNo adds i to no.
+func (m *ChapterMutation) AddNo(i int) {
+	if m.addno != nil {
+		*m.addno += i
+	} else {
+		m.addno = &i
+	}
+}
+
+// AddedNo returns the value that was added to the no field in this mutation.
+func (m *ChapterMutation) AddedNo() (r int, exists bool) {
+	v := m.addno
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNo reset all changes of the "no" field.
+func (m *ChapterMutation) ResetNo() {
+	m.no = nil
+	m.addno = nil
+}
+
+// SetTitle sets the title field.
+func (m *ChapterMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the title value in the mutation.
+func (m *ChapterMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old title value of the Chapter.
+// If the Chapter object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ChapterMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldTitle is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle reset all changes of the "title" field.
+func (m *ChapterMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetContent sets the content field.
+func (m *ChapterMutation) SetContent(s string) {
+	m.content = &s
+}
+
+// Content returns the content value in the mutation.
+func (m *ChapterMutation) Content() (r string, exists bool) {
+	v := m.content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContent returns the old content value of the Chapter.
+// If the Chapter object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ChapterMutation) OldContent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldContent is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContent: %w", err)
+	}
+	return oldValue.Content, nil
+}
+
+// ClearContent clears the value of content.
+func (m *ChapterMutation) ClearContent() {
+	m.content = nil
+	m.clearedFields[chapter.FieldContent] = struct{}{}
+}
+
+// ContentCleared returns if the field content was cleared in this mutation.
+func (m *ChapterMutation) ContentCleared() bool {
+	_, ok := m.clearedFields[chapter.FieldContent]
+	return ok
+}
+
+// ResetContent reset all changes of the "content" field.
+func (m *ChapterMutation) ResetContent() {
+	m.content = nil
+	delete(m.clearedFields, chapter.FieldContent)
+}
+
+// SetWordCount sets the word_count field.
+func (m *ChapterMutation) SetWordCount(i int) {
+	m.word_count = &i
+	m.addword_count = nil
+}
+
+// WordCount returns the word_count value in the mutation.
+func (m *ChapterMutation) WordCount() (r int, exists bool) {
+	v := m.word_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWordCount returns the old word_count value of the Chapter.
+// If the Chapter object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ChapterMutation) OldWordCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldWordCount is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldWordCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWordCount: %w", err)
+	}
+	return oldValue.WordCount, nil
+}
+
+// AddWordCount adds i to word_count.
+func (m *ChapterMutation) AddWordCount(i int) {
+	if m.addword_count != nil {
+		*m.addword_count += i
+	} else {
+		m.addword_count = &i
+	}
+}
+
+// AddedWordCount returns the value that was added to the word_count field in this mutation.
+func (m *ChapterMutation) AddedWordCount() (r int, exists bool) {
+	v := m.addword_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWordCount clears the value of word_count.
+func (m *ChapterMutation) ClearWordCount() {
+	m.word_count = nil
+	m.addword_count = nil
+	m.clearedFields[chapter.FieldWordCount] = struct{}{}
+}
+
+// WordCountCleared returns if the field word_count was cleared in this mutation.
+func (m *ChapterMutation) WordCountCleared() bool {
+	_, ok := m.clearedFields[chapter.FieldWordCount]
+	return ok
+}
+
+// ResetWordCount reset all changes of the "word_count" field.
+func (m *ChapterMutation) ResetWordCount() {
+	m.word_count = nil
+	m.addword_count = nil
+	delete(m.clearedFields, chapter.FieldWordCount)
+}
+
+// Op returns the operation name.
+func (m *ChapterMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Chapter).
+func (m *ChapterMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during
+// this mutation. Note that, in order to get all numeric
+// fields that were in/decremented, call AddedFields().
+func (m *ChapterMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.created_at != nil {
+		fields = append(fields, chapter.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, chapter.FieldUpdatedAt)
+	}
+	if m.novel != nil {
+		fields = append(fields, chapter.FieldNovel)
+	}
+	if m.no != nil {
+		fields = append(fields, chapter.FieldNo)
+	}
+	if m.title != nil {
+		fields = append(fields, chapter.FieldTitle)
+	}
+	if m.content != nil {
+		fields = append(fields, chapter.FieldContent)
+	}
+	if m.word_count != nil {
+		fields = append(fields, chapter.FieldWordCount)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name.
+// The second boolean value indicates that this field was
+// not set, or was not define in the schema.
+func (m *ChapterMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case chapter.FieldCreatedAt:
+		return m.CreatedAt()
+	case chapter.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case chapter.FieldNovel:
+		return m.Novel()
+	case chapter.FieldNo:
+		return m.No()
+	case chapter.FieldTitle:
+		return m.Title()
+	case chapter.FieldContent:
+		return m.Content()
+	case chapter.FieldWordCount:
+		return m.WordCount()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *ChapterMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case chapter.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case chapter.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case chapter.FieldNovel:
+		return m.OldNovel(ctx)
+	case chapter.FieldNo:
+		return m.OldNo(ctx)
+	case chapter.FieldTitle:
+		return m.OldTitle(ctx)
+	case chapter.FieldContent:
+		return m.OldContent(ctx)
+	case chapter.FieldWordCount:
+		return m.OldWordCount(ctx)
+	}
+	return nil, fmt.Errorf("unknown Chapter field %s", name)
+}
+
+// SetField sets the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *ChapterMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case chapter.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case chapter.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case chapter.FieldNovel:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNovel(v)
+		return nil
+	case chapter.FieldNo:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNo(v)
+		return nil
+	case chapter.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case chapter.FieldContent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContent(v)
+		return nil
+	case chapter.FieldWordCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWordCount(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Chapter field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented
+// or decremented during this mutation.
+func (m *ChapterMutation) AddedFields() []string {
+	var fields []string
+	if m.addnovel != nil {
+		fields = append(fields, chapter.FieldNovel)
+	}
+	if m.addno != nil {
+		fields = append(fields, chapter.FieldNo)
+	}
+	if m.addword_count != nil {
+		fields = append(fields, chapter.FieldWordCount)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was in/decremented
+// from a field with the given name. The second value indicates
+// that this field was not set, or was not define in the schema.
+func (m *ChapterMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case chapter.FieldNovel:
+		return m.AddedNovel()
+	case chapter.FieldNo:
+		return m.AddedNo()
+	case chapter.FieldWordCount:
+		return m.AddedWordCount()
+	}
+	return nil, false
+}
+
+// AddField adds the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *ChapterMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case chapter.FieldNovel:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNovel(v)
+		return nil
+	case chapter.FieldNo:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNo(v)
+		return nil
+	case chapter.FieldWordCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWordCount(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Chapter numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared
+// during this mutation.
+func (m *ChapterMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(chapter.FieldContent) {
+		fields = append(fields, chapter.FieldContent)
+	}
+	if m.FieldCleared(chapter.FieldWordCount) {
+		fields = append(fields, chapter.FieldWordCount)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicates if this field was
+// cleared in this mutation.
+func (m *ChapterMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value for the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ChapterMutation) ClearField(name string) error {
+	switch name {
+	case chapter.FieldContent:
+		m.ClearContent()
+		return nil
+	case chapter.FieldWordCount:
+		m.ClearWordCount()
+		return nil
+	}
+	return fmt.Errorf("unknown Chapter nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation regarding the
+// given field name. It returns an error if the field is not
+// defined in the schema.
+func (m *ChapterMutation) ResetField(name string) error {
+	switch name {
+	case chapter.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case chapter.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case chapter.FieldNovel:
+		m.ResetNovel()
+		return nil
+	case chapter.FieldNo:
+		m.ResetNo()
+		return nil
+	case chapter.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case chapter.FieldContent:
+		m.ResetContent()
+		return nil
+	case chapter.FieldWordCount:
+		m.ResetWordCount()
+		return nil
+	}
+	return fmt.Errorf("unknown Chapter field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this
+// mutation.
+func (m *ChapterMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all ids (to other nodes) that were added for
+// the given edge name.
+func (m *ChapterMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this
+// mutation.
+func (m *ChapterMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all ids (to other nodes) that were removed for
+// the given edge name.
+func (m *ChapterMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this
+// mutation.
+func (m *ChapterMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean indicates if this edge was
+// cleared in this mutation.
+func (m *ChapterMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value for the given name. It returns an
+// error if the edge name is not defined in the schema.
+func (m *ChapterMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Chapter unique edge %s", name)
+}
+
+// ResetEdge resets all changes in the mutation regarding the
+// given edge name. It returns an error if the edge is not
+// defined in the schema.
+func (m *ChapterMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Chapter edge %s", name)
+}
 
 // ConfigurationMutation represents an operation that mutate the Configurations
 // nodes in the graph.
@@ -1198,9 +1967,22 @@ func (m *NovelMutation) OldCover(ctx context.Context) (v string, err error) {
 	return oldValue.Cover, nil
 }
 
+// ClearCover clears the value of cover.
+func (m *NovelMutation) ClearCover() {
+	m.cover = nil
+	m.clearedFields[novel.FieldCover] = struct{}{}
+}
+
+// CoverCleared returns if the field cover was cleared in this mutation.
+func (m *NovelMutation) CoverCleared() bool {
+	_, ok := m.clearedFields[novel.FieldCover]
+	return ok
+}
+
 // ResetCover reset all changes of the "cover" field.
 func (m *NovelMutation) ResetCover() {
 	m.cover = nil
+	delete(m.clearedFields, novel.FieldCover)
 }
 
 // SetSummary sets the summary field.
@@ -1449,7 +2231,11 @@ func (m *NovelMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared
 // during this mutation.
 func (m *NovelMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(novel.FieldCover) {
+		fields = append(fields, novel.FieldCover)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicates if this field was
@@ -1462,6 +2248,11 @@ func (m *NovelMutation) FieldCleared(name string) bool {
 // ClearField clears the value for the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *NovelMutation) ClearField(name string) error {
+	switch name {
+	case novel.FieldCover:
+		m.ClearCover()
+		return nil
+	}
 	return fmt.Errorf("unknown Novel nullable field %s", name)
 }
 

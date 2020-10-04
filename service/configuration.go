@@ -20,13 +20,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vicanso/elton"
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/configuration"
 	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/util"
+	"github.com/vicanso/elton"
 )
 
 type (
@@ -78,7 +78,7 @@ func (*ConfigurationSrv) available() ([]*ent.Configuration, error) {
 		Where(configuration.Status(schema.StatusEnabled)).
 		Where(configuration.StartedAtLT(now)).
 		Where(configuration.EndedAtGT(now)).
-		Order(ent.Desc("updated_at")).
+		Order(ent.Desc(configuration.FieldUpdatedAt)).
 		All(ctx)
 }
 

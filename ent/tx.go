@@ -12,6 +12,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Chapter is the client for interacting with the Chapter builders.
+	Chapter *ChapterClient
 	// Configuration is the client for interacting with the Configuration builders.
 	Configuration *ConfigurationClient
 	// Novel is the client for interacting with the Novel builders.
@@ -157,6 +159,7 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Chapter = NewChapterClient(tx.config)
 	tx.Configuration = NewConfigurationClient(tx.config)
 	tx.Novel = NewNovelClient(tx.config)
 	tx.NovelSource = NewNovelSourceClient(tx.config)
@@ -171,7 +174,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Configuration.QueryXXX(), the query will be executed
+// applies a query, for example: Chapter.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.
