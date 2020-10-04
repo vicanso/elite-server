@@ -93,6 +93,11 @@ func init() {
 		"/v1/{id}/chapters",
 		ctrl.listChapter,
 	)
+	// 小说章节内容
+	g.GET(
+		"/v1/{id}/chapters/{no}",
+		ctrl.getChapterContent,
+	)
 }
 
 // where 将查询条件中的参数转换为对应的where条件
@@ -235,7 +240,7 @@ func (*novelCtrl) add(c *elton.Context) (err error) {
 
 // listChapter 获取小说章节
 func (*novelCtrl) listChapter(c *elton.Context) (err error) {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := getIDFromParams(c)
 	if err != nil {
 		return
 	}
@@ -268,5 +273,24 @@ func (*novelCtrl) listChapter(c *elton.Context) (err error) {
 		Count:    count,
 		Chapters: chapters,
 	}
+	return
+}
+
+// getChapterContent 获取章节内容
+func (*novelCtrl) getChapterContent(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	no, err := strconv.Atoi(c.Param("no"))
+	if err != nil {
+		return
+	}
+	result, err := novelSrv.GetChapterContent(id, no)
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge("10m")
+	c.Body = result
 	return
 }

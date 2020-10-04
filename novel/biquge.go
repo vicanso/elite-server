@@ -203,7 +203,8 @@ func (bqg *biQuGe) GetChapterContent(id, no int) (content string, err error) {
 	if err != nil {
 		return
 	}
-	if len(chapters) >= no {
+	if no >= len(chapters) {
+		// 正常一般不会出错超出范围，因此不使用hes error
 		err = errors.New("该章节已超出最新章节")
 		return
 	}
@@ -227,7 +228,7 @@ func (bqg *biQuGe) GetChapterContent(id, no int) (content string, err error) {
 		if value == "" {
 			continue
 		}
-		data = append(data, item)
+		data = append(data, value)
 	}
 	content = strings.Join(data, "\n")
 	return

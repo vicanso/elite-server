@@ -283,6 +283,38 @@ func (srv *Srv) UpdateChapters(id int) (err error) {
 	if err != nil {
 		return
 	}
+	return
+}
+
+// GetChapterContent 获取小说章节内容
+func (srv *Srv) GetChapterContent(id, no int) (result *ent.Chapter, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	result, err = getEntClient().Chapter.Query().
+		Where(chapter.NovelEQ(id)).
+		Where(chapter.NoEQ(no)).
+		First(ctx)
+	if err != nil {
+		return
+	}
+	if result.Content != "" {
+		return
+	}
+	fetcher, err := srv.GetFetcherByID(id)
+	if err != nil {
+		return
+	}
+	content, err := fetcher.GetChapterContent(no)
+	if err != nil {
+		return
+	}
+	result, err = result.Update().
+		SetContent(content).
+		SetWordCount(len(content)).
+		Save(ctx)
+	if err != nil {
+		return
+	}
 
 	return
 }
