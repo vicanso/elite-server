@@ -315,7 +315,7 @@ func GetRedisConfig() RedisConfig {
 func GetPostgresConfig() PostgresConfig {
 	prefix := "postgres."
 	postgresConfig := PostgresConfig{
-		URI: defaultViperX.GetString(prefix + "uri"),
+		URI: defaultViperX.GetStringFromENV(prefix + "uri"),
 	}
 	validateX(&postgresConfig)
 	return postgresConfig
