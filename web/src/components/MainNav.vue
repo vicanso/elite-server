@@ -55,7 +55,8 @@ import {
   SUPPLIERS,
   REGIONS,
   ADVERTISEMENTS,
-  ORDERS
+  ORDERS,
+  NOVEL_SOURCES
 } from "@/constants/route";
 import { USER_ADMIN, USER_SU, GROUP_MARKETING } from "@/constants/user";
 import { mapState } from "vuex";
@@ -140,6 +141,17 @@ const navs = [
       {
         name: "Session拦截信息配置",
         route: CONFIG_SESSION_INTERCEPTOR
+      }
+    ]
+  },
+  {
+    name: "小说",
+    icon: "el-icon-s-help",
+    roles: [USER_SU],
+    children: [
+      {
+        name: "小说源",
+        route: NOVEL_SOURCES
       }
     ]
   }

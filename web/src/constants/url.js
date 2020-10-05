@@ -39,3 +39,6 @@ export const ADVERTISEMENTS_ID = "/advertisements/v1/:id";
 export const ORDERS = "/orders/v1";
 export const ORDERS_ID = "/orders/v1/:sn";
 export const ORDERS_STATUSES = "/orders/v1/statuses";
+
+export const NOVEL_SOURCES = "/novels/v1/sources";
+export const NOVELS = "/novels/v1";

@@ -12,6 +12,9 @@ export const CONFIG_ORDER_COMMISSION = "OrderCommission";
 export const CONFIG_MARKETING_GROUP = "MarketingGroup";
 export const CONFIG_SESSION_INTERCEPTOR = "SessionInterceptor";
 
+// 小说源
+export const NOVEL_SOURCES = "NovelSources";
+
 export const CONFIG_EDITE_MODE = "edit";
 export const CONFIG_LIST_MODE = "list";
 

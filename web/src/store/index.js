@@ -4,6 +4,7 @@ import Vuex from "vuex";
 import userStore from "@/store/modules/user";
 import configStore from "@/store/modules/config";
 import commonStore from "@/store/modules/common";
+import novelStore from "@/store/modules/novel";
 
 Vue.use(Vuex);
 
@@ -14,6 +15,7 @@ export default new Vuex.Store({
   modules: {
     user: userStore,
     config: configStore,
-    common: commonStore
+    common: commonStore,
+    novel: novelStore
   }
 });

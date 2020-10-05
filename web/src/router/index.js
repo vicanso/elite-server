@@ -13,7 +13,8 @@ import {
   CONFIG_SESSION_INTERCEPTOR,
   USERS,
   PROFILE,
-  LOGINS
+  LOGINS,
+  NOVEL_SOURCES
 } from "@/constants/route";
 import Home from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
@@ -26,6 +27,7 @@ import RouterConcurrency from "@/views/configs/RouterConcurrency.vue";
 import SessionInterceptor from "@/views/configs/SessionInterceptor.vue";
 import Users from "@/views/Users.vue";
 import Logins from "@/views/Logins.vue";
+import NovelSources from "@/views/NovelSources.vue";
 
 Vue.use(VueRouter);
 
@@ -114,6 +116,14 @@ const routes = [
     name: PROFILE,
     component: () =>
       import(/* webpackChunkName: "profile" */ "@/views/Profile.vue"),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/novel-sources",
+    name: NOVEL_SOURCES,
+    component: NovelSources,
     meta: {
       requiresAuth: true
     }
