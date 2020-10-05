@@ -20,7 +20,7 @@ env:
   - PGVER=12
   - PGPORT=5433
   - PG_URI=postgresql://vicanso:A123456@127.0.0.1:5433/elite
-  - REDIS_URI=redis://127.0.0.1:6379/?db=0&slow=200ms&maxProcessing=1000
+  - REDIS_URI="redis://127.0.0.1:6379/?db=0&slow=200ms&maxProcessing=1000"
 
 before_script:
   - sudo sed -i -e '/local.*peer/s/postgres/all/' -e 's/peer\|md5/trust/g' /etc/postgresql/*/main/pg_hba.conf
