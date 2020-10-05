@@ -127,6 +127,12 @@ func init() {
 	novelsourceDescSourceID := novelsourceFields[3].Descriptor()
 	// novelsource.SourceIDValidator is a validator for the "source_id" field. It is called by the builders before save.
 	novelsource.SourceIDValidator = novelsourceDescSourceID.Validators[0].(func(int) error)
+	// novelsourceDescStatus is the schema descriptor for status field.
+	novelsourceDescStatus := novelsourceFields[4].Descriptor()
+	// novelsource.DefaultStatus holds the default value on creation for the status field.
+	novelsource.DefaultStatus = novelsourceDescStatus.Default.(int)
+	// novelsource.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	novelsource.StatusValidator = novelsourceDescStatus.Validators[0].(func(int) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	userMixinFields1 := userMixin[1].Fields()

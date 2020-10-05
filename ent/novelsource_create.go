@@ -72,6 +72,20 @@ func (nsc *NovelSourceCreate) SetSourceID(i int) *NovelSourceCreate {
 	return nsc
 }
 
+// SetStatus sets the status field.
+func (nsc *NovelSourceCreate) SetStatus(i int) *NovelSourceCreate {
+	nsc.mutation.SetStatus(i)
+	return nsc
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (nsc *NovelSourceCreate) SetNillableStatus(i *int) *NovelSourceCreate {
+	if i != nil {
+		nsc.SetStatus(*i)
+	}
+	return nsc
+}
+
 // Mutation returns the NovelSourceMutation object of the builder.
 func (nsc *NovelSourceCreate) Mutation() *NovelSourceMutation {
 	return nsc.mutation
@@ -132,6 +146,10 @@ func (nsc *NovelSourceCreate) defaults() {
 		v := novelsource.DefaultUpdatedAt()
 		nsc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := nsc.mutation.Status(); !ok {
+		v := novelsource.DefaultStatus
+		nsc.mutation.SetStatus(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -172,6 +190,14 @@ func (nsc *NovelSourceCreate) check() error {
 	if v, ok := nsc.mutation.SourceID(); ok {
 		if err := novelsource.SourceIDValidator(v); err != nil {
 			return &ValidationError{Name: "source_id", err: fmt.Errorf("ent: validator failed for field \"source_id\": %w", err)}
+		}
+	}
+	if _, ok := nsc.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New("ent: missing required field \"status\"")}
+	}
+	if v, ok := nsc.mutation.Status(); ok {
+		if err := novelsource.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
 		}
 	}
 	return nil
@@ -248,6 +274,14 @@ func (nsc *NovelSourceCreate) createSpec() (*NovelSource, *sqlgraph.CreateSpec) 
 			Column: novelsource.FieldSourceID,
 		})
 		_node.SourceID = value
+	}
+	if value, ok := nsc.mutation.Status(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novelsource.FieldStatus,
+		})
+		_node.Status = value
 	}
 	return _node, _spec
 }

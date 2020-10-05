@@ -27,6 +27,27 @@ func (nsu *NovelSourceUpdate) Where(ps ...predicate.NovelSource) *NovelSourceUpd
 	return nsu
 }
 
+// SetStatus sets the status field.
+func (nsu *NovelSourceUpdate) SetStatus(i int) *NovelSourceUpdate {
+	nsu.mutation.ResetStatus()
+	nsu.mutation.SetStatus(i)
+	return nsu
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (nsu *NovelSourceUpdate) SetNillableStatus(i *int) *NovelSourceUpdate {
+	if i != nil {
+		nsu.SetStatus(*i)
+	}
+	return nsu
+}
+
+// AddStatus adds i to status.
+func (nsu *NovelSourceUpdate) AddStatus(i int) *NovelSourceUpdate {
+	nsu.mutation.AddStatus(i)
+	return nsu
+}
+
 // Mutation returns the NovelSourceMutation object of the builder.
 func (nsu *NovelSourceUpdate) Mutation() *NovelSourceMutation {
 	return nsu.mutation
@@ -40,12 +61,18 @@ func (nsu *NovelSourceUpdate) Save(ctx context.Context) (int, error) {
 	)
 	nsu.defaults()
 	if len(nsu.hooks) == 0 {
+		if err = nsu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = nsu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*NovelSourceMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = nsu.check(); err != nil {
+				return 0, err
 			}
 			nsu.mutation = mutation
 			affected, err = nsu.sqlSave(ctx)
@@ -92,6 +119,16 @@ func (nsu *NovelSourceUpdate) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (nsu *NovelSourceUpdate) check() error {
+	if v, ok := nsu.mutation.Status(); ok {
+		if err := novelsource.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+		}
+	}
+	return nil
+}
+
 func (nsu *NovelSourceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -117,6 +154,20 @@ func (nsu *NovelSourceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: novelsource.FieldUpdatedAt,
 		})
 	}
+	if value, ok := nsu.mutation.Status(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novelsource.FieldStatus,
+		})
+	}
+	if value, ok := nsu.mutation.AddedStatus(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novelsource.FieldStatus,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, nsu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{novelsource.Label}
@@ -135,6 +186,27 @@ type NovelSourceUpdateOne struct {
 	mutation *NovelSourceMutation
 }
 
+// SetStatus sets the status field.
+func (nsuo *NovelSourceUpdateOne) SetStatus(i int) *NovelSourceUpdateOne {
+	nsuo.mutation.ResetStatus()
+	nsuo.mutation.SetStatus(i)
+	return nsuo
+}
+
+// SetNillableStatus sets the status field if the given value is not nil.
+func (nsuo *NovelSourceUpdateOne) SetNillableStatus(i *int) *NovelSourceUpdateOne {
+	if i != nil {
+		nsuo.SetStatus(*i)
+	}
+	return nsuo
+}
+
+// AddStatus adds i to status.
+func (nsuo *NovelSourceUpdateOne) AddStatus(i int) *NovelSourceUpdateOne {
+	nsuo.mutation.AddStatus(i)
+	return nsuo
+}
+
 // Mutation returns the NovelSourceMutation object of the builder.
 func (nsuo *NovelSourceUpdateOne) Mutation() *NovelSourceMutation {
 	return nsuo.mutation
@@ -148,12 +220,18 @@ func (nsuo *NovelSourceUpdateOne) Save(ctx context.Context) (*NovelSource, error
 	)
 	nsuo.defaults()
 	if len(nsuo.hooks) == 0 {
+		if err = nsuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = nsuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*NovelSourceMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = nsuo.check(); err != nil {
+				return nil, err
 			}
 			nsuo.mutation = mutation
 			node, err = nsuo.sqlSave(ctx)
@@ -200,6 +278,16 @@ func (nsuo *NovelSourceUpdateOne) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (nsuo *NovelSourceUpdateOne) check() error {
+	if v, ok := nsuo.mutation.Status(); ok {
+		if err := novelsource.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+		}
+	}
+	return nil
+}
+
 func (nsuo *NovelSourceUpdateOne) sqlSave(ctx context.Context) (_node *NovelSource, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -221,6 +309,20 @@ func (nsuo *NovelSourceUpdateOne) sqlSave(ctx context.Context) (_node *NovelSour
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: novelsource.FieldUpdatedAt,
+		})
+	}
+	if value, ok := nsuo.mutation.Status(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novelsource.FieldStatus,
+		})
+	}
+	if value, ok := nsuo.mutation.AddedStatus(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novelsource.FieldStatus,
 		})
 	}
 	_node = &NovelSource{config: nsuo.config}

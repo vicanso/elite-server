@@ -21,7 +21,6 @@ require (
 	github.com/jinzhu/now v1.1.1
 	github.com/klauspost/compress v1.11.1 // indirect
 	github.com/minio/minio-go/v7 v7.0.5
-	github.com/mmcloughlin/avo v0.0.0-20200803215136-443f81d77104
 	github.com/mozillazg/go-pinyin v0.18.0
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect

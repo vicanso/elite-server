@@ -16,11 +16,12 @@
         <el-table-column label="操作" width="80">
           <template slot-scope="scope">
             <el-button
+              :disabled="scope.row.status === 2"
               class="op"
               type="text"
               size="small"
               @click="publish(scope.row)"
-              >发布</el-button
+              >{{ scope.row.status === 2 ? "已发布" : "发布" }}</el-button
             >
           </template>
         </el-table-column>

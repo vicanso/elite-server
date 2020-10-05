@@ -23,6 +23,8 @@ const (
 	FieldSource = "source"
 	// FieldSourceID holds the string denoting the source_id field in the database.
 	FieldSourceID = "source_id"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 
 	// Table holds the table name of the novelsource in the database.
 	Table = "novel_sources"
@@ -37,6 +39,7 @@ var Columns = []string{
 	FieldAuthor,
 	FieldSource,
 	FieldSourceID,
+	FieldStatus,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -64,4 +67,8 @@ var (
 	SourceValidator func(int) error
 	// SourceIDValidator is a validator for the "source_id" field. It is called by the builders before save.
 	SourceIDValidator func(int) error
+	// DefaultStatus holds the default value on creation for the status field.
+	DefaultStatus int
+	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	StatusValidator func(int) error
 )

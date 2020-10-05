@@ -1,9 +1,20 @@
 package schema
 
 import (
+	"errors"
+
 	"github.com/facebook/ent"
 	"github.com/facebook/ent/schema/field"
 	"github.com/facebook/ent/schema/index"
+)
+
+const (
+	NovelSourceStatusUnknown = iota
+	// NovelSourceStatusNotPublished 未发布
+	NovelSourceStatusNotPublished
+	// NovelSourceStatusPublished 已发布
+	NovelSourceStatusPublished
+	NovelSourceStatusEnd
 )
 
 // NovelSource holds the schema definition for the NovelSource entity.
@@ -38,6 +49,15 @@ func (NovelSource) Fields() []ent.Field {
 			NonNegative().
 			Immutable().
 			Comment("小说来源ID"),
+		field.Int("status").
+			Default(NovelSourceStatusNotPublished).
+			Validate(func(i int) error {
+				if i <= NovelSourceStatusUnknown || i >= NovelSourceStatusEnd {
+					return errors.New("status is invalid")
+				}
+				return nil
+			}).
+			Comment("小说来源发布状态"),
 	}
 }
 

@@ -8,6 +8,7 @@ const mutationNovelSourceList = `${prefix}.source.list`;
 const mutationNovelSourceListProcessing = `${mutationNovelSourceList}.processing`;
 
 const mutationNovelPublishing = `${prefix}.publishing`;
+const mutationNovelPublished = `${prefix}.published`;
 
 const state = {
   // 是否正在发布小说
@@ -34,6 +35,15 @@ export default {
     },
     [mutationNovelPublishing](state, processing) {
       state.novelPublishing = processing;
+    },
+    [mutationNovelPublished](state, { name, author }) {
+      const arr = state.novelSourceList.data.slice(0);
+      arr.forEach(item => {
+        if (item.name === name && item.author === author) {
+          item.status = 2;
+        }
+      });
+      state.novelSourceList.data = arr;
     }
   },
   actions: {
@@ -52,6 +62,7 @@ export default {
       commit(mutationNovelPublishing, true);
       try {
         const { data } = await request.post(NOVELS, params);
+        commit(mutationNovelPublished, data);
         return data;
       } finally {
         commit(mutationNovelPublishing, false);

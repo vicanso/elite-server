@@ -25,14 +25,19 @@ import (
 	"github.com/vicanso/elite/ent/chapter"
 	"github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/ent/novelsource"
+	entSchema "github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/helper"
+	"github.com/vicanso/elite/log"
 	"github.com/vicanso/hes"
+	"go.uber.org/zap"
 )
 
 var novelConfigs = config.GetNovelConfigs()
 
 var (
 	getEntClient = helper.EntGetClient
+
+	logger = log.Default()
 )
 
 const (
@@ -250,6 +255,21 @@ func (srv *Srv) Publish(params QueryParams) (novel *ent.Novel, err error) {
 	if err != nil {
 		return
 	}
+	// 更新小说来源为已发布
+	go func() {
+		_, err := getEntClient().NovelSource.Update().
+			Where(novelsource.NameEQ(params.Name)).
+			Where(novelsource.AuthorEQ(params.Author)).
+			SetStatus(entSchema.NovelSourceStatusPublished).
+			Save(context.Background())
+		if err != nil {
+			logger.Error("update novel soucre status fail",
+				zap.String("name", params.Name),
+				zap.String("author", params.Author),
+				zap.Error(err),
+			)
+		}
+	}()
 	return
 }
 
