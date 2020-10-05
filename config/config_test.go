@@ -112,10 +112,10 @@ func TestInfluxdbConfig(t *testing.T) {
 	assert := assert.New(t)
 
 	influxdbConfig := GetInfluxdbConfig()
-	assert.Equal("http://127.0.0.1:9999", influxdbConfig.URI)
+	assert.NotEmpty(influxdbConfig.URI)
 	assert.Equal("elite", influxdbConfig.Bucket)
 	assert.Equal("bigTree", influxdbConfig.Org)
-	assert.Equal("vEne4wbhYbMOxU6rO2LhIp5ImN5Hah0GA5U35wP-Lq-xMVURCV0NUlVre1g_zLbiSI7JCRM1mRtULGdo4jL1oA==", influxdbConfig.Token)
+	assert.NotEmpty(influxdbConfig.Token)
 	assert.Equal(uint(100), influxdbConfig.BatchSize)
 	assert.Equal(10*time.Second, influxdbConfig.FlushInterval)
 	assert.False(influxdbConfig.Disabled)
@@ -148,8 +148,8 @@ func TestGetMinioConfig(t *testing.T) {
 	assert := assert.New(t)
 
 	minioConfig := GetMinioConfig()
-	assert.Equal("127.0.0.1:9000", minioConfig.Endpoint)
-	assert.Equal("origin", minioConfig.AccessKeyID)
-	assert.Equal("test123456", minioConfig.SecretAccessKey)
+	assert.NotEmpty(minioConfig.Endpoint)
+	assert.NotEmpty(minioConfig.AccessKeyID)
+	assert.NotEmpty(minioConfig.SecretAccessKey)
 	assert.False(minioConfig.SSL)
 }
