@@ -1,11 +1,11 @@
 <template>
-  <el-card class="novelSources">
+  <el-card class="novels">
     <div slot="header">
-      <span>小说源查询</span>
+      <span>小说查询</span>
     </div>
     <div v-loading="processing">
       <BaseFilter :fields="filterFields" @filter="filter" />
-      <el-table :data="novelSources" row-key="id" stripe>
+      <el-table :data="novels" row-key="id" stripe>
         <el-table-column prop="name" key="name" label="名称" />
         <el-table-column prop="author" key="author" label="作者" />
         <el-table-column prop="source" key="source" label="来源">
@@ -13,16 +13,9 @@
             {{ sourceNameList[scope.row.source] || sourceNameList[0] }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="80">
+        <el-table-column prop="status" key="status" label="状态">
           <template slot-scope="scope">
-            <el-button
-              :disabled="scope.row.status === 2"
-              class="op"
-              type="text"
-              size="small"
-              @click="publish(scope.row)"
-              >{{ scope.row.status === 2 ? "已发布" : "发布" }}</el-button
-            >
+            {{ statusList[scope.row.status] || statusList[0] }}
           </template>
         </el-table-column>
       </el-table>
@@ -31,7 +24,7 @@
         layout="prev, pager, next, sizes"
         :current-page="currentPage"
         :page-size="query.limit"
-        :total="novelSourceCount"
+        :total="novelCount"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       />
@@ -42,7 +35,7 @@
 import { mapActions, mapState } from "vuex";
 import BaseTable from "@/components/base/Table.vue";
 import BaseFilter from "@/components/base/Filter.vue";
-import { NOVEL_SOURCES } from "@/constants/common";
+import { NOVEL_SOURCES, NOVEL_STATUSES } from "@/constants/common";
 
 const filterFields = [
   {
@@ -61,7 +54,7 @@ const filterFields = [
 ];
 
 export default {
-  name: "NovelSources",
+  name: "Novels",
   extends: BaseTable,
   components: {
     BaseFilter
@@ -70,6 +63,7 @@ export default {
     const pageSizes = [10, 20, 30, 50];
     return {
       sourceNameList: NOVEL_SOURCES,
+      statusList: NOVEL_STATUSES,
       filterFields,
       query: {
         offset: 0,
@@ -80,28 +74,20 @@ export default {
   },
   computed: {
     ...mapState({
-      processing: state =>
-        state.novel.sourceListProcessing || state.novel.publishing,
-      novelSources: state => state.novel.sourceList.data || [],
-      novelSourceCount: state => state.novel.sourceList.count
+      processing: state => state.novel.listProcessing,
+      novels: state => state.novel.list.data || [],
+      novelCount: state => state.novel.list.count
     })
   },
   methods: {
-    ...mapActions(["listNovelSource", "publishNovel"]),
+    ...mapActions(["listNovel"]),
     async fetch() {
       const { query, processing } = this;
       if (processing) {
         return;
       }
       try {
-        await this.listNovelSource(query);
-      } catch (err) {
-        this.$message.error(err.message);
-      }
-    },
-    async publish(item) {
-      try {
-        await this.publishNovel(item);
+        await this.listNovel(query);
       } catch (err) {
         this.$message.error(err.message);
       }
@@ -109,9 +95,10 @@ export default {
   }
 };
 </script>
+
 <style lang="sass" scoped>
 @import "@/common.sass"
-.novelSources
+.novels
   margin: $mainMargin
   i
     margin-right: 5px

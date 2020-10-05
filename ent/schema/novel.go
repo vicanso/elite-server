@@ -14,6 +14,8 @@ const (
 	NovelStatusWritting
 	// NovelStatusDone 已完结
 	NovelStatusDone
+	// NovelStatusBan 禁止状态
+	NovelStatusBan
 	NovelStatusEnd
 )
 

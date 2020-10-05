@@ -10,12 +10,25 @@ const mutationNovelSourceListProcessing = `${mutationNovelSourceList}.processing
 const mutationNovelPublishing = `${prefix}.publishing`;
 const mutationNovelPublished = `${prefix}.published`;
 
+const mutationNovelList = `${prefix}.list`;
+const mutationNovelListProcessing = `${mutationNovelList}.processing`;
+
 const state = {
   // 是否正在发布小说
-  novelPublishing: false,
+  publishing: false,
 
-  novelSourceListProcessing: false,
-  novelSourceList: {
+  // 是否正在拉取小说源列表
+  sourceListProcessing: false,
+  // 小说源列表数据
+  sourceList: {
+    data: null,
+    count: -1
+  },
+
+  // 是否正在拉取小说列表
+  listProcessing: false,
+  // 小说列表数据
+  list: {
     data: null,
     count: -1
   }
@@ -25,25 +38,34 @@ export default {
   state,
   mutations: {
     [mutationNovelSourceListProcessing](state, processing) {
-      state.novelSourceListProcessing = processing;
+      state.sourceListProcessing = processing;
     },
     [mutationNovelSourceList](state, { novelSources = [], count = 0 }) {
       if (count >= 0) {
-        state.novelSourceList.count = count;
+        state.sourceList.count = count;
       }
-      state.novelSourceList.data = novelSources;
+      state.sourceList.data = novelSources;
     },
     [mutationNovelPublishing](state, processing) {
-      state.novelPublishing = processing;
+      state.publishing = processing;
     },
     [mutationNovelPublished](state, { name, author }) {
-      const arr = state.novelSourceList.data.slice(0);
+      const arr = state.sourceList.data.slice(0);
       arr.forEach(item => {
         if (item.name === name && item.author === author) {
           item.status = 2;
         }
       });
-      state.novelSourceList.data = arr;
+      state.sourceList.data = arr;
+    },
+    [mutationNovelListProcessing](state, processing) {
+      state.listProcessing = processing;
+    },
+    [mutationNovelList](state, { novels = [], count = 0 }) {
+      if (count >= 0) {
+        state.list.count = count;
+      }
+      state.list.data = novels;
     }
   },
   actions: {
@@ -66,6 +88,18 @@ export default {
         return data;
       } finally {
         commit(mutationNovelPublishing, false);
+      }
+    },
+    async listNovel({ commit }, params) {
+      commit(mutationNovelListProcessing, true);
+      try {
+        const { data } = await request.get(NOVELS, {
+          params
+        });
+        commit(mutationNovelList, data);
+        return data;
+      } finally {
+        commit(mutationNovelListProcessing, false);
       }
     }
   }

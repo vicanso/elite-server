@@ -3,7 +3,7 @@
     <h1>
       <router-link :to="{ name: home }">
         <i class="el-icon-eleme" />
-        Origin
+        Elite
       </router-link>
     </h1>
     <nav>
@@ -56,7 +56,8 @@ import {
   REGIONS,
   ADVERTISEMENTS,
   ORDERS,
-  NOVEL_SOURCES
+  NOVEL_SOURCES,
+  NOVELS
 } from "@/constants/route";
 import { USER_ADMIN, USER_SU, GROUP_MARKETING } from "@/constants/user";
 import { mapState } from "vuex";
@@ -149,6 +150,10 @@ const navs = [
     icon: "el-icon-s-help",
     roles: [USER_SU],
     children: [
+      {
+        name: "小说",
+        route: NOVELS
+      },
       {
         name: "小说源",
         route: NOVEL_SOURCES
