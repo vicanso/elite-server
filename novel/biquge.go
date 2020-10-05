@@ -31,6 +31,7 @@ import (
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/go-axios"
 	lruttl "github.com/vicanso/lru-ttl"
+	"go.uber.org/zap"
 )
 
 const (
@@ -247,14 +248,17 @@ func (bqg *biQuGe) Sync() (err error) {
 	if err != nil && !ent.IsNotFound(err) {
 		return
 	}
-	var id int
+	var id int = 1000
 	if source != nil {
 		id = source.SourceID
 	}
 	for i := id + 1; i < bqg.max; i++ {
 		novel, err := bqg.GetDetail(i)
 		if err != nil {
-			return err
+			logger.Error("sync novel fail",
+				zap.Int("id", i),
+			)
+			continue
 		}
 		if novel.SourceID == 0 {
 			continue
