@@ -80,7 +80,8 @@ var (
 	// 创建IP限制中间件
 	newIPLimit = middleware.NewIPLimit
 	// 创建出错限制中间件
-	newErrorLimit = middleware.NewErrorLimit
+	newErrorLimit       = middleware.NewErrorLimit
+	setNoCacheIfMatched = middleware.NewNoCacheWithCondition("cacheControl", "noCache")
 
 	// 图形验证码校验
 	captchaValidate = newMagicalCaptchaValidate()

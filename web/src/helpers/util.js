@@ -129,7 +129,7 @@ export function contains(arr, value) {
 
 // addNoCacheQueryParam 添加不缓存query参数
 export function addNoCacheQueryParam(params = {}) {
-  params["cacheControl"] = "no-cache";
+  params["cacheControl"] = "noCache";
   return params;
 }
 

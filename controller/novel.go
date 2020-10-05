@@ -19,10 +19,12 @@ package controller
 import (
 	"bytes"
 	"context"
+	"errors"
 	"strconv"
 	"strings"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/chapter"
 	entNovel "github.com/vicanso/elite/ent/novel"
@@ -62,6 +64,12 @@ type (
 	novelAddParams struct {
 		Name   string `json:"name,omitempty" validate:"required,xNovelName"`
 		Author string `json:"author,omitempty" validate:"required,xNovelAuthor"`
+	}
+	// novelUpdateParams 更新小说参数
+	novelUpdateParams struct {
+		ID      int    `json:"id,omitempty"`
+		Status  int    `json:"status,omitempty" validate:"omitempty,xNovelStatus"`
+		Summary string `json:"summary,omitempty" validate:"omitempty,xNovelSummary"`
 	}
 	// novelListParams 小说查询参数
 	novelListParams struct {
@@ -107,7 +115,22 @@ func init() {
 	// 小说查询
 	g.GET(
 		"/v1",
+		setNoCacheIfMatched,
 		ctrl.list,
+	)
+	// 单本小说查询
+	g.GET(
+		"/v1/{id}",
+		setNoCacheIfMatched,
+		ctrl.findByID,
+	)
+	// 单本小说更新
+	g.PATCH(
+		"/v1/{id}",
+		newTracker(cs.ActionNovelUpdate),
+		loadUserSession,
+		shouldBeAdmin,
+		ctrl.updateByID,
 	)
 	// 小说章节查询
 	g.GET(
@@ -203,6 +226,31 @@ func (params *novelSourceListParams) count(ctx context.Context) (count int, err 
 	return query.Count(ctx)
 }
 
+// update 更新小说
+func (params *novelUpdateParams) update(ctx context.Context) (count int, err error) {
+	if params.ID == 0 {
+		err = errors.New("id can't be nil")
+		return
+	}
+	update := getEntClient().Novel.Update().
+		Where(entNovel.IDEQ(params.ID))
+	if params.Summary != "" {
+		update = update.SetSummary(params.Summary)
+	}
+	if params.Status != 0 {
+		update = update.SetStatus(params.Status)
+	}
+	count, err = update.Save(ctx)
+	if err != nil {
+		return
+	}
+	if count == 0 {
+		err = errors.New("no record match")
+		return
+	}
+	return
+}
+
 // list 查询小说列表
 func (*novelCtrl) list(c *elton.Context) (err error) {
 	params := novelListParams{}
@@ -226,6 +274,43 @@ func (*novelCtrl) list(c *elton.Context) (err error) {
 		Novels: novels,
 		Count:  count,
 	}
+	return
+}
+
+// findByID 通过id查询书籍
+func (*novelCtrl) findByID(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	result, err := getEntClient().Novel.Query().
+		Where(entNovel.IDEQ(id)).
+		First(c.Context())
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge("10m")
+	c.Body = result
+	return
+}
+
+// updateByID 根据id更新小说信息
+func (*novelCtrl) updateByID(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	params := novelUpdateParams{}
+	err = validate.Do(&params, c.RequestBody)
+	if err != nil {
+		return
+	}
+	params.ID = id
+	_, err = params.update(c.Context())
+	if err != nil {
+		return
+	}
+	c.NoContent()
 	return
 }
 

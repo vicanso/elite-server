@@ -1,6 +1,7 @@
 import request from "@/helpers/request";
 
-import { NOVEL_SOURCES, NOVELS } from "@/constants/url";
+import { NOVEL_SOURCES, NOVELS, NOVELS_ID } from "@/constants/url";
+import { addNoCacheQueryParam } from "@/helpers/util";
 
 const prefix = "novel";
 
@@ -12,6 +13,9 @@ const mutationNovelPublished = `${prefix}.published`;
 
 const mutationNovelList = `${prefix}.list`;
 const mutationNovelListProcessing = `${mutationNovelList}.processing`;
+
+const mutationNovelUpdate = `${prefix}.update`;
+const mutationNovelUpdateProcessing = `${mutationNovelUpdate}.processing`;
 
 const state = {
   // 是否正在发布小说
@@ -31,7 +35,8 @@ const state = {
   list: {
     data: null,
     count: -1
-  }
+  },
+  updateProcessing: false
 };
 
 export default {
@@ -66,20 +71,37 @@ export default {
         state.list.count = count;
       }
       state.list.data = novels;
+    },
+    [mutationNovelUpdateProcessing](state, processing) {
+      state.updateProcessing = processing;
+    },
+    [mutationNovelUpdate](state, { id, data }) {
+      if (!state.list.data) {
+        return;
+      }
+      const arr = state.list.data.slice(0);
+      arr.forEach(item => {
+        if (item.id === id) {
+          item = Object.assign(item, data);
+        }
+      });
+      state.list.data = arr;
     }
   },
   actions: {
+    // listNovelSource 获取小说源列表
     async listNovelSource({ commit }, params) {
       commit(mutationNovelSourceListProcessing, true);
       try {
         const { data } = await request.get(NOVEL_SOURCES, {
-          params
+          params: addNoCacheQueryParam(params)
         });
         commit(mutationNovelSourceList, data);
       } finally {
         commit(mutationNovelSourceListProcessing, false);
       }
     },
+    // publishNovel 发布小说
     async publishNovel({ commit }, params) {
       commit(mutationNovelPublishing, true);
       try {
@@ -90,16 +112,33 @@ export default {
         commit(mutationNovelPublishing, false);
       }
     },
+    // listNovel 获取小说
     async listNovel({ commit }, params) {
       commit(mutationNovelListProcessing, true);
       try {
         const { data } = await request.get(NOVELS, {
-          params
+          params: addNoCacheQueryParam(params)
         });
         commit(mutationNovelList, data);
         return data;
       } finally {
         commit(mutationNovelListProcessing, false);
+      }
+    },
+    async getNovelByID(_, id) {
+      const { data } = await request.get(NOVELS_ID.replace(":id", id));
+      return data;
+    },
+    async updateNovelByID({ commit }, { id, data }) {
+      commit(mutationNovelUpdateProcessing, true);
+      try {
+        await request.patch(NOVELS_ID.replace(":id", id), data);
+        commit(mutationNovelUpdate, {
+          id,
+          data
+        });
+      } finally {
+        commit(mutationNovelUpdateProcessing, false);
       }
     }
   }

@@ -32,4 +32,7 @@ const (
 	ActionConfigurationAdd = "addConfiguration"
 	// ActionConfigurationUpdate update configuration
 	ActionConfigurationUpdate = "updateConfiguration"
+
+	// ActionNovelUpdate update novel
+	ActionNovelUpdate = "updateNovel"
 )

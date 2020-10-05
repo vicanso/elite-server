@@ -1,41 +1,68 @@
 <template>
-  <el-card class="novels">
-    <div slot="header">
-      <span>小说查询</span>
-    </div>
-    <div v-loading="processing">
-      <BaseFilter :fields="filterFields" @filter="filter" />
-      <el-table :data="novels" row-key="id" stripe>
-        <el-table-column prop="name" key="name" label="名称" />
-        <el-table-column prop="author" key="author" label="作者" />
-        <el-table-column prop="source" key="source" label="来源">
-          <template slot-scope="scope">
-            {{ sourceNameList[scope.row.source] || sourceNameList[0] }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="status" key="status" label="状态">
-          <template slot-scope="scope">
-            {{ statusList[scope.row.status] || statusList[0] }}
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-pagination
-        class="pagination"
-        layout="prev, pager, next, sizes"
-        :current-page="currentPage"
-        :page-size="query.limit"
-        :total="novelCount"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
-  </el-card>
+  <div class="novels">
+    <el-card v-if="!editMode">
+      <div slot="header">
+        <span>小说查询</span>
+      </div>
+      <div v-loading="processing">
+        <BaseFilter :fields="filterFields" @filter="filter" />
+        <el-table :data="novels" row-key="id" stripe>
+          <el-table-column prop="name" key="name" label="名称" width="200" />
+          <el-table-column
+            prop="author"
+            key="author"
+            label="作者"
+            width="150"
+          />
+          <el-table-column prop="source" key="source" label="来源" width="80">
+            <template slot-scope="scope">
+              {{ sourceNameList[scope.row.source] || sourceNameList[0] }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="status" key="status" label="状态" width="80">
+            <template slot-scope="scope">
+              {{ statusList[scope.row.status] || statusList[0] }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="summary" key="summary" label="简介">
+            <template slot-scope="scope">
+              <span :title="scope.row.summary">{{
+                scope.row.summary.substring(0, 10) + "..."
+              }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="80">
+            <template slot-scope="scope">
+              <el-button
+                class="op"
+                type="text"
+                size="small"
+                @click="modify(scope.row)"
+                >编辑</el-button
+              >
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          class="pagination"
+          layout="prev, pager, next, sizes"
+          :current-page="currentPage"
+          :page-size="query.limit"
+          :total="novelCount"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
+    </el-card>
+    <Novel v-else />
+  </div>
 </template>
 <script>
 import { mapActions, mapState } from "vuex";
 import BaseTable from "@/components/base/Table.vue";
 import BaseFilter from "@/components/base/Filter.vue";
 import { NOVEL_SOURCES, NOVEL_STATUSES } from "@/constants/common";
+import Novel from "@/components/Novel.vue";
 
 const filterFields = [
   {
@@ -57,6 +84,7 @@ export default {
   name: "Novels",
   extends: BaseTable,
   components: {
+    Novel,
     BaseFilter
   },
   data() {
