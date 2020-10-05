@@ -18,11 +18,8 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
-	"strings"
 
-	"github.com/iancoleman/strcase"
 	"github.com/vicanso/elite/cs"
-	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/log"
@@ -36,15 +33,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type (
-	// listParams 公共的列表查询参数
-	listParams struct {
-		Limit  string `json:"limit,omitempty" validate:"xLimit"`
-		Offset string `json:"offset,omitempty" validate:"omitempty,xOffset"`
-		Fields string `json:"fields,omitempty" validate:"omitempty,xFields"`
-		Order  string `json:"order,omitempty" validate:"omitempty,xOrder"`
-	}
-)
+type listParams = helper.EntListParams
 
 var (
 	errShouldLogin = &hes.Error{
@@ -102,48 +91,6 @@ var (
 	// 小说服务
 	novelSrv = &novel.Srv{}
 )
-
-// GetLimit 获取limit的值
-func (params *listParams) GetLimit() int {
-	limit, _ := strconv.Atoi(params.Limit)
-	return limit
-}
-
-// GetOffset 获取offset的值
-func (params *listParams) GetOffset() int {
-	offset, _ := strconv.Atoi(params.Offset)
-	return offset
-}
-
-// GetOrders 获取排序的函数列表
-func (params *listParams) GetOrders() []ent.OrderFunc {
-	if params.Order == "" {
-		return nil
-	}
-	arr := strings.Split(params.Order, ",")
-	funcs := make([]ent.OrderFunc, len(arr))
-	for index, item := range arr {
-		if item[0] == '-' {
-			funcs[index] = ent.Desc(strcase.ToSnake(item[1:]))
-		} else {
-			funcs[index] = ent.Asc(strcase.ToSnake(item))
-		}
-	}
-	return funcs
-}
-
-// GetFields 获取选择的字段
-func (params *listParams) GetFields() []string {
-	if params.Fields == "" {
-		return nil
-	}
-	arr := strings.Split(params.Fields, ",")
-	result := make([]string, len(arr))
-	for index, item := range arr {
-		result[index] = strcase.ToSnake(item)
-	}
-	return result
-}
 
 func newMagicalCaptchaValidate() elton.Handler {
 	magicValue := ""
