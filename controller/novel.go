@@ -26,6 +26,7 @@ import (
 	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/chapter"
 	entNovel "github.com/vicanso/elite/ent/novel"
+	"github.com/vicanso/elite/ent/novelsource"
 	"github.com/vicanso/elite/novel"
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/service"
@@ -51,6 +52,11 @@ type (
 		Chapters []*ent.Chapter `json:"chapters,omitempty"`
 		Count    int            `json:"count,omitempty"`
 	}
+	// novelSourceListResp 小说源列表响应
+	novelSourceListResp struct {
+		NovelSources []*ent.NovelSource `json:"novelSources,omitempty"`
+		Count        int                `json:"count,omitempty"`
+	}
 
 	// novelAddParams 添加小说参数
 	novelAddParams struct {
@@ -69,12 +75,27 @@ type (
 
 		ID int `json:"id,omitempty"`
 	}
+
+	// novelSourceListParams 小说源查询参数
+	novelSourceListParams struct {
+		listParams
+
+		Keyword string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
+	}
 )
 
 func init() {
 	ctrl := novelCtrl{}
 
 	g := router.NewGroup("/novels")
+
+	// 获取小说源列表
+	g.GET(
+		"/v1/sources",
+		loadUserSession,
+		shouldBeAdmin,
+		ctrl.listSource,
+	)
 
 	// 添加小说
 	g.POST(
@@ -135,7 +156,6 @@ func (params *novelListParams) count(ctx context.Context) (count int, err error)
 
 // where 将查询条件转换为where
 func (params *novelChpaterListParams) where(query *ent.ChapterQuery) *ent.ChapterQuery {
-	// id, _ := strconv.Atoi(params.ID)
 	query = query.Where(chapter.NovelEQ(params.ID))
 	return query
 }
@@ -153,6 +173,32 @@ func (params *novelChpaterListParams) queryAll(ctx context.Context) (chapters []
 // count 计算章节总数
 func (params *novelChpaterListParams) count(ctx context.Context) (count int, err error) {
 	query := getEntClient().Chapter.Query()
+	query = params.where(query)
+	return query.Count(ctx)
+}
+
+// where 将查询参数转换为where条件
+func (params *novelSourceListParams) where(query *ent.NovelSourceQuery) *ent.NovelSourceQuery {
+	if params.Keyword != "" {
+		query = query.Where(novelsource.Or(novelsource.NameContains(params.Keyword), novelsource.AuthorContains(params.Keyword)))
+	}
+	return query
+}
+
+// queryAll 查询符合条件的记录
+func (params *novelSourceListParams) queryAll(ctx context.Context) (sources []*ent.NovelSource, err error) {
+	query := getEntClient().NovelSource.Query()
+	query = query.Limit(params.GetLimit()).
+		Offset(params.GetOffset()).
+		Order(params.GetOrders()...)
+	query = params.where(query)
+
+	return query.All(ctx)
+}
+
+// count 计算小说源总数
+func (params *novelSourceListParams) count(ctx context.Context) (count int, err error) {
+	query := getEntClient().NovelSource.Query()
 	query = params.where(query)
 	return query.Count(ctx)
 }
@@ -321,5 +367,30 @@ func (*novelCtrl) getCover(c *elton.Context) (err error) {
 		}
 	}
 	c.Body = data
+	return
+}
+
+// listSource 获取小说源列表
+func (*novelCtrl) listSource(c *elton.Context) (err error) {
+	params := novelSourceListParams{}
+	err = validate.Do(&params, c.Query())
+	if err != nil {
+		return
+	}
+	count := -1
+	if params.GetOffset() == 0 {
+		count, err = params.count(c.Context())
+		if err != nil {
+			return
+		}
+	}
+	novelSources, err := params.queryAll(c.Context())
+	if err != nil {
+		return
+	}
+	c.Body = &novelSourceListResp{
+		NovelSources: novelSources,
+		Count:        count,
+	}
 	return
 }
