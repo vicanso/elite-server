@@ -24,13 +24,7 @@
               {{ statusList[scope.row.status] || statusList[0] }}
             </template>
           </el-table-column>
-          <el-table-column prop="summary" key="summary" label="简介">
-            <template slot-scope="scope">
-              <span :title="scope.row.summary">{{
-                scope.row.summary.substring(0, 10) + "..."
-              }}</span>
-            </template>
-          </el-table-column>
+          <el-table-column prop="summary" key="summary" label="简介" />
           <el-table-column label="操作" width="80">
             <template slot-scope="scope">
               <el-button
