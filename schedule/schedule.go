@@ -35,7 +35,7 @@ func init() {
 	_, _ = c.AddFunc("@every 5m", redisStats)
 	_, _ = c.AddFunc("@every 10s", entStats)
 	if os.Getenv("SYNC_SOURCE") != "" {
-		_, _ = c.AddFunc("@every 12h", syncNovelSource)
+		// _, _ = c.AddFunc("@every 12h", syncNovelSource)
 		go syncNovelSource()
 	}
 	c.Start()

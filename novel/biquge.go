@@ -26,7 +26,6 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/novelsource"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/go-axios"
@@ -237,21 +236,21 @@ func (bqg *biQuGe) GetChapterContent(id, no int) (content string, err error) {
 
 // Sync 同步小说来源
 func (bqg *biQuGe) Sync() (err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-	// 获取当前源的最后更新记录
-	source, err := getEntClient().NovelSource.Query().
-		Where(novelsource.SourceEQ(NovelSourceBiQuGe)).
-		Order(ent.Desc("source_id")).
-		First(ctx)
+	// ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	// defer cancel()
+	// // 获取当前源的最后更新记录
+	// source, err := getEntClient().NovelSource.Query().
+	// 	Where(novelsource.SourceEQ(NovelSourceBiQuGe)).
+	// 	Order(ent.Desc("source_id")).
+	// 	First(ctx)
 
-	if err != nil && !ent.IsNotFound(err) {
-		return
-	}
-	var id int = 1000
-	if source != nil {
-		id = source.SourceID
-	}
+	// if err != nil && !ent.IsNotFound(err) {
+	// 	return
+	// }
+	var id int
+	// if source != nil {
+	// id = source.SourceID
+	// }
 	for i := id + 1; i < bqg.max; i++ {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
