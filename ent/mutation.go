@@ -1587,6 +1587,12 @@ type NovelMutation struct {
 	addsource     *int
 	status        *int
 	addstatus     *int
+	views         *int
+	addviews      *int
+	downloads     *int
+	adddownloads  *int
+	favorites     *int
+	addfavorites  *int
 	cover         *string
 	summary       *string
 	clearedFields map[string]struct{}
@@ -1935,6 +1941,219 @@ func (m *NovelMutation) ResetStatus() {
 	m.addstatus = nil
 }
 
+// SetViews sets the views field.
+func (m *NovelMutation) SetViews(i int) {
+	m.views = &i
+	m.addviews = nil
+}
+
+// Views returns the views value in the mutation.
+func (m *NovelMutation) Views() (r int, exists bool) {
+	v := m.views
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldViews returns the old views value of the Novel.
+// If the Novel object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *NovelMutation) OldViews(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldViews is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldViews requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldViews: %w", err)
+	}
+	return oldValue.Views, nil
+}
+
+// AddViews adds i to views.
+func (m *NovelMutation) AddViews(i int) {
+	if m.addviews != nil {
+		*m.addviews += i
+	} else {
+		m.addviews = &i
+	}
+}
+
+// AddedViews returns the value that was added to the views field in this mutation.
+func (m *NovelMutation) AddedViews() (r int, exists bool) {
+	v := m.addviews
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearViews clears the value of views.
+func (m *NovelMutation) ClearViews() {
+	m.views = nil
+	m.addviews = nil
+	m.clearedFields[novel.FieldViews] = struct{}{}
+}
+
+// ViewsCleared returns if the field views was cleared in this mutation.
+func (m *NovelMutation) ViewsCleared() bool {
+	_, ok := m.clearedFields[novel.FieldViews]
+	return ok
+}
+
+// ResetViews reset all changes of the "views" field.
+func (m *NovelMutation) ResetViews() {
+	m.views = nil
+	m.addviews = nil
+	delete(m.clearedFields, novel.FieldViews)
+}
+
+// SetDownloads sets the downloads field.
+func (m *NovelMutation) SetDownloads(i int) {
+	m.downloads = &i
+	m.adddownloads = nil
+}
+
+// Downloads returns the downloads value in the mutation.
+func (m *NovelMutation) Downloads() (r int, exists bool) {
+	v := m.downloads
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDownloads returns the old downloads value of the Novel.
+// If the Novel object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *NovelMutation) OldDownloads(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDownloads is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDownloads requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDownloads: %w", err)
+	}
+	return oldValue.Downloads, nil
+}
+
+// AddDownloads adds i to downloads.
+func (m *NovelMutation) AddDownloads(i int) {
+	if m.adddownloads != nil {
+		*m.adddownloads += i
+	} else {
+		m.adddownloads = &i
+	}
+}
+
+// AddedDownloads returns the value that was added to the downloads field in this mutation.
+func (m *NovelMutation) AddedDownloads() (r int, exists bool) {
+	v := m.adddownloads
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDownloads clears the value of downloads.
+func (m *NovelMutation) ClearDownloads() {
+	m.downloads = nil
+	m.adddownloads = nil
+	m.clearedFields[novel.FieldDownloads] = struct{}{}
+}
+
+// DownloadsCleared returns if the field downloads was cleared in this mutation.
+func (m *NovelMutation) DownloadsCleared() bool {
+	_, ok := m.clearedFields[novel.FieldDownloads]
+	return ok
+}
+
+// ResetDownloads reset all changes of the "downloads" field.
+func (m *NovelMutation) ResetDownloads() {
+	m.downloads = nil
+	m.adddownloads = nil
+	delete(m.clearedFields, novel.FieldDownloads)
+}
+
+// SetFavorites sets the favorites field.
+func (m *NovelMutation) SetFavorites(i int) {
+	m.favorites = &i
+	m.addfavorites = nil
+}
+
+// Favorites returns the favorites value in the mutation.
+func (m *NovelMutation) Favorites() (r int, exists bool) {
+	v := m.favorites
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFavorites returns the old favorites value of the Novel.
+// If the Novel object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *NovelMutation) OldFavorites(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldFavorites is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldFavorites requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFavorites: %w", err)
+	}
+	return oldValue.Favorites, nil
+}
+
+// AddFavorites adds i to favorites.
+func (m *NovelMutation) AddFavorites(i int) {
+	if m.addfavorites != nil {
+		*m.addfavorites += i
+	} else {
+		m.addfavorites = &i
+	}
+}
+
+// AddedFavorites returns the value that was added to the favorites field in this mutation.
+func (m *NovelMutation) AddedFavorites() (r int, exists bool) {
+	v := m.addfavorites
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearFavorites clears the value of favorites.
+func (m *NovelMutation) ClearFavorites() {
+	m.favorites = nil
+	m.addfavorites = nil
+	m.clearedFields[novel.FieldFavorites] = struct{}{}
+}
+
+// FavoritesCleared returns if the field favorites was cleared in this mutation.
+func (m *NovelMutation) FavoritesCleared() bool {
+	_, ok := m.clearedFields[novel.FieldFavorites]
+	return ok
+}
+
+// ResetFavorites reset all changes of the "favorites" field.
+func (m *NovelMutation) ResetFavorites() {
+	m.favorites = nil
+	m.addfavorites = nil
+	delete(m.clearedFields, novel.FieldFavorites)
+}
+
 // SetCover sets the cover field.
 func (m *NovelMutation) SetCover(s string) {
 	m.cover = &s
@@ -2036,7 +2255,7 @@ func (m *NovelMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *NovelMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, novel.FieldCreatedAt)
 	}
@@ -2054,6 +2273,15 @@ func (m *NovelMutation) Fields() []string {
 	}
 	if m.status != nil {
 		fields = append(fields, novel.FieldStatus)
+	}
+	if m.views != nil {
+		fields = append(fields, novel.FieldViews)
+	}
+	if m.downloads != nil {
+		fields = append(fields, novel.FieldDownloads)
+	}
+	if m.favorites != nil {
+		fields = append(fields, novel.FieldFavorites)
 	}
 	if m.cover != nil {
 		fields = append(fields, novel.FieldCover)
@@ -2081,6 +2309,12 @@ func (m *NovelMutation) Field(name string) (ent.Value, bool) {
 		return m.Source()
 	case novel.FieldStatus:
 		return m.Status()
+	case novel.FieldViews:
+		return m.Views()
+	case novel.FieldDownloads:
+		return m.Downloads()
+	case novel.FieldFavorites:
+		return m.Favorites()
 	case novel.FieldCover:
 		return m.Cover()
 	case novel.FieldSummary:
@@ -2106,6 +2340,12 @@ func (m *NovelMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldSource(ctx)
 	case novel.FieldStatus:
 		return m.OldStatus(ctx)
+	case novel.FieldViews:
+		return m.OldViews(ctx)
+	case novel.FieldDownloads:
+		return m.OldDownloads(ctx)
+	case novel.FieldFavorites:
+		return m.OldFavorites(ctx)
 	case novel.FieldCover:
 		return m.OldCover(ctx)
 	case novel.FieldSummary:
@@ -2161,6 +2401,27 @@ func (m *NovelMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
+	case novel.FieldViews:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetViews(v)
+		return nil
+	case novel.FieldDownloads:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDownloads(v)
+		return nil
+	case novel.FieldFavorites:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFavorites(v)
+		return nil
 	case novel.FieldCover:
 		v, ok := value.(string)
 		if !ok {
@@ -2189,6 +2450,15 @@ func (m *NovelMutation) AddedFields() []string {
 	if m.addstatus != nil {
 		fields = append(fields, novel.FieldStatus)
 	}
+	if m.addviews != nil {
+		fields = append(fields, novel.FieldViews)
+	}
+	if m.adddownloads != nil {
+		fields = append(fields, novel.FieldDownloads)
+	}
+	if m.addfavorites != nil {
+		fields = append(fields, novel.FieldFavorites)
+	}
 	return fields
 }
 
@@ -2201,6 +2471,12 @@ func (m *NovelMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedSource()
 	case novel.FieldStatus:
 		return m.AddedStatus()
+	case novel.FieldViews:
+		return m.AddedViews()
+	case novel.FieldDownloads:
+		return m.AddedDownloads()
+	case novel.FieldFavorites:
+		return m.AddedFavorites()
 	}
 	return nil, false
 }
@@ -2224,6 +2500,27 @@ func (m *NovelMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddStatus(v)
 		return nil
+	case novel.FieldViews:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddViews(v)
+		return nil
+	case novel.FieldDownloads:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDownloads(v)
+		return nil
+	case novel.FieldFavorites:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFavorites(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Novel numeric field %s", name)
 }
@@ -2232,6 +2529,15 @@ func (m *NovelMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *NovelMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(novel.FieldViews) {
+		fields = append(fields, novel.FieldViews)
+	}
+	if m.FieldCleared(novel.FieldDownloads) {
+		fields = append(fields, novel.FieldDownloads)
+	}
+	if m.FieldCleared(novel.FieldFavorites) {
+		fields = append(fields, novel.FieldFavorites)
+	}
 	if m.FieldCleared(novel.FieldCover) {
 		fields = append(fields, novel.FieldCover)
 	}
@@ -2249,6 +2555,15 @@ func (m *NovelMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *NovelMutation) ClearField(name string) error {
 	switch name {
+	case novel.FieldViews:
+		m.ClearViews()
+		return nil
+	case novel.FieldDownloads:
+		m.ClearDownloads()
+		return nil
+	case novel.FieldFavorites:
+		m.ClearFavorites()
+		return nil
 	case novel.FieldCover:
 		m.ClearCover()
 		return nil
@@ -2278,6 +2593,15 @@ func (m *NovelMutation) ResetField(name string) error {
 		return nil
 	case novel.FieldStatus:
 		m.ResetStatus()
+		return nil
+	case novel.FieldViews:
+		m.ResetViews()
+		return nil
+	case novel.FieldDownloads:
+		m.ResetDownloads()
+		return nil
+	case novel.FieldFavorites:
+		m.ResetFavorites()
 		return nil
 	case novel.FieldCover:
 		m.ResetCover()

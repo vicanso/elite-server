@@ -14,10 +14,17 @@
 
 package validate
 
+import "github.com/vicanso/elite/cs"
+
 func init() {
 	AddAlias("xNovelName", "min=1,max=30")
 	AddAlias("xNovelAuthor", "min=1,max=20")
 	AddAlias("xNovelID", "number")
 	AddAlias("xNovelStatus", "number,min=1")
 	AddAlias("xNovelSummary", "min=1,max=1000")
+	Add("xNovelBehaviorCategory", newIsInString([]string{
+		cs.ActionNovelUserView,
+		cs.ActionNovelUserDownload,
+		cs.ActionNovelUserFavorite,
+	}))
 }

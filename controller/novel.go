@@ -81,7 +81,8 @@ type (
 	novelChpaterListParams struct {
 		listParams
 
-		ID int `json:"id,omitempty"`
+		// ID 小说id，由route param中获取并设置，因此设置omitempty
+		ID int `json:"id,omitempty" validate:"omitempty,xNovelID"`
 	}
 
 	// novelSourceListParams 小说源查询参数
@@ -89,6 +90,13 @@ type (
 		listParams
 
 		Keyword string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
+	}
+	// novelUserBehaviorParams 用户行为参数
+	novelUserBehaviorParams struct {
+		Category string `json:"category,omitempty" validate:"required,xNovelBehaviorCategory"`
+
+		// ID 小说id，由route param中获取并设置，因此设置omitempty
+		ID int `json:"id,omitempty" validate:"omitempty,xNovelID"`
 	}
 )
 
@@ -146,6 +154,12 @@ func init() {
 	g.GET(
 		"/v1/{id}/cover",
 		ctrl.getCover,
+	)
+	// 用户行为
+	g.POST(
+		"/v1/{id}/behaviors",
+		loadUserSession,
+		ctrl.addBehavior,
 	)
 }
 
@@ -236,25 +250,45 @@ func (params *novelSourceListParams) count(ctx context.Context) (count int, err 
 }
 
 // update 更新小说
-func (params *novelUpdateParams) update(ctx context.Context) (count int, err error) {
+func (params *novelUpdateParams) update(ctx context.Context) (err error) {
 	if params.ID == 0 {
 		err = errors.New("id can't be nil")
 		return
 	}
-	update := getEntClient().Novel.Update().
-		Where(entNovel.IDEQ(params.ID))
+	update := getEntClient().Novel.UpdateOneID(params.ID)
 	if params.Summary != "" {
 		update = update.SetSummary(params.Summary)
 	}
 	if params.Status != 0 {
 		update = update.SetStatus(params.Status)
 	}
-	count, err = update.Save(ctx)
+	result, err := update.Save(ctx)
 	if err != nil {
 		return
 	}
-	if count == 0 {
+	if result == nil {
 		err = errors.New("no record match")
+		return
+	}
+	return
+}
+
+// do 用户行为记录
+func (params *novelUserBehaviorParams) do(ctx context.Context) (err error) {
+	update := getEntClient().Novel.UpdateOneID(params.ID)
+	switch params.Category {
+	case cs.ActionNovelUserView:
+		update = update.AddViews(1)
+	case cs.ActionNovelUserDownload:
+		update = update.AddDownloads(1)
+	case cs.ActionNovelUserFavorite:
+		update = update.AddFavorites(1)
+	default:
+		err = errors.New(params.Category + " is not supported")
+		return
+	}
+	_, err = update.Save(ctx)
+	if err != nil {
 		return
 	}
 	return
@@ -315,7 +349,7 @@ func (*novelCtrl) updateByID(c *elton.Context) (err error) {
 		return
 	}
 	params.ID = id
-	_, err = params.update(c.Context())
+	err = params.update(c.Context())
 	if err != nil {
 		return
 	}
@@ -482,5 +516,25 @@ func (*novelCtrl) listSource(c *elton.Context) (err error) {
 		NovelSources: novelSources,
 		Count:        count,
 	}
+	return
+}
+
+// addBehavior 添加用户行为
+func (*novelCtrl) addBehavior(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	params := novelUserBehaviorParams{}
+	err = validate.Do(&params, c.RequestBody)
+	if err != nil {
+		return
+	}
+	params.ID = id
+	err = params.do(c.Context())
+	if err != nil {
+		return
+	}
+	c.NoContent()
 	return
 }

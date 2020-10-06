@@ -55,6 +55,15 @@ func (Novel) Fields() []ent.Field {
 				return nil
 			}).
 			Comment("小说状态"),
+		field.Int("views").
+			Optional().
+			Comment("小说阅读次数"),
+		field.Int("downloads").
+			Optional().
+			Comment("小说下载次数"),
+		field.Int("favorites").
+			Optional().
+			Comment("小说收藏次数"),
 		field.String("cover").
 			Optional().
 			Comment("小说封面"),

@@ -80,6 +80,48 @@ func (nc *NovelCreate) SetNillableStatus(i *int) *NovelCreate {
 	return nc
 }
 
+// SetViews sets the views field.
+func (nc *NovelCreate) SetViews(i int) *NovelCreate {
+	nc.mutation.SetViews(i)
+	return nc
+}
+
+// SetNillableViews sets the views field if the given value is not nil.
+func (nc *NovelCreate) SetNillableViews(i *int) *NovelCreate {
+	if i != nil {
+		nc.SetViews(*i)
+	}
+	return nc
+}
+
+// SetDownloads sets the downloads field.
+func (nc *NovelCreate) SetDownloads(i int) *NovelCreate {
+	nc.mutation.SetDownloads(i)
+	return nc
+}
+
+// SetNillableDownloads sets the downloads field if the given value is not nil.
+func (nc *NovelCreate) SetNillableDownloads(i *int) *NovelCreate {
+	if i != nil {
+		nc.SetDownloads(*i)
+	}
+	return nc
+}
+
+// SetFavorites sets the favorites field.
+func (nc *NovelCreate) SetFavorites(i int) *NovelCreate {
+	nc.mutation.SetFavorites(i)
+	return nc
+}
+
+// SetNillableFavorites sets the favorites field if the given value is not nil.
+func (nc *NovelCreate) SetNillableFavorites(i *int) *NovelCreate {
+	if i != nil {
+		nc.SetFavorites(*i)
+	}
+	return nc
+}
+
 // SetCover sets the cover field.
 func (nc *NovelCreate) SetCover(s string) *NovelCreate {
 	nc.mutation.SetCover(s)
@@ -283,6 +325,30 @@ func (nc *NovelCreate) createSpec() (*Novel, *sqlgraph.CreateSpec) {
 			Column: novel.FieldStatus,
 		})
 		_node.Status = value
+	}
+	if value, ok := nc.mutation.Views(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldViews,
+		})
+		_node.Views = value
+	}
+	if value, ok := nc.mutation.Downloads(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldDownloads,
+		})
+		_node.Downloads = value
+	}
+	if value, ok := nc.mutation.Favorites(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldFavorites,
+		})
+		_node.Favorites = value
 	}
 	if value, ok := nc.mutation.Cover(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

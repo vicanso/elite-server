@@ -48,6 +48,87 @@ func (nu *NovelUpdate) AddStatus(i int) *NovelUpdate {
 	return nu
 }
 
+// SetViews sets the views field.
+func (nu *NovelUpdate) SetViews(i int) *NovelUpdate {
+	nu.mutation.ResetViews()
+	nu.mutation.SetViews(i)
+	return nu
+}
+
+// SetNillableViews sets the views field if the given value is not nil.
+func (nu *NovelUpdate) SetNillableViews(i *int) *NovelUpdate {
+	if i != nil {
+		nu.SetViews(*i)
+	}
+	return nu
+}
+
+// AddViews adds i to views.
+func (nu *NovelUpdate) AddViews(i int) *NovelUpdate {
+	nu.mutation.AddViews(i)
+	return nu
+}
+
+// ClearViews clears the value of views.
+func (nu *NovelUpdate) ClearViews() *NovelUpdate {
+	nu.mutation.ClearViews()
+	return nu
+}
+
+// SetDownloads sets the downloads field.
+func (nu *NovelUpdate) SetDownloads(i int) *NovelUpdate {
+	nu.mutation.ResetDownloads()
+	nu.mutation.SetDownloads(i)
+	return nu
+}
+
+// SetNillableDownloads sets the downloads field if the given value is not nil.
+func (nu *NovelUpdate) SetNillableDownloads(i *int) *NovelUpdate {
+	if i != nil {
+		nu.SetDownloads(*i)
+	}
+	return nu
+}
+
+// AddDownloads adds i to downloads.
+func (nu *NovelUpdate) AddDownloads(i int) *NovelUpdate {
+	nu.mutation.AddDownloads(i)
+	return nu
+}
+
+// ClearDownloads clears the value of downloads.
+func (nu *NovelUpdate) ClearDownloads() *NovelUpdate {
+	nu.mutation.ClearDownloads()
+	return nu
+}
+
+// SetFavorites sets the favorites field.
+func (nu *NovelUpdate) SetFavorites(i int) *NovelUpdate {
+	nu.mutation.ResetFavorites()
+	nu.mutation.SetFavorites(i)
+	return nu
+}
+
+// SetNillableFavorites sets the favorites field if the given value is not nil.
+func (nu *NovelUpdate) SetNillableFavorites(i *int) *NovelUpdate {
+	if i != nil {
+		nu.SetFavorites(*i)
+	}
+	return nu
+}
+
+// AddFavorites adds i to favorites.
+func (nu *NovelUpdate) AddFavorites(i int) *NovelUpdate {
+	nu.mutation.AddFavorites(i)
+	return nu
+}
+
+// ClearFavorites clears the value of favorites.
+func (nu *NovelUpdate) ClearFavorites() *NovelUpdate {
+	nu.mutation.ClearFavorites()
+	return nu
+}
+
 // SetCover sets the cover field.
 func (nu *NovelUpdate) SetCover(s string) *NovelUpdate {
 	nu.mutation.SetCover(s)
@@ -194,6 +275,66 @@ func (nu *NovelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: novel.FieldStatus,
 		})
 	}
+	if value, ok := nu.mutation.Views(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldViews,
+		})
+	}
+	if value, ok := nu.mutation.AddedViews(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldViews,
+		})
+	}
+	if nu.mutation.ViewsCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: novel.FieldViews,
+		})
+	}
+	if value, ok := nu.mutation.Downloads(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldDownloads,
+		})
+	}
+	if value, ok := nu.mutation.AddedDownloads(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldDownloads,
+		})
+	}
+	if nu.mutation.DownloadsCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: novel.FieldDownloads,
+		})
+	}
+	if value, ok := nu.mutation.Favorites(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldFavorites,
+		})
+	}
+	if value, ok := nu.mutation.AddedFavorites(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldFavorites,
+		})
+	}
+	if nu.mutation.FavoritesCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: novel.FieldFavorites,
+		})
+	}
 	if value, ok := nu.mutation.Cover(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -250,6 +391,87 @@ func (nuo *NovelUpdateOne) SetNillableStatus(i *int) *NovelUpdateOne {
 // AddStatus adds i to status.
 func (nuo *NovelUpdateOne) AddStatus(i int) *NovelUpdateOne {
 	nuo.mutation.AddStatus(i)
+	return nuo
+}
+
+// SetViews sets the views field.
+func (nuo *NovelUpdateOne) SetViews(i int) *NovelUpdateOne {
+	nuo.mutation.ResetViews()
+	nuo.mutation.SetViews(i)
+	return nuo
+}
+
+// SetNillableViews sets the views field if the given value is not nil.
+func (nuo *NovelUpdateOne) SetNillableViews(i *int) *NovelUpdateOne {
+	if i != nil {
+		nuo.SetViews(*i)
+	}
+	return nuo
+}
+
+// AddViews adds i to views.
+func (nuo *NovelUpdateOne) AddViews(i int) *NovelUpdateOne {
+	nuo.mutation.AddViews(i)
+	return nuo
+}
+
+// ClearViews clears the value of views.
+func (nuo *NovelUpdateOne) ClearViews() *NovelUpdateOne {
+	nuo.mutation.ClearViews()
+	return nuo
+}
+
+// SetDownloads sets the downloads field.
+func (nuo *NovelUpdateOne) SetDownloads(i int) *NovelUpdateOne {
+	nuo.mutation.ResetDownloads()
+	nuo.mutation.SetDownloads(i)
+	return nuo
+}
+
+// SetNillableDownloads sets the downloads field if the given value is not nil.
+func (nuo *NovelUpdateOne) SetNillableDownloads(i *int) *NovelUpdateOne {
+	if i != nil {
+		nuo.SetDownloads(*i)
+	}
+	return nuo
+}
+
+// AddDownloads adds i to downloads.
+func (nuo *NovelUpdateOne) AddDownloads(i int) *NovelUpdateOne {
+	nuo.mutation.AddDownloads(i)
+	return nuo
+}
+
+// ClearDownloads clears the value of downloads.
+func (nuo *NovelUpdateOne) ClearDownloads() *NovelUpdateOne {
+	nuo.mutation.ClearDownloads()
+	return nuo
+}
+
+// SetFavorites sets the favorites field.
+func (nuo *NovelUpdateOne) SetFavorites(i int) *NovelUpdateOne {
+	nuo.mutation.ResetFavorites()
+	nuo.mutation.SetFavorites(i)
+	return nuo
+}
+
+// SetNillableFavorites sets the favorites field if the given value is not nil.
+func (nuo *NovelUpdateOne) SetNillableFavorites(i *int) *NovelUpdateOne {
+	if i != nil {
+		nuo.SetFavorites(*i)
+	}
+	return nuo
+}
+
+// AddFavorites adds i to favorites.
+func (nuo *NovelUpdateOne) AddFavorites(i int) *NovelUpdateOne {
+	nuo.mutation.AddFavorites(i)
+	return nuo
+}
+
+// ClearFavorites clears the value of favorites.
+func (nuo *NovelUpdateOne) ClearFavorites() *NovelUpdateOne {
+	nuo.mutation.ClearFavorites()
 	return nuo
 }
 
@@ -395,6 +617,66 @@ func (nuo *NovelUpdateOne) sqlSave(ctx context.Context) (_node *Novel, err error
 			Type:   field.TypeInt,
 			Value:  value,
 			Column: novel.FieldStatus,
+		})
+	}
+	if value, ok := nuo.mutation.Views(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldViews,
+		})
+	}
+	if value, ok := nuo.mutation.AddedViews(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldViews,
+		})
+	}
+	if nuo.mutation.ViewsCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: novel.FieldViews,
+		})
+	}
+	if value, ok := nuo.mutation.Downloads(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldDownloads,
+		})
+	}
+	if value, ok := nuo.mutation.AddedDownloads(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldDownloads,
+		})
+	}
+	if nuo.mutation.DownloadsCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: novel.FieldDownloads,
+		})
+	}
+	if value, ok := nuo.mutation.Favorites(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldFavorites,
+		})
+	}
+	if value, ok := nuo.mutation.AddedFavorites(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldFavorites,
+		})
+	}
+	if nuo.mutation.FavoritesCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: novel.FieldFavorites,
 		})
 	}
 	if value, ok := nuo.mutation.Cover(); ok {

@@ -134,6 +134,27 @@ func Status(v int) predicate.Novel {
 	})
 }
 
+// Views applies equality check predicate on the "views" field. It's identical to ViewsEQ.
+func Views(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldViews), v))
+	})
+}
+
+// Downloads applies equality check predicate on the "downloads" field. It's identical to DownloadsEQ.
+func Downloads(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDownloads), v))
+	})
+}
+
+// Favorites applies equality check predicate on the "favorites" field. It's identical to FavoritesEQ.
+func Favorites(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFavorites), v))
+	})
+}
+
 // Cover applies equality check predicate on the "cover" field. It's identical to CoverEQ.
 func Cover(v string) predicate.Novel {
 	return predicate.Novel(func(s *sql.Selector) {
@@ -671,6 +692,276 @@ func StatusLT(v int) predicate.Novel {
 func StatusLTE(v int) predicate.Novel {
 	return predicate.Novel(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldStatus), v))
+	})
+}
+
+// ViewsEQ applies the EQ predicate on the "views" field.
+func ViewsEQ(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldViews), v))
+	})
+}
+
+// ViewsNEQ applies the NEQ predicate on the "views" field.
+func ViewsNEQ(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldViews), v))
+	})
+}
+
+// ViewsIn applies the In predicate on the "views" field.
+func ViewsIn(vs ...int) predicate.Novel {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Novel(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldViews), v...))
+	})
+}
+
+// ViewsNotIn applies the NotIn predicate on the "views" field.
+func ViewsNotIn(vs ...int) predicate.Novel {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Novel(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldViews), v...))
+	})
+}
+
+// ViewsGT applies the GT predicate on the "views" field.
+func ViewsGT(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldViews), v))
+	})
+}
+
+// ViewsGTE applies the GTE predicate on the "views" field.
+func ViewsGTE(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldViews), v))
+	})
+}
+
+// ViewsLT applies the LT predicate on the "views" field.
+func ViewsLT(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldViews), v))
+	})
+}
+
+// ViewsLTE applies the LTE predicate on the "views" field.
+func ViewsLTE(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldViews), v))
+	})
+}
+
+// ViewsIsNil applies the IsNil predicate on the "views" field.
+func ViewsIsNil() predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldViews)))
+	})
+}
+
+// ViewsNotNil applies the NotNil predicate on the "views" field.
+func ViewsNotNil() predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldViews)))
+	})
+}
+
+// DownloadsEQ applies the EQ predicate on the "downloads" field.
+func DownloadsEQ(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDownloads), v))
+	})
+}
+
+// DownloadsNEQ applies the NEQ predicate on the "downloads" field.
+func DownloadsNEQ(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDownloads), v))
+	})
+}
+
+// DownloadsIn applies the In predicate on the "downloads" field.
+func DownloadsIn(vs ...int) predicate.Novel {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Novel(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDownloads), v...))
+	})
+}
+
+// DownloadsNotIn applies the NotIn predicate on the "downloads" field.
+func DownloadsNotIn(vs ...int) predicate.Novel {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Novel(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDownloads), v...))
+	})
+}
+
+// DownloadsGT applies the GT predicate on the "downloads" field.
+func DownloadsGT(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDownloads), v))
+	})
+}
+
+// DownloadsGTE applies the GTE predicate on the "downloads" field.
+func DownloadsGTE(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDownloads), v))
+	})
+}
+
+// DownloadsLT applies the LT predicate on the "downloads" field.
+func DownloadsLT(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDownloads), v))
+	})
+}
+
+// DownloadsLTE applies the LTE predicate on the "downloads" field.
+func DownloadsLTE(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDownloads), v))
+	})
+}
+
+// DownloadsIsNil applies the IsNil predicate on the "downloads" field.
+func DownloadsIsNil() predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldDownloads)))
+	})
+}
+
+// DownloadsNotNil applies the NotNil predicate on the "downloads" field.
+func DownloadsNotNil() predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldDownloads)))
+	})
+}
+
+// FavoritesEQ applies the EQ predicate on the "favorites" field.
+func FavoritesEQ(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFavorites), v))
+	})
+}
+
+// FavoritesNEQ applies the NEQ predicate on the "favorites" field.
+func FavoritesNEQ(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldFavorites), v))
+	})
+}
+
+// FavoritesIn applies the In predicate on the "favorites" field.
+func FavoritesIn(vs ...int) predicate.Novel {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Novel(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldFavorites), v...))
+	})
+}
+
+// FavoritesNotIn applies the NotIn predicate on the "favorites" field.
+func FavoritesNotIn(vs ...int) predicate.Novel {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Novel(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldFavorites), v...))
+	})
+}
+
+// FavoritesGT applies the GT predicate on the "favorites" field.
+func FavoritesGT(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldFavorites), v))
+	})
+}
+
+// FavoritesGTE applies the GTE predicate on the "favorites" field.
+func FavoritesGTE(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldFavorites), v))
+	})
+}
+
+// FavoritesLT applies the LT predicate on the "favorites" field.
+func FavoritesLT(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldFavorites), v))
+	})
+}
+
+// FavoritesLTE applies the LTE predicate on the "favorites" field.
+func FavoritesLTE(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldFavorites), v))
+	})
+}
+
+// FavoritesIsNil applies the IsNil predicate on the "favorites" field.
+func FavoritesIsNil() predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldFavorites)))
+	})
+}
+
+// FavoritesNotNil applies the NotNil predicate on the "favorites" field.
+func FavoritesNotNil() predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldFavorites)))
 	})
 }
 

@@ -23,6 +23,12 @@ const (
 	FieldSource = "source"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldViews holds the string denoting the views field in the database.
+	FieldViews = "views"
+	// FieldDownloads holds the string denoting the downloads field in the database.
+	FieldDownloads = "downloads"
+	// FieldFavorites holds the string denoting the favorites field in the database.
+	FieldFavorites = "favorites"
 	// FieldCover holds the string denoting the cover field in the database.
 	FieldCover = "cover"
 	// FieldSummary holds the string denoting the summary field in the database.
@@ -41,6 +47,9 @@ var Columns = []string{
 	FieldAuthor,
 	FieldSource,
 	FieldStatus,
+	FieldViews,
+	FieldDownloads,
+	FieldFavorites,
 	FieldCover,
 	FieldSummary,
 }

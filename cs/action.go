@@ -36,3 +36,12 @@ const (
 	// ActionNovelUpdate update novel
 	ActionNovelUpdate = "updateNovel"
 )
+
+const (
+	// ActionNovelUserView novel user view
+	ActionNovelUserView = "view"
+	// ActionNovelUserDownload novel user download
+	ActionNovelUserDownload = "download"
+	// ActionNovelUserFavorite novel user favorite
+	ActionNovelUserFavorite = "favorite"
+)
