@@ -36,6 +36,7 @@ require (
 	github.com/vicanso/hes v0.2.3
 	github.com/vicanso/ips v1.0.1
 	github.com/vicanso/lru-ttl v0.1.1
+	github.com/vicanso/tiny v1.0.2
 	github.com/vicanso/viperx v0.1.3
 	go.uber.org/atomic v1.7.0
 	go.uber.org/automaxprocs v1.3.0
@@ -43,6 +44,7 @@ require (
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/net v0.0.0-20201002202402-0a1ea396d57c
+	google.golang.org/grpc v1.30.0
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )

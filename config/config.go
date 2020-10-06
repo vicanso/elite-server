@@ -155,6 +155,12 @@ type (
 		Timeout time.Duration `validate:"required"`
 		Max     int           `validate:"required"`
 	}
+	// TinyConfig tiny config
+	TinyConfig struct {
+		Host    string        `validate:"required,ip"`
+		Port    int           `validate:"required,number"`
+		Timeout time.Duration `validate:"required"`
+	}
 )
 
 // loadConfigX 加载配置，出错是则抛出panic
@@ -402,4 +408,16 @@ func GetNovelConfigs() []NovelConfig {
 		}
 	}
 	return data
+}
+
+// GetTinyConfig get tiny config
+func GetTinyConfig() TinyConfig {
+	prefix := "tiny."
+	tinyConfig := TinyConfig{
+		Host:    defaultViperX.GetString(prefix + "host"),
+		Port:    defaultViperX.GetInt(prefix + "port"),
+		Timeout: defaultViperX.GetDuration(prefix + "timeout"),
+	}
+	validateX(&tinyConfig)
+	return tinyConfig
 }

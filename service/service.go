@@ -22,5 +22,6 @@ import (
 var (
 	logger = log.Default()
 
-	redisSrv = new(helper.Redis)
+	redisSrv = &helper.Redis{}
+	fileSrv  = &FileSrv{}
 )

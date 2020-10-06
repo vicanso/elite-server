@@ -22,6 +22,14 @@ func init() {
 	AddAlias("xNovelID", "number")
 	AddAlias("xNovelStatus", "number,min=1")
 	AddAlias("xNovelSummary", "min=1,max=1000")
+	AddAlias("xNovelCoverWidth", "number")
+	AddAlias("xNovelCoverHeight", "number")
+	AddAlias("xNovelCoverQuality", "number")
+	Add("xNoverCoverType", newIsInString([]string{
+		"jpg",
+		"webp",
+		"png",
+	}))
 	Add("xNovelBehaviorCategory", newIsInString([]string{
 		cs.ActionNovelUserView,
 		cs.ActionNovelUserDownload,

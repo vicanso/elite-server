@@ -98,6 +98,13 @@ type (
 		// ID 小说id，由route param中获取并设置，因此设置omitempty
 		ID int `json:"id,omitempty" validate:"omitempty,xNovelID"`
 	}
+	// novelCoverParams 小说封面参数
+	novelCoverParams struct {
+		Type    string `json:"type,omitempty" validate:"required,xNoverCoverType"`
+		Width   string `json:"width,omitempty" validate:"omitempty,xNovelCoverWidth"`
+		Height  string `json:"height,omitempty" validate:"omitempty,xNovelCoverHeight"`
+		Quality string `json:"quality,omitempty" validate:"required,xNovelCoverQuality"`
+	}
 )
 
 func init() {
@@ -480,16 +487,36 @@ func (*novelCtrl) getCover(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
+	params := novelCoverParams{}
+	err = validate.Do(&params, c.Query())
+	if err != nil {
+		return
+	}
 	cover, err := novelSrv.GetCover(id)
 	if err != nil {
 		return
 	}
-	// TODO 后续优化cover压缩，支持webp
-	data, header, err := fileSrv.GetData(c.Context(), eliteCoverBucket, cover)
+	width, _ := strconv.Atoi(params.Width)
+	height, _ := strconv.Atoi(params.Height)
+	quality, _ := strconv.Atoi(params.Quality)
+
+	data, header, err := imageSrv.GetImageFromBucket(
+		c.Context(),
+		eliteCoverBucket,
+		cover,
+		service.ImageOptimParams{
+			Type:    params.Type,
+			Width:   width,
+			Height:  height,
+			Quality: quality,
+		},
+	)
 	if err != nil {
 		return
 	}
+
 	c.MergeHeader(header)
+	c.CacheMaxAge("1h")
 	c.Body = data
 	return
 }

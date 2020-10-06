@@ -91,6 +91,8 @@ var (
 	fileSrv = &service.FileSrv{}
 	// 小说服务
 	novelSrv = &novel.Srv{}
+	// 图片服务
+	imageSrv = &service.ImageSrv{}
 )
 
 func newMagicalCaptchaValidate() elton.Handler {
