@@ -165,7 +165,16 @@ func (params *novelListParams) queryAll(ctx context.Context) (novels []*ent.Nove
 	query = query.Limit(params.GetLimit()).
 		Offset(params.GetOffset()).
 		Order(params.GetOrders()...)
+	fields := params.GetFields()
 	query = params.where(query)
+	// 如果指定select的字段
+	if len(fields) != 0 {
+		err = query.Select(fields[0], fields[1:]...).Scan(ctx, &novels)
+		if err != nil {
+			return
+		}
+		return
+	}
 	return query.All(ctx)
 }
 
@@ -446,11 +455,7 @@ func (*novelCtrl) getCover(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	for key, values := range header {
-		for _, value := range values {
-			c.AddHeader(key, value)
-		}
-	}
+	c.MergeHeader(header)
 	c.Body = data
 	return
 }
