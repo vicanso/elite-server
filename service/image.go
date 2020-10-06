@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"mime"
 	"net/http"
 	"strings"
 	"time"
@@ -123,7 +124,7 @@ func (srv *ImageSrv) GetImageFromBucket(ctx context.Context, bucket, filename st
 	if err != nil {
 		return
 	}
-	header.Set(elton.HeaderContentType, "image/"+params.Type)
+	header.Set(elton.HeaderContentType, mime.TypeByExtension("."+params.Type))
 
 	return
 }

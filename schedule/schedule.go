@@ -27,6 +27,10 @@ import (
 	"go.uber.org/zap"
 )
 
+var (
+	logger = log.Default()
+)
+
 func init() {
 	c := cron.New()
 	_, _ = c.AddFunc("@every 5m", redisCheck)
@@ -44,7 +48,7 @@ func init() {
 func redisCheck() {
 	err := helper.RedisPing()
 	if err != nil {
-		log.Default().Error("redis check fail",
+		logger.Error("redis check fail",
 			zap.Error(err),
 		)
 		service.AlarmError("redis check fail, " + err.Error())
@@ -55,7 +59,7 @@ func configRefresh() {
 	configSrv := new(service.ConfigurationSrv)
 	err := configSrv.Refresh()
 	if err != nil {
-		log.Default().Error("config refresh fail",
+		logger.Error("config refresh fail",
 			zap.Error(err),
 		)
 		service.AlarmError("config refresh fail, " + err.Error())
@@ -71,7 +75,7 @@ func redisStats() {
 func entCheck() {
 	err := helper.EntPing()
 	if err != nil {
-		log.Default().Error("ent check fail",
+		logger.Error("ent check fail",
 			zap.Error(err),
 		)
 		service.AlarmError("ent check fail, " + err.Error())
@@ -89,7 +93,7 @@ func syncNovelSource() {
 	srv := novel.Srv{}
 	err := srv.SyncSource()
 	if err != nil {
-		log.Default().Error("sync novel source fail",
+		logger.Error("sync novel source fail",
 			zap.Error(err),
 		)
 	}

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/vicanso/elite/cs"
@@ -29,6 +30,7 @@ import (
 	"github.com/vicanso/elite/ent/chapter"
 	entNovel "github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/ent/novelsource"
+	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/novel"
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/service"
@@ -89,6 +91,7 @@ type (
 	novelSourceListParams struct {
 		listParams
 
+		Status  string `json:"status,omitempty" validate:"omitempty,xNovelStatus"`
 		Keyword string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
 	}
 	// novelUserBehaviorParams 用户行为参数
@@ -168,6 +171,13 @@ func init() {
 		loadUserSession,
 		ctrl.addBehavior,
 	)
+	// 发布所有的小说
+	g.POST(
+		"/v1/publish-all",
+		loadUserSession,
+		shouldBeAdmin,
+		ctrl.publishAll,
+	)
 }
 
 // where 将查询条件中的参数转换为对应的where条件
@@ -234,6 +244,10 @@ func (params *novelChpaterListParams) count(ctx context.Context) (count int, err
 func (params *novelSourceListParams) where(query *ent.NovelSourceQuery) *ent.NovelSourceQuery {
 	if params.Keyword != "" {
 		query = query.Where(novelsource.Or(novelsource.NameContains(params.Keyword), novelsource.AuthorContains(params.Keyword)))
+	}
+	if params.Status != "" {
+		status, _ := strconv.Atoi(params.Status)
+		query = query.Where(novelsource.StatusEQ(status))
 	}
 	return query
 }
@@ -364,18 +378,8 @@ func (*novelCtrl) updateByID(c *elton.Context) (err error) {
 	return
 }
 
-// add 添加小说
-func (*novelCtrl) add(c *elton.Context) (err error) {
-	params := novelAddParams{}
-	err = validate.Do(&params, c.RequestBody)
-	if err != nil {
-		return
-	}
-	queryParmas := novel.QueryParams{
-		Name:   params.Name,
-		Author: params.Author,
-	}
-	result, err := novelSrv.Publish(queryParmas)
+func (*novelCtrl) publish(params novel.QueryParams) (result *ent.Novel, err error) {
+	result, err = novelSrv.Publish(params)
 	if err != nil {
 		return
 	}
@@ -419,8 +423,61 @@ func (*novelCtrl) add(c *elton.Context) (err error) {
 
 		}
 	}()
+	return
+}
+
+// add 添加小说
+func (ctrl *novelCtrl) add(c *elton.Context) (err error) {
+	params := novelAddParams{}
+	err = validate.Do(&params, c.RequestBody)
+	if err != nil {
+		return
+	}
+	result, err := ctrl.publish(novel.QueryParams{
+		Name:   params.Name,
+		Author: params.Author,
+	})
+	if err != nil {
+		return
+	}
 
 	c.Created(result)
+	return
+}
+
+// publishAll 将所有小说源的小说发布
+func (ctrl *novelCtrl) publishAll(c *elton.Context) (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	id, err := getEntClient().NovelSource.Query().
+		Order(ent.Desc("id")).
+		FirstID(ctx)
+	if err != nil {
+		return
+	}
+	go func() {
+		for i := 1; i < id; i++ {
+			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			defer cancel()
+			result, _ := getEntClient().NovelSource.Get(ctx, i)
+			if result == nil || result.Status == schema.NovelSourceStatusPublished {
+				continue
+			}
+
+			_, err := ctrl.publish(novel.QueryParams{
+				Name:   result.Name,
+				Author: result.Author,
+			})
+			if err != nil {
+				logger.Error("publish novel fail",
+					zap.String("name", result.Name),
+					zap.String("author", result.Author),
+					zap.Error(err),
+				)
+			}
+		}
+	}()
+	c.NoContent()
 	return
 }
 

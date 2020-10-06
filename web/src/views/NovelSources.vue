@@ -50,13 +50,30 @@ const filterFields = [
     key: "keyword",
     placeholder: "请输入要查询的关键字",
     clearable: true,
-    span: 12
+    span: 8
+  },
+  {
+    label: "状态：",
+    key: "status",
+    placeholder: "请选择状态",
+    type: "select",
+    span: 8,
+    options: [
+      {
+        name: "未发布",
+        value: 1
+      },
+      {
+        name: "已发布",
+        value: 2
+      }
+    ]
   },
   {
     label: "",
     type: "filter",
     labelWidth: "0px",
-    span: 12
+    span: 8
   }
 ];
 
