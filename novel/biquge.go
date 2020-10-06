@@ -253,6 +253,15 @@ func (bqg *biQuGe) Sync() (err error) {
 		id = source.SourceID
 	}
 	for i := id + 1; i < bqg.max; i++ {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		exists, _ := getEntClient().NovelSource.Query().
+			Where(novelsource.SourceIDEQ(i)).
+			Where(novelsource.SourceEQ(NovelSourceBiQuGe)).
+			Exist(ctx)
+		if exists {
+			continue
+		}
 		novel, err := bqg.GetDetail(i)
 		if err != nil {
 			logger.Error("sync novel fail",
