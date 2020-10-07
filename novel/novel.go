@@ -276,6 +276,9 @@ func (srv *Srv) Publish(params QueryParams) (novel *ent.Novel, err error) {
 // UpdateChapters 拉取小说章节
 func (srv *Srv) UpdateChapters(id int) (err error) {
 	fetcher, err := srv.GetFetcherByID(id)
+	if err != nil {
+		return
+	}
 	// TODO 支持更多的小说源
 	chapters, err := fetcher.GetChapters()
 	if err != nil {
@@ -304,6 +307,25 @@ func (srv *Srv) UpdateChapters(id int) (err error) {
 	_, err = getEntClient().Chapter.CreateBulk(bulk...).Save(ctx)
 	if err != nil {
 		return
+	}
+	return
+}
+
+// FetchAllChapterContent 拉取所有章节内容
+func (srv *Srv) FetchAllChapterContent(id int) (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*defaultQueryTimeout)
+	defer cancel()
+	count, err := getEntClient().Chapter.Query().
+		Where(chapter.NovelEQ(id)).
+		Count(ctx)
+	if err != nil {
+		return
+	}
+	for i := 0; i < count; i++ {
+		_, err = srv.GetChapterContent(id, i)
+		if err != nil {
+			return
+		}
 	}
 	return
 }

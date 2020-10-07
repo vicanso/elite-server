@@ -178,6 +178,13 @@ func init() {
 		shouldBeAdmin,
 		ctrl.publishAll,
 	)
+	// 更新所有章节
+	g.POST(
+		"/v1/update-all-chapters",
+		loadUserSession,
+		shouldBeAdmin,
+		ctrl.updateAllChapters,
+	)
 }
 
 // where 将查询条件中的参数转换为对应的where条件
@@ -477,6 +484,44 @@ func (ctrl *novelCtrl) publishAll(c *elton.Context) (err error) {
 			}
 		}
 		logger.Info("publish all done")
+	}()
+	c.NoContent()
+	return
+}
+
+// updateAllChapters 更新所有小说章节
+func (*novelCtrl) updateAllChapters(c *elton.Context) (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	id, err := getEntClient().Novel.Query().
+		Order(ent.Desc("id")).
+		FirstID(ctx)
+	if err != nil {
+		return
+	}
+	fetchingContent := c.QueryParam("fetching") != ""
+	go func() {
+		for i := 1; i <= id; i++ {
+			err := novelSrv.UpdateChapters(i)
+			if err != nil {
+				logger.Error("update chapters fail",
+					zap.Int("id", i),
+					zap.Error(err),
+				)
+				continue
+			}
+			if fetchingContent {
+				err = novelSrv.FetchAllChapterContent(i)
+				if err != nil {
+					logger.Error("fetch all chapter content fail",
+						zap.Int("id", i),
+
+						zap.Error(err),
+					)
+					continue
+				}
+			}
+		}
 	}()
 	c.NoContent()
 	return
