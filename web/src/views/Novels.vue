@@ -6,7 +6,12 @@
       </div>
       <div v-loading="processing">
         <BaseFilter :fields="filterFields" @filter="filter" />
-        <el-table :data="novels" row-key="id" stripe>
+        <el-table
+          :data="novels"
+          row-key="id"
+          stripe
+          @sort-change="handleSortChange"
+        >
           <el-table-column prop="name" key="name" label="名称" width="200" />
           <el-table-column
             prop="author"
@@ -24,6 +29,27 @@
               {{ statusList[scope.row.status] || statusList[0] }}
             </template>
           </el-table-column>
+          <el-table-column
+            sortable
+            prop="views"
+            key="views"
+            label="浏览量"
+            width="80"
+          />
+          <el-table-column
+            sortable
+            prop="downloads"
+            key="downloads"
+            label="下载量"
+            width="80"
+          />
+          <el-table-column
+            sortable
+            prop="favorites"
+            key="favorites"
+            label="收藏量"
+            width="80"
+          />
           <el-table-column prop="summary" key="summary" label="简介" />
           <el-table-column label="操作" width="80">
             <template slot-scope="scope">

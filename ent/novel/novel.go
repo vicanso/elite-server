@@ -81,4 +81,10 @@ var (
 	DefaultStatus int
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	StatusValidator func(int) error
+	// DefaultViews holds the default value on creation for the views field.
+	DefaultViews int
+	// DefaultDownloads holds the default value on creation for the downloads field.
+	DefaultDownloads int
+	// DefaultFavorites holds the default value on creation for the favorites field.
+	DefaultFavorites int
 )

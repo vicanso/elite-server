@@ -70,6 +70,13 @@ export default {
       if (count >= 0) {
         state.list.count = count;
       }
+      novels.forEach(item => {
+        ["views", "downloads", "favorites"].forEach(key => {
+          if (!item[key]) {
+            item[key] = 0;
+          }
+        });
+      });
       state.list.data = novels;
     },
     [mutationNovelUpdateProcessing](state, processing) {

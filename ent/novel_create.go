@@ -206,6 +206,18 @@ func (nc *NovelCreate) defaults() {
 		v := novel.DefaultStatus
 		nc.mutation.SetStatus(v)
 	}
+	if _, ok := nc.mutation.Views(); !ok {
+		v := novel.DefaultViews
+		nc.mutation.SetViews(v)
+	}
+	if _, ok := nc.mutation.Downloads(); !ok {
+		v := novel.DefaultDownloads
+		nc.mutation.SetDownloads(v)
+	}
+	if _, ok := nc.mutation.Favorites(); !ok {
+		v := novel.DefaultFavorites
+		nc.mutation.SetFavorites(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.

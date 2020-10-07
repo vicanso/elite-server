@@ -97,6 +97,18 @@ func init() {
 	novel.DefaultStatus = novelDescStatus.Default.(int)
 	// novel.StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	novel.StatusValidator = novelDescStatus.Validators[0].(func(int) error)
+	// novelDescViews is the schema descriptor for views field.
+	novelDescViews := novelFields[4].Descriptor()
+	// novel.DefaultViews holds the default value on creation for the views field.
+	novel.DefaultViews = novelDescViews.Default.(int)
+	// novelDescDownloads is the schema descriptor for downloads field.
+	novelDescDownloads := novelFields[5].Descriptor()
+	// novel.DefaultDownloads holds the default value on creation for the downloads field.
+	novel.DefaultDownloads = novelDescDownloads.Default.(int)
+	// novelDescFavorites is the schema descriptor for favorites field.
+	novelDescFavorites := novelFields[6].Descriptor()
+	// novel.DefaultFavorites holds the default value on creation for the favorites field.
+	novel.DefaultFavorites = novelDescFavorites.Default.(int)
 	novelsourceMixin := schema.NovelSource{}.Mixin()
 	novelsourceMixinFields0 := novelsourceMixin[0].Fields()
 	novelsourceFields := schema.NovelSource{}.Fields()
