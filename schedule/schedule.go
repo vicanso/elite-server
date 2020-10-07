@@ -96,5 +96,7 @@ func syncNovelSource() {
 		logger.Error("sync novel source fail",
 			zap.Error(err),
 		)
+	} else {
+		logger.Info("synce novel source done")
 	}
 }

@@ -476,6 +476,7 @@ func (ctrl *novelCtrl) publishAll(c *elton.Context) (err error) {
 				)
 			}
 		}
+		logger.Info("publish all done")
 	}()
 	c.NoContent()
 	return
