@@ -62,6 +62,7 @@
           :current-page="currentPage"
           :page-size="query.limit"
           :total="userCount"
+          :page-sizes="pageSizes"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         />
@@ -75,6 +76,7 @@ import { mapActions, mapState } from "vuex";
 import BaseTable from "@/components/base/Table.vue";
 import User from "@/components/User.vue";
 import BaseFilter from "@/components/base/Filter.vue";
+import { PAGE_SIZES } from "@/constants/common";
 
 const userRoles = [];
 const userStatuses = [];
@@ -116,14 +118,13 @@ export default {
     BaseFilter
   },
   data() {
-    const pageSizes = [10, 20, 30, 50];
     return {
       inited: false,
       filterFields: null,
-      pageSizes,
+      pageSizes: PAGE_SIZES,
       query: {
         offset: 0,
-        limit: pageSizes[0],
+        limit: PAGE_SIZES[0],
         order: "-updatedAt"
       }
     };

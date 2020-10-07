@@ -31,6 +31,7 @@
         layout="prev, pager, next, sizes"
         :current-page="currentPage"
         :page-size="query.limit"
+        :page-sizes="pageSizes"
         :total="novelSourceCount"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -42,7 +43,7 @@
 import { mapActions, mapState } from "vuex";
 import BaseTable from "@/components/base/Table.vue";
 import BaseFilter from "@/components/base/Filter.vue";
-import { NOVEL_SOURCES } from "@/constants/common";
+import { NOVEL_SOURCES, PAGE_SIZES } from "@/constants/common";
 
 const filterFields = [
   {
@@ -84,13 +85,13 @@ export default {
     BaseFilter
   },
   data() {
-    const pageSizes = [10, 20, 30, 50];
     return {
       sourceNameList: NOVEL_SOURCES,
       filterFields,
+      pageSizes: PAGE_SIZES,
       query: {
         offset: 0,
-        limit: pageSizes[0],
+        limit: PAGE_SIZES[0],
         order: "-createdAt"
       }
     };
