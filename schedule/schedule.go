@@ -38,6 +38,7 @@ func init() {
 	_, _ = c.AddFunc("@every 1m", configRefresh)
 	_, _ = c.AddFunc("@every 5m", redisStats)
 	_, _ = c.AddFunc("@every 10s", entStats)
+	_, _ = c.AddFunc("@every 30s", cpuUsageStats)
 	if os.Getenv("SYNC_SOURCE") != "" {
 		// _, _ = c.AddFunc("@every 12h", syncNovelSource)
 		go syncNovelSource()
@@ -97,6 +98,18 @@ func syncNovelSource() {
 			zap.Error(err),
 		)
 	} else {
-		logger.Info("synce novel source done")
+		logger.Info("sync novel source done")
 	}
 }
+
+// cpuUsageStats cpu使用率
+func cpuUsageStats() {
+	err := service.UpdateCPUUsage()
+	if err != nil {
+		logger.Error("update cpu usage fail",
+			zap.Error(err),
+		)
+		service.AlarmError("update cpu usage fail, " + err.Error())
+	}
+}
+
