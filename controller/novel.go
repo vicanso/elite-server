@@ -340,7 +340,7 @@ func (*novelCtrl) list(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	c.CacheMaxAge("5m")
+	c.CacheMaxAge(5 * time.Minute)
 	c.Body = &novelListResp{
 		Novels: novels,
 		Count:  count,
@@ -360,7 +360,7 @@ func (*novelCtrl) findByID(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	c.CacheMaxAge("10m")
+	c.CacheMaxAge(10 * time.Minute)
 	c.Body = result
 	return
 }
@@ -557,7 +557,7 @@ func (*novelCtrl) listChapter(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	c.CacheMaxAge("5m")
+	c.CacheMaxAge(5 * time.Minute)
 	c.Body = &novelChapterListResp{
 		Count:    count,
 		Chapters: chapters,
@@ -579,7 +579,7 @@ func (*novelCtrl) getChapterContent(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	c.CacheMaxAge("10m")
+	c.CacheMaxAge(10 * time.Minute)
 	c.Body = result
 	return
 }
@@ -619,7 +619,7 @@ func (*novelCtrl) getCover(c *elton.Context) (err error) {
 	}
 
 	c.MergeHeader(header)
-	c.CacheMaxAge("1h")
+	c.CacheMaxAge(time.Hour)
 	c.Body = data
 	return
 }

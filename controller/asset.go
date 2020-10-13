@@ -21,11 +21,12 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"time"
 
 	"github.com/gobuffalo/packr/v2"
+	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elton"
 	M "github.com/vicanso/elton/middleware"
-	"github.com/vicanso/elite/router"
 )
 
 type (
@@ -105,7 +106,7 @@ func (*assetCtrl) getIndex(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	c.CacheMaxAge("10s")
+	c.CacheMaxAge(10 * time.Second)
 	return
 }
 
@@ -115,6 +116,6 @@ func (*assetCtrl) getFavIcon(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	c.CacheMaxAge("1h", "10m")
+	c.CacheMaxAge(time.Hour, 10*time.Minute)
 	return
 }
