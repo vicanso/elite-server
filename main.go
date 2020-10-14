@@ -23,13 +23,7 @@ import (
 	"syscall"
 	"time"
 
-	_ "net/http/pprof"
-
-	"github.com/felixge/fgprof"
 	warner "github.com/vicanso/count-warner"
-	"github.com/vicanso/elton"
-	compress "github.com/vicanso/elton-compress"
-	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/elite/config"
 	_ "github.com/vicanso/elite/controller"
 	"github.com/vicanso/elite/cs"
@@ -40,6 +34,9 @@ import (
 	_ "github.com/vicanso/elite/schedule"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elite/util"
+	"github.com/vicanso/elton"
+	compress "github.com/vicanso/elton-compress"
+	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/hes"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
@@ -161,23 +158,7 @@ func newOnErrorHandler(e *elton.Elton) {
 	})
 }
 
-// newProf 初始化prof
-func newProf() {
-	srv := http.NewServeMux()
-	// go tool pprof --http=:6061 http://localhost:6060/debug/fgprof?seconds=3
-	srv.Handle("/debug/fgprof", fgprof.Handler())
-	go func() {
-		err := http.ListenAndServe(":6060", srv)
-		if err != nil {
-			log.Default().Error("fgprof fail",
-				zap.Error(err),
-			)
-		}
-	}()
-}
-
 func main() {
-	newProf()
 	logger := log.Default()
 	defer func() {
 		if r := recover(); r != nil {
