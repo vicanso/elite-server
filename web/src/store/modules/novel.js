@@ -5,7 +5,8 @@ import {
   NOVELS,
   NOVELS_ID,
   NOVEL_CHAPTERS,
-  NOVEL_CHAPTERS_UPDATE
+  NOVEL_CHAPTERS_UPDATE,
+  NOVEL_CHAPTERS_ID
 } from "@/constants/url";
 import { addNoCacheQueryParam, formatDate } from "@/helpers/util";
 
@@ -214,6 +215,15 @@ export default {
     },
     updateNovelChapters(_, id) {
       return request.post(NOVEL_CHAPTERS_UPDATE.replace(":id", id));
+    },
+    async getNovelChapterByID(_, id) {
+      const { data } = await request.get(NOVEL_CHAPTERS_ID.replace(":id", id));
+      data.no = data.no || 0;
+      data.chapterNO = data.no + 1;
+      return data;
+    },
+    async updateNovelChapterByID(_, { id, data }) {
+      return request.patch(NOVEL_CHAPTERS_ID.replace(":id", id), data);
     }
   }
 };

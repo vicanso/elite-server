@@ -193,7 +193,7 @@ func (srv *Srv) GetFetcherByID(id int) (fetcher Fetcher, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
 	defer cancel()
 	result, err := getEntClient().Novel.Query().
-		Where(novel.IDEQ(id)).
+		Where(novel.ID(id)).
 		First(ctx)
 	if err != nil {
 		return
@@ -367,7 +367,7 @@ func (*Srv) GetCover(id int) (cover string, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
 	defer cancel()
 	result, err := getEntClient().Novel.Query().
-		Where(novel.IDEQ(id)).
+		Where(novel.ID(id)).
 		First(ctx)
 	if err != nil {
 		return

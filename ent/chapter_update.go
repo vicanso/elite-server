@@ -53,6 +53,12 @@ func (cu *ChapterUpdate) AddNo(i int) *ChapterUpdate {
 	return cu
 }
 
+// SetTitle sets the title field.
+func (cu *ChapterUpdate) SetTitle(s string) *ChapterUpdate {
+	cu.mutation.SetTitle(s)
+	return cu
+}
+
 // SetContent sets the content field.
 func (cu *ChapterUpdate) SetContent(s string) *ChapterUpdate {
 	cu.mutation.SetContent(s)
@@ -218,6 +224,13 @@ func (cu *ChapterUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: chapter.FieldNo,
 		})
 	}
+	if value, ok := cu.mutation.Title(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: chapter.FieldTitle,
+		})
+	}
 	if value, ok := cu.mutation.Content(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -292,6 +305,12 @@ func (cuo *ChapterUpdateOne) SetNo(i int) *ChapterUpdateOne {
 // AddNo adds i to no.
 func (cuo *ChapterUpdateOne) AddNo(i int) *ChapterUpdateOne {
 	cuo.mutation.AddNo(i)
+	return cuo
+}
+
+// SetTitle sets the title field.
+func (cuo *ChapterUpdateOne) SetTitle(s string) *ChapterUpdateOne {
+	cuo.mutation.SetTitle(s)
 	return cuo
 }
 
@@ -456,6 +475,13 @@ func (cuo *ChapterUpdateOne) sqlSave(ctx context.Context) (_node *Chapter, err e
 			Type:   field.TypeInt,
 			Value:  value,
 			Column: chapter.FieldNo,
+		})
+	}
+	if value, ok := cuo.mutation.Title(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: chapter.FieldTitle,
 		})
 	}
 	if value, ok := cuo.mutation.Content(); ok {

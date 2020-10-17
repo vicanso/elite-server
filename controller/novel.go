@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -38,10 +39,26 @@ import (
 	"github.com/vicanso/elite/validate"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/go-axios"
+	"github.com/vicanso/hes"
 	"go.uber.org/zap"
 )
 
 const eliteCoverBucket = "elite-covers"
+
+const errNovelCategory = "novel"
+
+var (
+	novelNoMatchRecord = &hes.Error{
+		Message:    "没有匹配的记录",
+		StatusCode: http.StatusBadRequest,
+		Category:   errNovelCategory,
+	}
+	novelIDInvalid = &hes.Error{
+		Message:    "ID不能为空",
+		StatusCode: http.StatusBadRequest,
+		Category:   errNovelCategory,
+	}
+)
 
 type (
 	novelCtrl struct{}
@@ -83,8 +100,10 @@ type (
 	novelChapterListParams struct {
 		listParams
 
-		// ID 小说id，由route param中获取并设置，因此设置omitempty
-		ID int `json:"id,omitempty" validate:"omitempty,xNovelID"`
+		// ID 小说id，由route param中获取并设置，因此不设置validate
+		ID int `json:"id,omitempty"`
+		// ChapterID 章节id，由route param中获取并设置，因此不设置validate
+		ChapterID int `json:"chapterID,omitempty"`
 	}
 
 	// novelSourceListParams 小说源查询参数
@@ -108,12 +127,18 @@ type (
 		Height  string `json:"height,omitempty" validate:"omitempty,xNovelCoverHeight"`
 		Quality string `json:"quality,omitempty" validate:"required,xNovelCoverQuality"`
 	}
+	// novelChapterUpdateParams 小说章节更新参数
+	novelChapterUpdateParams struct {
+		ID      int    `json:"id,omitempty"`
+		Title   string `json:"title,omitempty" validate:"omitempty,xNovelChapterTitle"`
+		Content string `json:"content,omitempty" validate:"omitempty,xNovelChapterContent"`
+	}
 )
 
 func init() {
 	ctrl := novelCtrl{}
 
-	g := router.NewGroup("/novels")
+	g := router.NewGroup("/novels", setNoCacheIfMatched)
 
 	// 获取小说源列表
 	g.GET(
@@ -133,13 +158,11 @@ func init() {
 	// 小说查询
 	g.GET(
 		"/v1",
-		setNoCacheIfMatched,
 		ctrl.list,
 	)
 	// 单本小说查询
 	g.GET(
 		"/v1/{id}",
-		setNoCacheIfMatched,
 		ctrl.findByID,
 	)
 	// 单本小说更新
@@ -185,12 +208,26 @@ func init() {
 		shouldBeAdmin,
 		ctrl.updateAllChapters,
 	)
+	// 指定小说更新所有章节
 	g.POST(
 		"/v1/{id}/update-chapters",
-		newTracker(cs.ActionNovelChapterUpdate),
+		newTracker(cs.ActionNovelChaptersUpdate),
 		loadUserSession,
 		shouldBeAdmin,
 		ctrl.updateChaptersByID,
+	)
+	// 根据ID获取小说章节
+	g.GET(
+		"/v1/chapters/{id}",
+		ctrl.getChapterByID,
+	)
+	// 根据ID更新小说章节
+	g.PATCH(
+		"/v1/chapters/{id}",
+		newTracker(cs.ActionNovelChapterUpdate),
+		loadUserSession,
+		shouldBeAdmin,
+		ctrl.updateChapterByID,
 	)
 }
 
@@ -233,7 +270,12 @@ func (params *novelListParams) count(ctx context.Context) (count int, err error)
 
 // where 将查询条件转换为where
 func (params *novelChapterListParams) where(query *ent.ChapterQuery) *ent.ChapterQuery {
-	query = query.Where(chapter.NovelEQ(params.ID))
+	if params.ID != 0 {
+		query = query.Where(chapter.NovelEQ(params.ID))
+	}
+	if params.ChapterID != 0 {
+		query = query.Where(chapter.ID(params.ChapterID))
+	}
 	return query
 }
 
@@ -287,7 +329,7 @@ func (params *novelSourceListParams) count(ctx context.Context) (count int, err 
 // update 更新小说
 func (params *novelUpdateParams) update(ctx context.Context) (err error) {
 	if params.ID == 0 {
-		err = errors.New("id can't be nil")
+		err = novelIDInvalid
 		return
 	}
 	update := getEntClient().Novel.UpdateOneID(params.ID)
@@ -302,7 +344,31 @@ func (params *novelUpdateParams) update(ctx context.Context) (err error) {
 		return
 	}
 	if result == nil {
-		err = errors.New("no record match")
+		err = novelNoMatchRecord
+		return
+	}
+	return
+}
+
+func (params *novelChapterUpdateParams) update(ctx context.Context) (err error) {
+	if params.ID == 0 {
+		err = novelIDInvalid
+		return
+	}
+	update := getEntClient().Chapter.UpdateOneID(params.ID)
+	if params.Title != "" {
+		update = update.SetTitle(params.Title)
+	}
+	if params.Content != "" {
+		update = update.SetContent(params.Content).
+			SetWordCount(len(params.Content))
+	}
+	result, err := update.Save(ctx)
+	if err != nil {
+		return
+	}
+	if result == nil {
+		err = novelNoMatchRecord
 		return
 	}
 	return
@@ -362,7 +428,7 @@ func (*novelCtrl) findByID(c *elton.Context) (err error) {
 		return
 	}
 	result, err := getEntClient().Novel.Query().
-		Where(entNovel.IDEQ(id)).
+		Where(entNovel.ID(id)).
 		First(c.Context())
 	if err != nil {
 		return
@@ -689,6 +755,46 @@ func (*novelCtrl) addBehavior(c *elton.Context) (err error) {
 	}
 	params.ID = id
 	err = params.do(c.Context())
+	if err != nil {
+		return
+	}
+	c.NoContent()
+	return
+}
+
+// getChapterByID 通过ID获取章节
+func (*novelCtrl) getChapterByID(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	params := novelChapterListParams{}
+	params.ChapterID = id
+	chapters, err := params.queryAll(c.Context())
+	if err != nil {
+		return
+	}
+	if len(chapters) == 0 {
+		err = hes.New("无法获取该章节内容")
+		return
+	}
+	c.Body = chapters[0]
+	return
+}
+
+// updateChapterByID 根据章节ID更新章节
+func (*novelCtrl) updateChapterByID(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	params := novelChapterUpdateParams{}
+	err = validate.Do(&params, c.RequestBody)
+	if err != nil {
+		return
+	}
+	params.ID = id
+	err = params.update(c.Context())
 	if err != nil {
 		return
 	}

@@ -30,6 +30,17 @@
             key="contentDesc"
             label="章节内容"
           />
+          <el-table-column label="操作" width="80">
+            <template slot-scope="scope">
+              <el-button
+                class="op"
+                type="text"
+                size="small"
+                @click="modify(scope.row)"
+                >编辑</el-button
+              >
+            </template>
+          </el-table-column>
         </el-table>
         <el-pagination
           class="pagination"
@@ -43,6 +54,7 @@
         />
       </div>
     </el-card>
+    <Chapter v-else />
   </div>
 </template>
 <script>
@@ -50,6 +62,7 @@ import { mapActions, mapState } from "vuex";
 import BaseTable from "@/components/base/Table.vue";
 import BaseFilter from "@/components/base/Filter.vue";
 import { PAGE_SIZES } from "@/constants/common";
+import Chapter from "@/components/Chapter.vue";
 
 const filterFields = [
   {
@@ -70,7 +83,8 @@ export default {
   name: "Chapters",
   extends: BaseTable,
   components: {
-    BaseFilter
+    BaseFilter,
+    Chapter
   },
   data() {
     return {

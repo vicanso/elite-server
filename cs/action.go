@@ -35,6 +35,8 @@ const (
 
 	// ActionNovelUpdate update novel
 	ActionNovelUpdate = "updateNovel"
+	// ActionNovelChaptersUpdate update novel chapters
+	ActionNovelChaptersUpdate = "updateNovelChapters"
 	// ActionNovelChapterUpdate update novel chapter
 	ActionNovelChapterUpdate = "updateNovelChapter"
 )

@@ -26,7 +26,6 @@ func (Chapter) Fields() []ent.Field {
 		field.Int("no").
 			Comment("章节序号"),
 		field.String("title").
-			Immutable().
 			Comment("章节名称"),
 		field.String("content").
 			Optional().

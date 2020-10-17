@@ -35,4 +35,6 @@ func init() {
 		cs.ActionNovelUserDownload,
 		cs.ActionNovelUserFavorite,
 	}))
+	AddAlias("xNovelChapterTitle", "min=1,max=1000")
+	AddAlias("xNovelChapterContent", "min=1,max=50000")
 }
