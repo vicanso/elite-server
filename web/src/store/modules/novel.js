@@ -1,7 +1,12 @@
 import request from "@/helpers/request";
 
-import { NOVEL_SOURCES, NOVELS, NOVELS_ID } from "@/constants/url";
-import { addNoCacheQueryParam } from "@/helpers/util";
+import {
+  NOVEL_SOURCES,
+  NOVELS,
+  NOVELS_ID,
+  NOVEL_CHAPTERS
+} from "@/constants/url";
+import { addNoCacheQueryParam, formatDate } from "@/helpers/util";
 
 const prefix = "novel";
 
@@ -16,6 +21,9 @@ const mutationNovelListProcessing = `${mutationNovelList}.processing`;
 
 const mutationNovelUpdate = `${prefix}.update`;
 const mutationNovelUpdateProcessing = `${mutationNovelUpdate}.processing`;
+
+const mutationNovelChapterList = `${prefix}.chapter.list`;
+const mutationNovelChapterListProcessing = `${mutationNovelChapterList}.processing`;
 
 const state = {
   // 是否正在发布小说
@@ -36,7 +44,14 @@ const state = {
     data: null,
     count: -1
   },
-  updateProcessing: false
+  updateProcessing: false,
+
+  // 是否正在拉取小说章节列表
+  listChapterProcessing: false,
+  chapterList: {
+    data: null,
+    count: -1
+  }
 };
 
 export default {
@@ -93,6 +108,27 @@ export default {
         }
       });
       state.list.data = arr;
+    },
+    [mutationNovelChapterListProcessing](state, processing) {
+      state.listChapterProcessing = processing;
+    },
+    [mutationNovelChapterList](state, { chapters = [], count = 0 }) {
+      if (count >= 0) {
+        state.chapterList.count = count;
+      }
+      chapters.forEach(item => {
+        if (item.wordCount) {
+          item.wordCountDesc = `${item.wordCount}字`;
+        } else {
+          item.wordCountDesc = "--";
+        }
+        item.contentDesc = item.content || "--";
+        if (item.content && item.content.length > 20) {
+          item.contentDesc = `${item.content.substring(0, 20)}...`;
+        }
+        item.updatedAtDesc = formatDate(item.updatedAt);
+      });
+      state.chapterList.data = chapters;
     }
   },
   actions: {
@@ -132,6 +168,13 @@ export default {
         commit(mutationNovelListProcessing, false);
       }
     },
+    // searchNovel
+    async searchNovel(_, params) {
+      const { data } = await request.get(NOVELS, {
+        params: addNoCacheQueryParam(params)
+      });
+      return data;
+    },
     async getNovelByID(_, id) {
       const { data } = await request.get(NOVELS_ID.replace(":id", id));
       return data;
@@ -146,6 +189,19 @@ export default {
         });
       } finally {
         commit(mutationNovelUpdateProcessing, false);
+      }
+    },
+    // listNovelChapter
+    async listNovelChapter({ commit }, { id, params }) {
+      commit(mutationNovelChapterListProcessing, true);
+      try {
+        const { data } = await request.get(NOVEL_CHAPTERS.replace(":id", id), {
+          params
+        });
+        commit(mutationNovelChapterList, data);
+        return data;
+      } finally {
+        commit(mutationNovelChapterListProcessing, false);
       }
     }
   }

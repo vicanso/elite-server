@@ -57,7 +57,8 @@ import {
   ADVERTISEMENTS,
   ORDERS,
   NOVEL_SOURCES,
-  NOVELS
+  NOVELS,
+  NOVEL_CHAPTERS
 } from "@/constants/route";
 import { USER_ADMIN, USER_SU, GROUP_MARKETING } from "@/constants/user";
 import { mapState } from "vuex";
@@ -157,6 +158,10 @@ const navs = [
       {
         name: "小说源",
         route: NOVEL_SOURCES
+      },
+      {
+        name: "小说章节",
+        route: NOVEL_CHAPTERS
       }
     ]
   }

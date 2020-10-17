@@ -43,3 +43,4 @@ export const ORDERS_STATUSES = "/orders/v1/statuses";
 export const NOVEL_SOURCES = "/novels/v1/sources";
 export const NOVELS = "/novels/v1";
 export const NOVELS_ID = "/novels/v1/:id";
+export const NOVEL_CHAPTERS = "/novels/v1/:id/chapters";

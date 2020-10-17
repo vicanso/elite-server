@@ -15,7 +15,8 @@ import {
   PROFILE,
   LOGINS,
   NOVEL_SOURCES,
-  NOVELS
+  NOVELS,
+  NOVEL_CHAPTERS
 } from "@/constants/route";
 import Home from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
@@ -30,6 +31,7 @@ import Users from "@/views/Users.vue";
 import Logins from "@/views/Logins.vue";
 import NovelSources from "@/views/NovelSources.vue";
 import Novels from "@/views/Novels.vue";
+import NovelChapters from "@/views/Chapters";
 
 Vue.use(VueRouter);
 
@@ -134,6 +136,14 @@ const routes = [
     path: "/novels",
     name: NOVELS,
     component: Novels,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/novel-chapters",
+    name: NOVEL_CHAPTERS,
+    component: NovelChapters,
     meta: {
       requiresAuth: true
     }

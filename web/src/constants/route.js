@@ -16,8 +16,10 @@ export const CONFIG_SESSION_INTERCEPTOR = "SessionInterceptor";
 export const NOVEL_SOURCES = "NovelSources";
 // 小说列表
 export const NOVELS = "Novels";
+// 小说章节列表
+export const NOVEL_CHAPTERS = "NovelChapters";
 
-export const CONFIG_EDITE_MODE = "edit";
+export const CONFIG_EDIT_MODE = "edit";
 export const CONFIG_LIST_MODE = "list";
 
 export const USERS = "Users";

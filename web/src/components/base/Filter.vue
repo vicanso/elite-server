@@ -25,6 +25,25 @@
               :value="item.value"
             />
           </el-select>
+          <el-select
+            class="select"
+            v-else-if="field.type === 'novelSelect'"
+            :placeholder="field.placeholder"
+            v-model="current[field.key]"
+            :multiple="field.multiple || false"
+            filterable
+            remote
+            :remote-method="searchNovelByKeyword"
+            :loading="searchNovelProcessing"
+          >
+            <el-option
+              v-for="item in novels"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
           <el-button
             v-else-if="field.type === 'filter'"
             :loading="processing"
@@ -58,6 +77,8 @@
   </el-form>
 </template>
 <script>
+import { mapActions } from "vuex";
+
 export default {
   name: "BaseFilter",
   props: {
@@ -80,11 +101,46 @@ export default {
       current[item.key] = item.defaultValue || "";
     });
     return {
+      novels: null,
+      searchNovelProcessing: false,
       processing: false,
       current
     };
   },
   methods: {
+    ...mapActions(["searchNovel"]),
+    async searchNovelByKeyword(keyword) {
+      if (keyword == this._latestKeyword) {
+        return;
+      }
+      this._latestKeyword = keyword;
+      this.searchNovelProcessing = true;
+      try {
+        const data = await this.searchNovel({
+          limit: 10,
+          keyword: keyword
+        });
+        // 判断是否当前的搜索关键字
+        if (keyword == this._latestKeyword) {
+          const novels = (data.novels || []).map(item => {
+            const label = `${item.author} ${item.name}`;
+            return {
+              key: `${item.id}`,
+              value: item.id,
+              label
+            };
+          });
+          this.novels = novels;
+        }
+      } catch (err) {
+        this.$message.error(err.message);
+      } finally {
+        // 判断是否当前的搜索关键字
+        if (keyword == this._latestKeyword) {
+          this.searchNovelProcessing = false;
+        }
+      }
+    },
     filter() {
       this.$emit("filter", this.current);
     }
