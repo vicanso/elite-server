@@ -25,7 +25,7 @@ func init() {
 	AddAlias("xNovelCoverWidth", "number")
 	AddAlias("xNovelCoverHeight", "number")
 	AddAlias("xNovelCoverQuality", "number")
-	Add("xNoverCoverType", newIsInString([]string{
+	Add("xNovelCoverType", newIsInString([]string{
 		"jpg",
 		"webp",
 		"png",

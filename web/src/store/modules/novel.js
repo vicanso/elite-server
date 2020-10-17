@@ -4,7 +4,8 @@ import {
   NOVEL_SOURCES,
   NOVELS,
   NOVELS_ID,
-  NOVEL_CHAPTERS
+  NOVEL_CHAPTERS,
+  NOVEL_CHAPTERS_UPDATE
 } from "@/constants/url";
 import { addNoCacheQueryParam, formatDate } from "@/helpers/util";
 
@@ -54,6 +55,19 @@ const state = {
   }
 };
 
+function adjustNovelFields(item) {
+  ["views", "downloads", "favorites"].forEach(key => {
+    if (!item[key]) {
+      item[key] = 0;
+    }
+  });
+  item.summaryCut = item.summary;
+  const max = 40;
+  if (item.summary || item.summary.length > max) {
+    item.summaryCut = item.summary.substring(0, max) + "...";
+  }
+}
+
 export default {
   state,
   mutations: {
@@ -85,13 +99,7 @@ export default {
       if (count >= 0) {
         state.list.count = count;
       }
-      novels.forEach(item => {
-        ["views", "downloads", "favorites"].forEach(key => {
-          if (!item[key]) {
-            item[key] = 0;
-          }
-        });
-      });
+      novels.forEach(adjustNovelFields);
       state.list.data = novels;
     },
     [mutationNovelUpdateProcessing](state, processing) {
@@ -104,7 +112,7 @@ export default {
       const arr = state.list.data.slice(0);
       arr.forEach(item => {
         if (item.id === id) {
-          item = Object.assign(item, data);
+          item = adjustNovelFields(Object.assign(item, data));
         }
       });
       state.list.data = arr;
@@ -203,6 +211,9 @@ export default {
       } finally {
         commit(mutationNovelChapterListProcessing, false);
       }
+    },
+    updateNovelChapters(_, id) {
+      return request.post(NOVEL_CHAPTERS_UPDATE.replace(":id", id));
     }
   }
 };

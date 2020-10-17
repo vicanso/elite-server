@@ -152,12 +152,12 @@ const navs = [
     roles: [USER_SU],
     children: [
       {
-        name: "小说",
-        route: NOVELS
-      },
-      {
         name: "小说源",
         route: NOVEL_SOURCES
+      },
+      {
+        name: "小说",
+        route: NOVELS
       },
       {
         name: "小说章节",

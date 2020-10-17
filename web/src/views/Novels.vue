@@ -50,8 +50,8 @@
             label="收藏量"
             width="80"
           />
-          <el-table-column prop="summary" key="summary" label="简介" />
-          <el-table-column label="操作" width="80">
+          <el-table-column prop="summaryCut" key="summaryCut" label="简介" />
+          <el-table-column label="操作" width="120">
             <template slot-scope="scope">
               <el-button
                 class="op"
@@ -59,6 +59,13 @@
                 size="small"
                 @click="modify(scope.row)"
                 >编辑</el-button
+              >
+              <el-button
+                class="op"
+                type="text"
+                size="small"
+                @click="updateChapter(scope.row)"
+                >更新章节</el-button
               >
             </template>
           </el-table-column>
@@ -129,7 +136,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions(["listNovel"]),
+    ...mapActions(["listNovel", "updateNovelChapters"]),
     async fetch() {
       const { query, processing } = this;
       if (processing) {
@@ -137,6 +144,13 @@ export default {
       }
       try {
         await this.listNovel(query);
+      } catch (err) {
+        this.$message.error(err.message);
+      }
+    },
+    async updateChapter({ id }) {
+      try {
+        await this.updateNovelChapters(id);
       } catch (err) {
         this.$message.error(err.message);
       }

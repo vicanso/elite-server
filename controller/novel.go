@@ -79,8 +79,8 @@ type (
 
 		Keyword string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
 	}
-	// novelChpaterListParams 章节查询参数
-	novelChpaterListParams struct {
+	// novelChapterListParams 章节查询参数
+	novelChapterListParams struct {
 		listParams
 
 		// ID 小说id，由route param中获取并设置，因此设置omitempty
@@ -103,7 +103,7 @@ type (
 	}
 	// novelCoverParams 小说封面参数
 	novelCoverParams struct {
-		Type    string `json:"type,omitempty" validate:"required,xNoverCoverType"`
+		Type    string `json:"type,omitempty" validate:"required,xNovelCoverType"`
 		Width   string `json:"width,omitempty" validate:"omitempty,xNovelCoverWidth"`
 		Height  string `json:"height,omitempty" validate:"omitempty,xNovelCoverHeight"`
 		Quality string `json:"quality,omitempty" validate:"required,xNovelCoverQuality"`
@@ -185,6 +185,13 @@ func init() {
 		shouldBeAdmin,
 		ctrl.updateAllChapters,
 	)
+	g.POST(
+		"/v1/{id}/update-chapters",
+		newTracker(cs.ActionNovelChapterUpdate),
+		loadUserSession,
+		shouldBeAdmin,
+		ctrl.updateChaptersByID,
+	)
 }
 
 // where 将查询条件中的参数转换为对应的where条件
@@ -225,13 +232,13 @@ func (params *novelListParams) count(ctx context.Context) (count int, err error)
 }
 
 // where 将查询条件转换为where
-func (params *novelChpaterListParams) where(query *ent.ChapterQuery) *ent.ChapterQuery {
+func (params *novelChapterListParams) where(query *ent.ChapterQuery) *ent.ChapterQuery {
 	query = query.Where(chapter.NovelEQ(params.ID))
 	return query
 }
 
 // queryAll 查询小说章节
-func (params *novelChpaterListParams) queryAll(ctx context.Context) (chapters []*ent.Chapter, err error) {
+func (params *novelChapterListParams) queryAll(ctx context.Context) (chapters []*ent.Chapter, err error) {
 	query := getEntClient().Chapter.Query()
 	query = query.Limit(params.GetLimit()).
 		Offset(params.GetOffset()).
@@ -241,7 +248,7 @@ func (params *novelChpaterListParams) queryAll(ctx context.Context) (chapters []
 }
 
 // count 计算章节总数
-func (params *novelChpaterListParams) count(ctx context.Context) (count int, err error) {
+func (params *novelChapterListParams) count(ctx context.Context) (count int, err error) {
 	query := getEntClient().Chapter.Query()
 	query = params.where(query)
 	return query.Count(ctx)
@@ -489,6 +496,37 @@ func (ctrl *novelCtrl) publishAll(c *elton.Context) (err error) {
 	return
 }
 
+func updateNovelChapters(id int, fetchingContent bool) (err error) {
+	err = novelSrv.UpdateChapters(id)
+	if err != nil {
+		return
+	}
+	if !fetchingContent {
+		return
+	}
+	return novelSrv.FetchAllChapterContent(id)
+}
+
+// updateChaptersByID 更新单本小说章节
+func (*novelCtrl) updateChaptersByID(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	// 章节内容较多，开新的goroutine处理
+	go func() {
+		err := updateNovelChapters(id, true)
+		if err != nil {
+			logger.Error("fetch chapter content fail",
+				zap.Int("id", id),
+				zap.Error(err),
+			)
+		}
+	}()
+	c.NoContent()
+	return
+}
+
 // updateAllChapters 更新所有小说章节
 func (*novelCtrl) updateAllChapters(c *elton.Context) (err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -502,24 +540,13 @@ func (*novelCtrl) updateAllChapters(c *elton.Context) (err error) {
 	fetchingContent := c.QueryParam("fetching") != ""
 	go func() {
 		for i := 1; i <= id; i++ {
-			err := novelSrv.UpdateChapters(i)
+			err := updateNovelChapters(i, fetchingContent)
 			if err != nil {
 				logger.Error("update chapters fail",
 					zap.Int("id", i),
 					zap.Error(err),
 				)
 				continue
-			}
-			if fetchingContent {
-				err = novelSrv.FetchAllChapterContent(i)
-				if err != nil {
-					logger.Error("fetch all chapter content fail",
-						zap.Int("id", i),
-
-						zap.Error(err),
-					)
-					continue
-				}
 			}
 		}
 	}()
@@ -533,7 +560,7 @@ func (*novelCtrl) listChapter(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	params := novelChpaterListParams{}
+	params := novelChapterListParams{}
 	err = validate.Do(&params, c.Query())
 	if err != nil {
 		return

@@ -23,7 +23,7 @@ const (
 
 	// ActionUserInfoUpdate update user info
 	ActionUserInfoUpdate = "updateUserInfo"
-	// ActionUserMeUpdate update minie info
+	// ActionUserMeUpdate update mine info
 	ActionUserMeUpdate = "updateUserMe"
 	// ActionUserTrackAdd add user track
 	ActionUserTrackAdd = "addUserTrack"
@@ -35,6 +35,8 @@ const (
 
 	// ActionNovelUpdate update novel
 	ActionNovelUpdate = "updateNovel"
+	// ActionNovelChapterUpdate update novel chapter
+	ActionNovelChapterUpdate = "updateNovelChapter"
 )
 
 const (

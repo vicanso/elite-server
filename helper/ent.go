@@ -217,8 +217,10 @@ func initSchemaHooks(c *ent.Client) {
 				case reflect.String:
 					str, ok := value.(string)
 					// 如果更新过长，则截断
-					if ok && len(str) > maxString {
-						value = str[:maxString] + "..."
+					if ok {
+						if runeValue := []rune(str); len(runeValue) > maxString {
+							value = string(runeValue[:maxString]) + "..."
+						}
 					}
 				}
 
