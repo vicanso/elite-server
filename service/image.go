@@ -37,8 +37,8 @@ var (
 )
 
 type (
-	// ImageOptimParams image optim params
-	ImageOptimParams struct {
+	// ImageOptimizeParams image optimize params
+	ImageOptimizeParams struct {
 		Data       []byte
 		Type       string
 		SourceType string
@@ -74,8 +74,8 @@ func init() {
 	}
 }
 
-// optim image optim
-func (*ImageSrv) optim(params *ImageOptimParams) (data []byte, err error) {
+// optimize image optimize
+func (*ImageSrv) optimize(params *ImageOptimizeParams) (data []byte, err error) {
 	client := pb.NewOptimClient(grpcConn)
 	ctx, cancel := context.WithTimeout(context.Background(), tinyConfig.Timeout)
 	defer cancel()
@@ -111,7 +111,7 @@ func (*ImageSrv) optim(params *ImageOptimParams) (data []byte, err error) {
 }
 
 // GetImageFromBucket get image from bucket
-func (srv *ImageSrv) GetImageFromBucket(ctx context.Context, bucket, filename string, params ImageOptimParams) (data []byte, header http.Header, err error) {
+func (srv *ImageSrv) GetImageFromBucket(ctx context.Context, bucket, filename string, params ImageOptimizeParams) (data []byte, header http.Header, err error) {
 	data, header, err = fileSrv.GetData(ctx, bucket, filename)
 	if err != nil {
 		return
@@ -120,7 +120,7 @@ func (srv *ImageSrv) GetImageFromBucket(ctx context.Context, bucket, filename st
 	source := strings.Split(contentType, "/")[1]
 	params.Data = data
 	params.SourceType = source
-	data, err = srv.optim(&params)
+	data, err = srv.optimize(&params)
 	if err != nil {
 		return
 	}

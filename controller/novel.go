@@ -708,7 +708,7 @@ func (*novelCtrl) getCover(c *elton.Context) (err error) {
 		c.Context(),
 		eliteCoverBucket,
 		cover,
-		service.ImageOptimParams{
+		service.ImageOptimizeParams{
 			Type:    params.Type,
 			Width:   width,
 			Height:  height,
