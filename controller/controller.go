@@ -105,15 +105,15 @@ func newMagicalCaptchaValidate() elton.Handler {
 	return middleware.ValidateCaptcha(magicValue)
 }
 
-// isLogined 判断是否登录状态
-func isLogined(c *elton.Context) bool {
+// isLogin 判断是否登录状态
+func isLogin(c *elton.Context) bool {
 	us := service.NewUserSession(c)
-	return us.IsLogined()
+	return us.IsLogin()
 }
 
 // checkLogin 校验是否登录中间件
 func checkLogin(c *elton.Context) (err error) {
-	if !isLogined(c) {
+	if !isLogin(c) {
 		err = errShouldLogin
 		return
 	}
@@ -122,7 +122,7 @@ func checkLogin(c *elton.Context) (err error) {
 
 // checkAnonymous 判断是匿名状态
 func checkAnonymous(c *elton.Context) (err error) {
-	if isLogined(c) {
+	if isLogin(c) {
 		err = errLoginAlready
 		return
 	}
@@ -132,7 +132,7 @@ func checkAnonymous(c *elton.Context) (err error) {
 // newCheckRolesMiddleware 创建用户角色校验中间件
 func newCheckRolesMiddleware(validRoles []string) elton.Handler {
 	return func(c *elton.Context) (err error) {
-		if !isLogined(c) {
+		if !isLogin(c) {
 			err = errShouldLogin
 			return
 		}
@@ -157,7 +157,7 @@ func newTracker(action string) elton.Handler {
 		OnTrack: func(info *M.TrackerInfo, c *elton.Context) {
 			account := ""
 			us := service.NewUserSession(c)
-			if us != nil && us.IsLogined() {
+			if us != nil && us.IsLogin() {
 				account = us.MustGetInfo().Account
 			}
 			ip := c.RealIP()

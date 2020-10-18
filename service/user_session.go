@@ -17,10 +17,10 @@ package service
 import (
 	"encoding/json"
 
-	"github.com/vicanso/elton"
-	session "github.com/vicanso/elton-session"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/util"
+	"github.com/vicanso/elton"
+	session "github.com/vicanso/elton-session"
 )
 
 const (
@@ -76,8 +76,8 @@ func (us *UserSession) MustGetInfo() (info UserSessionInfo) {
 	return info
 }
 
-// IsLogined 判断用户是否已登录
-func (us *UserSession) IsLogined() bool {
+// IsLogin 判断用户是否已登录
+func (us *UserSession) IsLogin() bool {
 	info, err := us.GetInfo()
 	if err != nil {
 		return false
