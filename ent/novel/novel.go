@@ -23,6 +23,8 @@ const (
 	FieldSource = "source"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldWordCount holds the string denoting the word_count field in the database.
+	FieldWordCount = "word_count"
 	// FieldViews holds the string denoting the views field in the database.
 	FieldViews = "views"
 	// FieldDownloads holds the string denoting the downloads field in the database.
@@ -47,6 +49,7 @@ var Columns = []string{
 	FieldAuthor,
 	FieldSource,
 	FieldStatus,
+	FieldWordCount,
 	FieldViews,
 	FieldDownloads,
 	FieldFavorites,
@@ -81,6 +84,8 @@ var (
 	DefaultStatus int
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	StatusValidator func(int) error
+	// DefaultWordCount holds the default value on creation for the word_count field.
+	DefaultWordCount int
 	// DefaultViews holds the default value on creation for the views field.
 	DefaultViews int
 	// DefaultDownloads holds the default value on creation for the downloads field.

@@ -32,7 +32,7 @@ func (Chapter) Fields() []ent.Field {
 			Comment("章节内容"),
 		field.Int("word_count").
 			Optional().
-			StructTag(`json:"wordCount,omitempty"`).
+			StructTag(`json:"wordCount,omitempty" sql:"word_count"`).
 			Comment("章节字数"),
 	}
 }

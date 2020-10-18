@@ -134,6 +134,13 @@ func Status(v int) predicate.Novel {
 	})
 }
 
+// WordCount applies equality check predicate on the "word_count" field. It's identical to WordCountEQ.
+func WordCount(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWordCount), v))
+	})
+}
+
 // Views applies equality check predicate on the "views" field. It's identical to ViewsEQ.
 func Views(v int) predicate.Novel {
 	return predicate.Novel(func(s *sql.Selector) {
@@ -692,6 +699,96 @@ func StatusLT(v int) predicate.Novel {
 func StatusLTE(v int) predicate.Novel {
 	return predicate.Novel(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldStatus), v))
+	})
+}
+
+// WordCountEQ applies the EQ predicate on the "word_count" field.
+func WordCountEQ(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWordCount), v))
+	})
+}
+
+// WordCountNEQ applies the NEQ predicate on the "word_count" field.
+func WordCountNEQ(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldWordCount), v))
+	})
+}
+
+// WordCountIn applies the In predicate on the "word_count" field.
+func WordCountIn(vs ...int) predicate.Novel {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Novel(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldWordCount), v...))
+	})
+}
+
+// WordCountNotIn applies the NotIn predicate on the "word_count" field.
+func WordCountNotIn(vs ...int) predicate.Novel {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Novel(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldWordCount), v...))
+	})
+}
+
+// WordCountGT applies the GT predicate on the "word_count" field.
+func WordCountGT(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldWordCount), v))
+	})
+}
+
+// WordCountGTE applies the GTE predicate on the "word_count" field.
+func WordCountGTE(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldWordCount), v))
+	})
+}
+
+// WordCountLT applies the LT predicate on the "word_count" field.
+func WordCountLT(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldWordCount), v))
+	})
+}
+
+// WordCountLTE applies the LTE predicate on the "word_count" field.
+func WordCountLTE(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldWordCount), v))
+	})
+}
+
+// WordCountIsNil applies the IsNil predicate on the "word_count" field.
+func WordCountIsNil() predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldWordCount)))
+	})
+}
+
+// WordCountNotNil applies the NotNil predicate on the "word_count" field.
+func WordCountNotNil() predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldWordCount)))
 	})
 }
 

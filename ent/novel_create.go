@@ -80,6 +80,20 @@ func (nc *NovelCreate) SetNillableStatus(i *int) *NovelCreate {
 	return nc
 }
 
+// SetWordCount sets the word_count field.
+func (nc *NovelCreate) SetWordCount(i int) *NovelCreate {
+	nc.mutation.SetWordCount(i)
+	return nc
+}
+
+// SetNillableWordCount sets the word_count field if the given value is not nil.
+func (nc *NovelCreate) SetNillableWordCount(i *int) *NovelCreate {
+	if i != nil {
+		nc.SetWordCount(*i)
+	}
+	return nc
+}
+
 // SetViews sets the views field.
 func (nc *NovelCreate) SetViews(i int) *NovelCreate {
 	nc.mutation.SetViews(i)
@@ -205,6 +219,10 @@ func (nc *NovelCreate) defaults() {
 	if _, ok := nc.mutation.Status(); !ok {
 		v := novel.DefaultStatus
 		nc.mutation.SetStatus(v)
+	}
+	if _, ok := nc.mutation.WordCount(); !ok {
+		v := novel.DefaultWordCount
+		nc.mutation.SetWordCount(v)
 	}
 	if _, ok := nc.mutation.Views(); !ok {
 		v := novel.DefaultViews
@@ -337,6 +355,14 @@ func (nc *NovelCreate) createSpec() (*Novel, *sqlgraph.CreateSpec) {
 			Column: novel.FieldStatus,
 		})
 		_node.Status = value
+	}
+	if value, ok := nc.mutation.WordCount(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldWordCount,
+		})
+		_node.WordCount = value
 	}
 	if value, ok := nc.mutation.Views(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

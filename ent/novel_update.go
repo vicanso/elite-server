@@ -48,6 +48,33 @@ func (nu *NovelUpdate) AddStatus(i int) *NovelUpdate {
 	return nu
 }
 
+// SetWordCount sets the word_count field.
+func (nu *NovelUpdate) SetWordCount(i int) *NovelUpdate {
+	nu.mutation.ResetWordCount()
+	nu.mutation.SetWordCount(i)
+	return nu
+}
+
+// SetNillableWordCount sets the word_count field if the given value is not nil.
+func (nu *NovelUpdate) SetNillableWordCount(i *int) *NovelUpdate {
+	if i != nil {
+		nu.SetWordCount(*i)
+	}
+	return nu
+}
+
+// AddWordCount adds i to word_count.
+func (nu *NovelUpdate) AddWordCount(i int) *NovelUpdate {
+	nu.mutation.AddWordCount(i)
+	return nu
+}
+
+// ClearWordCount clears the value of word_count.
+func (nu *NovelUpdate) ClearWordCount() *NovelUpdate {
+	nu.mutation.ClearWordCount()
+	return nu
+}
+
 // SetViews sets the views field.
 func (nu *NovelUpdate) SetViews(i int) *NovelUpdate {
 	nu.mutation.ResetViews()
@@ -275,6 +302,26 @@ func (nu *NovelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: novel.FieldStatus,
 		})
 	}
+	if value, ok := nu.mutation.WordCount(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldWordCount,
+		})
+	}
+	if value, ok := nu.mutation.AddedWordCount(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldWordCount,
+		})
+	}
+	if nu.mutation.WordCountCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: novel.FieldWordCount,
+		})
+	}
 	if value, ok := nu.mutation.Views(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
@@ -391,6 +438,33 @@ func (nuo *NovelUpdateOne) SetNillableStatus(i *int) *NovelUpdateOne {
 // AddStatus adds i to status.
 func (nuo *NovelUpdateOne) AddStatus(i int) *NovelUpdateOne {
 	nuo.mutation.AddStatus(i)
+	return nuo
+}
+
+// SetWordCount sets the word_count field.
+func (nuo *NovelUpdateOne) SetWordCount(i int) *NovelUpdateOne {
+	nuo.mutation.ResetWordCount()
+	nuo.mutation.SetWordCount(i)
+	return nuo
+}
+
+// SetNillableWordCount sets the word_count field if the given value is not nil.
+func (nuo *NovelUpdateOne) SetNillableWordCount(i *int) *NovelUpdateOne {
+	if i != nil {
+		nuo.SetWordCount(*i)
+	}
+	return nuo
+}
+
+// AddWordCount adds i to word_count.
+func (nuo *NovelUpdateOne) AddWordCount(i int) *NovelUpdateOne {
+	nuo.mutation.AddWordCount(i)
+	return nuo
+}
+
+// ClearWordCount clears the value of word_count.
+func (nuo *NovelUpdateOne) ClearWordCount() *NovelUpdateOne {
+	nuo.mutation.ClearWordCount()
 	return nuo
 }
 
@@ -617,6 +691,26 @@ func (nuo *NovelUpdateOne) sqlSave(ctx context.Context) (_node *Novel, err error
 			Type:   field.TypeInt,
 			Value:  value,
 			Column: novel.FieldStatus,
+		})
+	}
+	if value, ok := nuo.mutation.WordCount(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldWordCount,
+		})
+	}
+	if value, ok := nuo.mutation.AddedWordCount(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldWordCount,
+		})
+	}
+	if nuo.mutation.WordCountCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: novel.FieldWordCount,
 		})
 	}
 	if value, ok := nuo.mutation.Views(); ok {

@@ -311,6 +311,33 @@ func (srv *Srv) UpdateChapters(id int) (err error) {
 	return
 }
 
+// UpdateWordCount 更新总字数
+func (srv *Srv) UpdateWordCount(id int) (err error) {
+	chapters := make([]*ent.Chapter, 0)
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	err = getEntClient().Chapter.Query().
+		Where(chapter.Novel(id)).
+		Where(chapter.WordCountNotNil()).
+		Select(chapter.FieldWordCount).
+		Scan(ctx, &chapters)
+	if err != nil {
+		return
+	}
+	wordCount := 0
+	for _, item := range chapters {
+		wordCount += item.WordCount
+	}
+	_, err = getEntClient().Novel.UpdateOneID(id).
+		SetWordCount(wordCount).
+		Save(context.Background())
+	if err != nil {
+		return
+	}
+	return
+}
+
 // FetchAllChapterContent 拉取所有章节内容
 func (srv *Srv) FetchAllChapterContent(id int) (err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*defaultQueryTimeout)

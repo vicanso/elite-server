@@ -251,6 +251,7 @@ func (params *novelListParams) queryAll(ctx context.Context) (novels []*ent.Nove
 	query = params.where(query)
 	// 如果指定select的字段
 	if len(fields) != 0 {
+		novels = make([]*ent.Novel, 0)
 		err = query.Select(fields[0], fields[1:]...).Scan(ctx, &novels)
 		if err != nil {
 			return
@@ -578,7 +579,11 @@ func updateNovelChapters(id int, fetchingContent bool) (err error) {
 	if !fetchingContent {
 		return
 	}
-	return novelSrv.FetchAllChapterContent(id)
+	err = novelSrv.FetchAllChapterContent(id)
+	if err != nil {
+		return
+	}
+	return novelSrv.UpdateWordCount(id)
 }
 
 // updateChaptersByID 更新单本小说章节

@@ -13,7 +13,7 @@ import (
 
 // Novel is the model entity for the Novel schema.
 type Novel struct {
-	config `json:"-"`
+	config `json:"-" sql:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -28,6 +28,8 @@ type Novel struct {
 	Source int `json:"source,omitempty"`
 	// Status holds the value of the "status" field.
 	Status int `json:"status,omitempty"`
+	// WordCount holds the value of the "word_count" field.
+	WordCount int `json:"wordCount,omitempty" sql:"word_count"`
 	// Views holds the value of the "views" field.
 	Views int `json:"views,omitempty"`
 	// Downloads holds the value of the "downloads" field.
@@ -50,6 +52,7 @@ func (*Novel) scanValues() []interface{} {
 		&sql.NullString{}, // author
 		&sql.NullInt64{},  // source
 		&sql.NullInt64{},  // status
+		&sql.NullInt64{},  // word_count
 		&sql.NullInt64{},  // views
 		&sql.NullInt64{},  // downloads
 		&sql.NullInt64{},  // favorites
@@ -101,27 +104,32 @@ func (n *Novel) assignValues(values ...interface{}) error {
 		n.Status = int(value.Int64)
 	}
 	if value, ok := values[6].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field views", values[6])
+		return fmt.Errorf("unexpected type %T for field word_count", values[6])
+	} else if value.Valid {
+		n.WordCount = int(value.Int64)
+	}
+	if value, ok := values[7].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field views", values[7])
 	} else if value.Valid {
 		n.Views = int(value.Int64)
 	}
-	if value, ok := values[7].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field downloads", values[7])
+	if value, ok := values[8].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field downloads", values[8])
 	} else if value.Valid {
 		n.Downloads = int(value.Int64)
 	}
-	if value, ok := values[8].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field favorites", values[8])
+	if value, ok := values[9].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field favorites", values[9])
 	} else if value.Valid {
 		n.Favorites = int(value.Int64)
 	}
-	if value, ok := values[9].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field cover", values[9])
+	if value, ok := values[10].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field cover", values[10])
 	} else if value.Valid {
 		n.Cover = value.String
 	}
-	if value, ok := values[10].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field summary", values[10])
+	if value, ok := values[11].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field summary", values[11])
 	} else if value.Valid {
 		n.Summary = value.String
 	}
@@ -163,6 +171,8 @@ func (n *Novel) String() string {
 	builder.WriteString(fmt.Sprintf("%v", n.Source))
 	builder.WriteString(", status=")
 	builder.WriteString(fmt.Sprintf("%v", n.Status))
+	builder.WriteString(", word_count=")
+	builder.WriteString(fmt.Sprintf("%v", n.WordCount))
 	builder.WriteString(", views=")
 	builder.WriteString(fmt.Sprintf("%v", n.Views))
 	builder.WriteString(", downloads=")

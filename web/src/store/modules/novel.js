@@ -57,7 +57,7 @@ const state = {
 };
 
 function adjustNovelFields(item) {
-  ["views", "downloads", "favorites"].forEach(key => {
+  ["views", "downloads", "favorites", "wordCount"].forEach(key => {
     if (!item[key]) {
       item[key] = 0;
     }

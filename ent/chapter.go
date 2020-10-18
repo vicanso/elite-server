@@ -13,7 +13,7 @@ import (
 
 // Chapter is the model entity for the Chapter schema.
 type Chapter struct {
-	config `json:"-"`
+	config `json:"-" sql:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -29,7 +29,7 @@ type Chapter struct {
 	// Content holds the value of the "content" field.
 	Content string `json:"content,omitempty"`
 	// WordCount holds the value of the "word_count" field.
-	WordCount int `json:"wordCount,omitempty"`
+	WordCount int `json:"wordCount,omitempty" sql:"word_count"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

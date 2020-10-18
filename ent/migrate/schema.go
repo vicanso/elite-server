@@ -74,6 +74,7 @@ var (
 		{Name: "author", Type: field.TypeString},
 		{Name: "source", Type: field.TypeInt},
 		{Name: "status", Type: field.TypeInt, Default: 1},
+		{Name: "word_count", Type: field.TypeInt, Nullable: true},
 		{Name: "views", Type: field.TypeInt, Nullable: true},
 		{Name: "downloads", Type: field.TypeInt, Nullable: true},
 		{Name: "favorites", Type: field.TypeInt, Nullable: true},

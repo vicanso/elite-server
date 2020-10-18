@@ -1587,6 +1587,8 @@ type NovelMutation struct {
 	addsource     *int
 	status        *int
 	addstatus     *int
+	word_count    *int
+	addword_count *int
 	views         *int
 	addviews      *int
 	downloads     *int
@@ -1941,6 +1943,77 @@ func (m *NovelMutation) ResetStatus() {
 	m.addstatus = nil
 }
 
+// SetWordCount sets the word_count field.
+func (m *NovelMutation) SetWordCount(i int) {
+	m.word_count = &i
+	m.addword_count = nil
+}
+
+// WordCount returns the word_count value in the mutation.
+func (m *NovelMutation) WordCount() (r int, exists bool) {
+	v := m.word_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWordCount returns the old word_count value of the Novel.
+// If the Novel object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *NovelMutation) OldWordCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldWordCount is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldWordCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWordCount: %w", err)
+	}
+	return oldValue.WordCount, nil
+}
+
+// AddWordCount adds i to word_count.
+func (m *NovelMutation) AddWordCount(i int) {
+	if m.addword_count != nil {
+		*m.addword_count += i
+	} else {
+		m.addword_count = &i
+	}
+}
+
+// AddedWordCount returns the value that was added to the word_count field in this mutation.
+func (m *NovelMutation) AddedWordCount() (r int, exists bool) {
+	v := m.addword_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWordCount clears the value of word_count.
+func (m *NovelMutation) ClearWordCount() {
+	m.word_count = nil
+	m.addword_count = nil
+	m.clearedFields[novel.FieldWordCount] = struct{}{}
+}
+
+// WordCountCleared returns if the field word_count was cleared in this mutation.
+func (m *NovelMutation) WordCountCleared() bool {
+	_, ok := m.clearedFields[novel.FieldWordCount]
+	return ok
+}
+
+// ResetWordCount reset all changes of the "word_count" field.
+func (m *NovelMutation) ResetWordCount() {
+	m.word_count = nil
+	m.addword_count = nil
+	delete(m.clearedFields, novel.FieldWordCount)
+}
+
 // SetViews sets the views field.
 func (m *NovelMutation) SetViews(i int) {
 	m.views = &i
@@ -2255,7 +2328,7 @@ func (m *NovelMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *NovelMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, novel.FieldCreatedAt)
 	}
@@ -2273,6 +2346,9 @@ func (m *NovelMutation) Fields() []string {
 	}
 	if m.status != nil {
 		fields = append(fields, novel.FieldStatus)
+	}
+	if m.word_count != nil {
+		fields = append(fields, novel.FieldWordCount)
 	}
 	if m.views != nil {
 		fields = append(fields, novel.FieldViews)
@@ -2309,6 +2385,8 @@ func (m *NovelMutation) Field(name string) (ent.Value, bool) {
 		return m.Source()
 	case novel.FieldStatus:
 		return m.Status()
+	case novel.FieldWordCount:
+		return m.WordCount()
 	case novel.FieldViews:
 		return m.Views()
 	case novel.FieldDownloads:
@@ -2340,6 +2418,8 @@ func (m *NovelMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldSource(ctx)
 	case novel.FieldStatus:
 		return m.OldStatus(ctx)
+	case novel.FieldWordCount:
+		return m.OldWordCount(ctx)
 	case novel.FieldViews:
 		return m.OldViews(ctx)
 	case novel.FieldDownloads:
@@ -2401,6 +2481,13 @@ func (m *NovelMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
+	case novel.FieldWordCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWordCount(v)
+		return nil
 	case novel.FieldViews:
 		v, ok := value.(int)
 		if !ok {
@@ -2450,6 +2537,9 @@ func (m *NovelMutation) AddedFields() []string {
 	if m.addstatus != nil {
 		fields = append(fields, novel.FieldStatus)
 	}
+	if m.addword_count != nil {
+		fields = append(fields, novel.FieldWordCount)
+	}
 	if m.addviews != nil {
 		fields = append(fields, novel.FieldViews)
 	}
@@ -2471,6 +2561,8 @@ func (m *NovelMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedSource()
 	case novel.FieldStatus:
 		return m.AddedStatus()
+	case novel.FieldWordCount:
+		return m.AddedWordCount()
 	case novel.FieldViews:
 		return m.AddedViews()
 	case novel.FieldDownloads:
@@ -2499,6 +2591,13 @@ func (m *NovelMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddStatus(v)
+		return nil
+	case novel.FieldWordCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWordCount(v)
 		return nil
 	case novel.FieldViews:
 		v, ok := value.(int)
@@ -2529,6 +2628,9 @@ func (m *NovelMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *NovelMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(novel.FieldWordCount) {
+		fields = append(fields, novel.FieldWordCount)
+	}
 	if m.FieldCleared(novel.FieldViews) {
 		fields = append(fields, novel.FieldViews)
 	}
@@ -2555,6 +2657,9 @@ func (m *NovelMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *NovelMutation) ClearField(name string) error {
 	switch name {
+	case novel.FieldWordCount:
+		m.ClearWordCount()
+		return nil
 	case novel.FieldViews:
 		m.ClearViews()
 		return nil
@@ -2593,6 +2698,9 @@ func (m *NovelMutation) ResetField(name string) error {
 		return nil
 	case novel.FieldStatus:
 		m.ResetStatus()
+		return nil
+	case novel.FieldWordCount:
+		m.ResetWordCount()
 		return nil
 	case novel.FieldViews:
 		m.ResetViews()

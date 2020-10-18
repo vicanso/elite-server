@@ -114,7 +114,7 @@ export default {
       }
       try {
         const params = Object.assign({}, query);
-        const id = params.id;
+        const id = params.id || 0;
         // 如果未指定了小说 ID
         if (!id) {
           params.order = "-updatedAt";

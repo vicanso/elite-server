@@ -34,22 +34,33 @@
             prop="views"
             key="views"
             label="浏览量"
-            width="80"
+            width="90"
           />
           <el-table-column
             sortable
             prop="downloads"
             key="downloads"
             label="下载量"
-            width="80"
+            width="90"
           />
           <el-table-column
             sortable
             prop="favorites"
             key="favorites"
             label="收藏量"
-            width="80"
+            width="90"
           />
+          <el-table-column
+            sortable
+            prop="wordCount"
+            key="wordCount"
+            label="总字数"
+            width="90"
+          >
+            <template slot-scope="scope">
+              <span>{{ scope.row.wordCount.toLocaleString() }}</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="summaryCut" key="summaryCut" label="简介" />
           <el-table-column label="操作" width="120">
             <template slot-scope="scope">
