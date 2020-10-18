@@ -109,12 +109,16 @@ export default {
     ...mapActions(["listNovelChapter"]),
     async fetch() {
       const { query, processing } = this;
-      const id = query.id;
-      if (!id || processing) {
+      if (processing) {
         return;
       }
       try {
         const params = Object.assign({}, query);
+        const id = params.id;
+        // 如果未指定了小说 ID
+        if (!id) {
+          params.order = "-updatedAt";
+        }
         delete params.id;
         await this.listNovelChapter({
           id: id,

@@ -127,7 +127,7 @@ export default {
       }
       chapters.forEach(item => {
         if (item.wordCount) {
-          item.wordCountDesc = `${item.wordCount}字`;
+          item.wordCountDesc = `${item.wordCount.toLocaleString()}字`;
         } else {
           item.wordCountDesc = "--";
         }
@@ -220,6 +220,11 @@ export default {
       const { data } = await request.get(NOVEL_CHAPTERS_ID.replace(":id", id));
       data.no = data.no || 0;
       data.chapterNO = data.no + 1;
+      const res = await request.get(NOVELS_ID.replace(":id", data.novel));
+      if (res.data) {
+        data.name = res.data.name;
+        data.author = res.data.author;
+      }
       return data;
     },
     async updateNovelChapterByID(_, { id, data }) {

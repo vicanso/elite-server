@@ -16,17 +16,26 @@ import { mapActions } from "vuex";
 import BaseEditor from "@/components/base/Editor.vue";
 const fields = [
   {
+    label: "名称： ",
+    key: "name",
+    disabled: true
+  },
+  {
+    label: "作者： ",
+    key: "author",
+    disabled: true
+  },
+  {
     label: "章节序号：",
     key: "chapterNO",
     disabled: true,
-    labelWidth: "100px",
-    span: 8
+    labelWidth: "100px"
   },
   {
     label: "章节名称：",
     key: "title",
     labelWidth: "100px",
-    span: 16
+    span: 24
   },
   {
     label: "章节内容：",
