@@ -116,6 +116,25 @@ const navs = [
     ]
   },
   {
+    name: "小说",
+    icon: "el-icon-s-help",
+    roles: [USER_SU],
+    children: [
+      {
+        name: "小说源",
+        route: NOVEL_SOURCES
+      },
+      {
+        name: "小说",
+        route: NOVELS
+      },
+      {
+        name: "小说章节",
+        route: NOVEL_CHAPTERS
+      }
+    ]
+  },
+  {
     name: "配置",
     icon: "el-icon-setting",
     roles: [USER_SU],
@@ -143,25 +162,6 @@ const navs = [
       {
         name: "Session拦截信息配置",
         route: CONFIG_SESSION_INTERCEPTOR
-      }
-    ]
-  },
-  {
-    name: "小说",
-    icon: "el-icon-s-help",
-    roles: [USER_SU],
-    children: [
-      {
-        name: "小说源",
-        route: NOVEL_SOURCES
-      },
-      {
-        name: "小说",
-        route: NOVELS
-      },
-      {
-        name: "小说章节",
-        route: NOVEL_CHAPTERS
       }
     ]
   }
