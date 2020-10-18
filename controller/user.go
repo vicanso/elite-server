@@ -214,7 +214,7 @@ func init() {
 	g.DELETE(
 		"/v1/me",
 		newTracker(cs.ActionLogout),
-		shouldBeLogined,
+		shouldBeLogin,
 		ctrl.logout,
 	)
 

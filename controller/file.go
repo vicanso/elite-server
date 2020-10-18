@@ -18,11 +18,11 @@ import (
 	"strings"
 
 	"github.com/minio/minio-go/v7"
-	"github.com/vicanso/elton"
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elite/util"
 	"github.com/vicanso/elite/validate"
+	"github.com/vicanso/elton"
 )
 
 type (
@@ -48,7 +48,7 @@ func init() {
 	g.POST(
 		"/v1",
 		loadUserSession,
-		shouldBeLogined,
+		shouldBeLogin,
 		ctrl.upload,
 	)
 }

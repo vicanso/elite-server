@@ -62,7 +62,7 @@ var (
 	// 加载用户session
 	loadUserSession = elton.Compose(sessionInterceptor, middleware.NewSession())
 	// 判断用户是否登录
-	shouldBeLogined = checkLogin
+	shouldBeLogin = checkLogin
 	// 判断用户是否未登录
 	shouldBeAnonymous = checkAnonymous
 	// 判断用户是否admin权限
