@@ -263,7 +263,7 @@ func (srv *Srv) Publish(params QueryParams) (novel *ent.Novel, err error) {
 			SetStatus(entSchema.NovelSourceStatusPublished).
 			Save(context.Background())
 		if err != nil {
-			logger.Error("update novel soucre status fail",
+			logger.Error("update novel source status fail",
 				zap.String("name", params.Name),
 				zap.String("author", params.Author),
 				zap.Error(err),

@@ -471,11 +471,19 @@ func (*novelCtrl) publish(params novel.QueryParams) (result *ent.Novel, err erro
 			if err != nil {
 				logger.Error("get cover fail",
 					zap.String("name", params.Name),
+					zap.Error(err),
 				)
 				return
 			}
 			contentType := resp.Headers.Get("Content-Type")
 			fileType := strings.Split(contentType, "/")[1]
+			if fileType == "html" {
+				logger.Error("get cover fail",
+					zap.String("name", params.Name),
+					zap.Error(errors.New("type of cover is invalid")),
+				)
+				return
+			}
 			name := util.GenUlid() + "." + fileType
 			_, err = fileSrv.Upload(context.Background(), service.UploadParams{
 				Bucket: eliteCoverBucket,
