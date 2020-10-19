@@ -404,7 +404,7 @@ func (*novelCtrl) list(c *elton.Context) (err error) {
 		return
 	}
 	count := -1
-	if params.GetOffset() == 0 {
+	if params.Countable() {
 		count, err = params.count(c.Context())
 		if err != nil {
 			return
@@ -646,7 +646,7 @@ func (*novelCtrl) listChapter(c *elton.Context) (err error) {
 	}
 	params.ID = id
 	count := -1
-	if params.GetOffset() == 0 {
+	if params.Countable() {
 		count, err = params.count(c.Context())
 		if err != nil {
 			return
@@ -738,7 +738,7 @@ func (*novelCtrl) listSource(c *elton.Context) (err error) {
 		return
 	}
 	count := -1
-	if params.GetOffset() == 0 {
+	if params.Countable() {
 		count, err = params.count(c.Context())
 		if err != nil {
 			return

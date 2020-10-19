@@ -43,6 +43,7 @@
           </el-table-column>
         </el-table>
         <el-pagination
+          v-if="chapterCount >= 0"
           class="pagination"
           layout="prev, pager, next, sizes"
           :current-page="currentPage"
@@ -118,6 +119,8 @@ export default {
         // 如果未指定了小说 ID
         if (!id) {
           params.order = "-updatedAt";
+          // 不计算总数
+          params.ignoreCount = "false";
         }
         delete params.id;
         await this.listNovelChapter({
