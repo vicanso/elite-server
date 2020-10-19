@@ -72,7 +72,7 @@ type (
 	// Fetcher 小说拉取的interface
 	Fetcher interface {
 		GetDetail() (novel Novel, err error)
-		GetChapters() (chpaters []*Chapter, err error)
+		GetChapters() (chapters []*Chapter, err error)
 		GetChapterContent(no int) (content string, err error)
 	}
 	// Novel 小说

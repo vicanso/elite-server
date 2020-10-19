@@ -209,15 +209,25 @@ func (bqg *biQuGe) GetChapterContent(id, no int) (content string, err error) {
 		return
 	}
 
-	resp, err := bqg.ins.Get(chapters[no].URL)
-	if err != nil {
-		return
+	var resp *axios.Response
+	var doc *goquery.Document
+	var html string
+	for i := 0; i < 3; i++ {
+		resp, err = bqg.ins.Get(chapters[no].URL)
+		if err != nil {
+			continue
+		}
+		doc, err = goquery.NewDocumentFromReader(bytes.NewReader(resp.Data))
+		if err != nil {
+			continue
+		}
+		html, err = doc.Find("#content").Html()
+		if err != nil {
+			continue
+		}
+		// 如果成功，则break
+		break
 	}
-	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(resp.Data))
-	if err != nil {
-		return
-	}
-	html, err := doc.Find("#content").Html()
 	if err != nil {
 		return
 	}
