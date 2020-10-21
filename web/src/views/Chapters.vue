@@ -120,7 +120,7 @@ export default {
         if (!id) {
           params.order = "-updatedAt";
           // 不计算总数
-          params.ignoreCount = "false";
+          params.ignoreCount = "true";
         }
         delete params.id;
         await this.listNovelChapter({

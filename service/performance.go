@@ -17,6 +17,7 @@ package service
 import (
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/shirou/gopsutil/process"
 	"go.uber.org/atomic"
@@ -25,13 +26,22 @@ import (
 type (
 	// Performance 应用性能指标
 	Performance struct {
-		GoMaxProcs   int    `json:"goMaxProcs,omitempty"`
-		Concurrency  uint32 `json:"concurrency,omitempty"`
-		MemSys       int    `json:"memSys,omitempty"`
-		MemHeapSys   int    `json:"memHeapSys,omitempty"`
-		MemHeapInuse int    `json:"memHeapInuse,omitempty"`
-		RoutineCount int    `json:"routineCount,omitempty"`
-		CPUUsage     uint32 `json:"cpuUsage,omitempty"`
+		GoMaxProcs    int           `json:"goMaxProcs,omitempty"`
+		Concurrency   uint32        `json:"concurrency,omitempty"`
+		MemSys        int           `json:"memSys,omitempty"`
+		MemHeapSys    int           `json:"memHeapSys,omitempty"`
+		MemHeapInuse  int           `json:"memHeapInuse,omitempty"`
+		MemFrees      uint64        `json:"memFrees,omitempty"`
+		RoutineCount  int           `json:"routineCount,omitempty"`
+		CPUUsage      uint32        `json:"cpuUsage,omitempty"`
+		LastGC        time.Time     `json:"lastGC,omitempty"`
+		NumGC         uint32        `json:"numGC,omitempty"`
+		RecentPause   string        `json:"recentPause,omitempty"`
+		RecentPauseNs time.Duration `json:"recentPauseNs,omitempty"`
+		PauseTotal    string        `json:"pauseTotal,omitempty"`
+		CPUBusy       string        `json:"cpuBusy,omitempty"`
+		Uptime        string        `json:"uptime,omitempty"`
+		PauseNs       [256]uint64   `json:"pauseNs,omitempty"`
 	}
 )
 
@@ -39,6 +49,7 @@ var (
 	concurrency atomic.Uint32
 	cpuUsage    atomic.Uint32
 )
+var startedAt = time.Now()
 
 var currentProcess *process.Process
 
@@ -56,14 +67,32 @@ func GetPerformance() Performance {
 	var mb uint64 = 1024 * 1024
 	m := &runtime.MemStats{}
 	runtime.ReadMemStats(m)
+	seconds := int64(m.LastGC) / int64(time.Second)
+	recentPauseNs := time.Duration(int64(m.PauseNs[(m.NumGC+255)%256]))
+	pauseTotalNs := time.Duration(int64(m.PauseTotalNs))
+	cpuTimes, _ := currentProcess.Times()
+	cpuBusy := ""
+	if cpuTimes != nil {
+		busy := time.Duration(int64(cpuTimes.Total()-cpuTimes.Idle)) * time.Second
+		cpuBusy = busy.String()
+	}
 	return Performance{
-		GoMaxProcs:   runtime.GOMAXPROCS(0),
-		Concurrency:  GetConcurrency(),
-		MemSys:       int(m.Sys / mb),
-		MemHeapSys:   int(m.HeapSys / mb),
-		MemHeapInuse: int(m.HeapInuse / mb),
-		RoutineCount: runtime.NumGoroutine(),
-		CPUUsage:     cpuUsage.Load(),
+		GoMaxProcs:    runtime.GOMAXPROCS(0),
+		Concurrency:   GetConcurrency(),
+		MemSys:        int(m.Sys / mb),
+		MemHeapSys:    int(m.HeapSys / mb),
+		MemHeapInuse:  int(m.HeapInuse / mb),
+		MemFrees:      m.Frees,
+		RoutineCount:  runtime.NumGoroutine(),
+		CPUUsage:      cpuUsage.Load(),
+		LastGC:        time.Unix(seconds, 0),
+		NumGC:         m.NumGC,
+		RecentPause:   recentPauseNs.String(),
+		RecentPauseNs: recentPauseNs,
+		PauseTotal:    pauseTotalNs.String(),
+		CPUBusy:       cpuBusy,
+		Uptime:        time.Since(startedAt).String(),
+		PauseNs:       m.PauseNs,
 	}
 }
 
