@@ -16,6 +16,7 @@ package schedule
 
 import (
 	"os"
+	"time"
 
 	"github.com/robfig/cron/v3"
 	"github.com/vicanso/elite/cs"
@@ -39,6 +40,7 @@ func init() {
 	_, _ = c.AddFunc("@every 5m", redisStats)
 	_, _ = c.AddFunc("@every 10s", entStats)
 	_, _ = c.AddFunc("@every 30s", cpuUsageStats)
+	_, _ = c.AddFunc("@every 1m", performanceStats)
 	if os.Getenv("SYNC_SOURCE") != "" {
 		// _, _ = c.AddFunc("@every 12h", syncNovelSource)
 		go syncNovelSource()
@@ -113,3 +115,32 @@ func cpuUsageStats() {
 	}
 }
 
+// prevMemFrees 上一次 memory 释放的次数
+var prevMemFrees uint64
+
+// prevNumGC 上一次 gc 的次数
+var prevNumGC uint32
+
+// prevPauseTotal 上一次 pause 的总时长
+var prevPauseTotal time.Duration
+
+// performanceStats 系统性能
+func performanceStats() {
+	data := service.GetPerformance()
+	fields := map[string]interface{}{
+		"goMaxProcs":   data.GoMaxProcs,
+		"concurrency":  data.Concurrency,
+		"memSys":       data.MemSys,
+		"memHeapSys":   data.MemHeapSys,
+		"memHeapInuse": data.MemHeapInuse,
+		"memFrees":     data.MemFrees - prevMemFrees,
+		"routineCount": data.RoutineCount,
+		"cpuUsage":     data.CPUUsage,
+		"numGC":        data.NumGC - prevNumGC,
+		"pause":        (data.PauseTotalNs - prevPauseTotal).Milliseconds(),
+	}
+	prevMemFrees = data.MemFrees
+	prevNumGC = data.NumGC
+
+	helper.GetInfluxSrv().Write(cs.MeasurementPerformance, fields, nil)
+}

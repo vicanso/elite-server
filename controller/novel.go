@@ -94,7 +94,9 @@ type (
 	novelListParams struct {
 		listParams
 
-		Keyword string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
+		Keyword       string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
+		AuthorKeyword string
+		NameKeyword   string
 	}
 	// novelChapterListParams 章节查询参数
 	novelChapterListParams struct {
@@ -233,6 +235,12 @@ func init() {
 
 // where 将查询条件中的参数转换为对应的where条件
 func (params *novelListParams) where(query *ent.NovelQuery) *ent.NovelQuery {
+	if params.NameKeyword != "" {
+		query = query.Where(entNovel.NameContains(params.NameKeyword))
+	}
+	if params.AuthorKeyword != "" {
+		query = query.Where(entNovel.AuthorContains(params.AuthorKeyword))
+	}
 	if params.Keyword != "" {
 		query = query.Where(entNovel.Or(entNovel.NameContains(params.Keyword), entNovel.AuthorContains(params.Keyword)))
 	}
@@ -404,15 +412,42 @@ func (*novelCtrl) list(c *elton.Context) (err error) {
 		return
 	}
 	count := -1
-	if params.Countable() {
-		count, err = params.count(c.Context())
+	var novels []*ent.Novel
+	// 如果有关键字，则不计算总数
+	if params.Keyword != "" {
+		limit := params.GetLimit()
+		// 优先查名字，再查作者
+		keyword := params.Keyword
+		params.NameKeyword = keyword
+		novels, err = params.queryAll(c.Context())
 		if err != nil {
 			return
 		}
-	}
-	novels, err := params.queryAll(c.Context())
-	if err != nil {
-		return
+		// 如果未达到limit，则查询名称
+		if len(novels) < limit {
+			nameMatchNovels := novels
+			params.NameKeyword = ""
+			params.AuthorKeyword = keyword
+			novels, err = params.queryAll(c.Context())
+			if err != nil {
+				return
+			}
+			novels = append(nameMatchNovels, novels...)
+		}
+		if len(novels) > limit {
+			novels = novels[:limit]
+		}
+	} else {
+		if params.Countable() {
+			count, err = params.count(c.Context())
+			if err != nil {
+				return
+			}
+		}
+		novels, err = params.queryAll(c.Context())
+		if err != nil {
+			return
+		}
 	}
 	c.CacheMaxAge(5 * time.Minute)
 	c.Body = &novelListResp{

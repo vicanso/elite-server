@@ -34,6 +34,7 @@ import (
 	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/hook"
 	"github.com/vicanso/elite/ent/migrate"
+	"github.com/vicanso/elite/util"
 	"go.uber.org/atomic"
 	"go.uber.org/zap"
 )
@@ -147,7 +148,7 @@ func (params *EntListParams) GetFields() []string {
 
 // Countable 判断是否需要计算总数
 func (params *EntListParams) Countable() bool {
-	return params.IgnoreCount == "true" && params.GetOffset() == 0
+	return params.IgnoreCount == "" && params.GetOffset() == 0
 }
 
 // init 初始化统计
@@ -225,9 +226,7 @@ func initSchemaHooks(c *ent.Client) {
 					str, ok := value.(string)
 					// 如果更新过长，则截断
 					if ok {
-						if runeValue := []rune(str); len(runeValue) > maxString {
-							value = string(runeValue[:maxString]) + "..."
-						}
+						value = util.CutRune(str, maxString)
 					}
 				}
 
