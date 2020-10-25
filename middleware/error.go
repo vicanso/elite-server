@@ -18,9 +18,9 @@ import (
 	"bytes"
 	"net/http"
 
-	"github.com/vicanso/elton"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/helper"
+	"github.com/vicanso/elton"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
 )
@@ -45,6 +45,8 @@ func NewError() elton.Handler {
 			he = hes.NewWithError(err)
 			he.StatusCode = http.StatusInternalServerError
 			he.Exception = true
+		} else {
+			he = he.Clone()
 		}
 		if he.StatusCode == 0 {
 			he.StatusCode = http.StatusInternalServerError
