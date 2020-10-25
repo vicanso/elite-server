@@ -338,6 +338,35 @@ func (srv *Srv) UpdateWordCount(id int) (err error) {
 	return
 }
 
+// GetMaxID 获取最大的小说ID
+func (srv *Srv) GetMaxID() (id int, err error) {
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+	return getEntClient().Novel.Query().
+		Order(ent.Desc("id")).
+		FirstID(ctx)
+}
+
+// UpdateAllWordCount 更新所有小说总字数
+func (srv *Srv) UpdateAllWordCount() (err error) {
+	maxID, err := srv.GetMaxID()
+	if err != nil {
+		return
+	}
+	for i := 0; i < maxID; i++ {
+		// 小说id从1开始
+		err = srv.UpdateWordCount(i + 1)
+		if ent.IsNotFound(err) {
+			err = nil
+		}
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
 // FetchAllChapterContent 拉取所有章节内容
 func (srv *Srv) FetchAllChapterContent(id int) (err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*defaultQueryTimeout)

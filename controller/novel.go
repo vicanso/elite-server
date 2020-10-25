@@ -643,11 +643,7 @@ func (*novelCtrl) updateChaptersByID(c *elton.Context) (err error) {
 
 // updateAllChapters 更新所有小说章节
 func (*novelCtrl) updateAllChapters(c *elton.Context) (err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-	id, err := getEntClient().Novel.Query().
-		Order(ent.Desc("id")).
-		FirstID(ctx)
+	id, err := novelSrv.GetMaxID()
 	if err != nil {
 		return
 	}

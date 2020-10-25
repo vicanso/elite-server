@@ -41,6 +41,7 @@ func init() {
 	_, _ = c.AddFunc("@every 10s", entStats)
 	_, _ = c.AddFunc("@every 30s", cpuUsageStats)
 	_, _ = c.AddFunc("@every 1m", performanceStats)
+	_, _ = c.AddFunc("@every 1d", updateAllNovelWordCount)
 	if os.Getenv("SYNC_SOURCE") != "" {
 		// _, _ = c.AddFunc("@every 12h", syncNovelSource)
 		go syncNovelSource()
@@ -101,6 +102,19 @@ func syncNovelSource() {
 		)
 	} else {
 		logger.Info("sync novel source done")
+	}
+}
+
+// updateAllNovelWordCount 更新小说总字数
+func updateAllNovelWordCount() {
+	srv := novel.Srv{}
+	err := srv.UpdateAllWordCount()
+	if err != nil {
+		logger.Error("update all novel word count fail",
+			zap.Error(err),
+		)
+	} else {
+		logger.Info("update all novel word count done")
 	}
 }
 

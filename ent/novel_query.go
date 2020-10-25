@@ -237,7 +237,7 @@ func (nq *NovelQuery) Clone() *NovelQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"createdAt,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty" sql:"created_at"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -263,7 +263,7 @@ func (nq *NovelQuery) GroupBy(field string, fields ...string) *NovelGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"createdAt,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty" sql:"created_at"`
 //	}
 //
 //	client.Novel.Query().

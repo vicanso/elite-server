@@ -237,7 +237,7 @@ func (cq *ChapterQuery) Clone() *ChapterQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"createdAt,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty" sql:"created_at"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -263,7 +263,7 @@ func (cq *ChapterQuery) GroupBy(field string, fields ...string) *ChapterGroupBy 
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"createdAt,omitempty"`
+//		CreatedAt time.Time `json:"createdAt,omitempty" sql:"created_at"`
 //	}
 //
 //	client.Chapter.Query().

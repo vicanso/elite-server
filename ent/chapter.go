@@ -17,9 +17,9 @@ type Chapter struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"createdAt,omitempty"`
+	CreatedAt time.Time `json:"createdAt,omitempty" sql:"created_at"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	UpdatedAt time.Time `json:"updatedAt,omitempty" sql:"updated_at"`
 	// Novel holds the value of the "novel" field.
 	Novel int `json:"novel,omitempty"`
 	// No holds the value of the "no" field.
