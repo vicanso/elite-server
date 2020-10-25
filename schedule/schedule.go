@@ -41,8 +41,15 @@ func init() {
 	_, _ = c.AddFunc("@every 10s", entStats)
 	_, _ = c.AddFunc("@every 30s", cpuUsageStats)
 	_, _ = c.AddFunc("@every 1m", performanceStats)
-	_, _ = c.AddFunc("@every 1d", updateAllNovelWordCount)
-	_, _ = c.AddFunc("@every 1d", updateAllNovelUpdatedWeight)
+	_, _ = c.AddFunc("@every 24h", updateAllNovelWordCount)
+	_, _ = c.AddFunc("@every 24h", updateAllNovelUpdatedWeight)
+	// 每小时更新权重>=50的小说
+	// _, _ = c.AddFunc("@every 1h", newUpdateNovelChapterByWeight(50))
+	// 每12小时更新权重>=10的小说
+	// _, _ = c.AddFunc("@every 12h", newUpdateNovelChapterByWeight(10))
+	// 每24小时更新权重>=1的小说
+	// _, _ = c.AddFunc("@every 24h", newUpdateNovelChapterByWeight(1))
+
 	if os.Getenv("SYNC_SOURCE") != "" {
 		// _, _ = c.AddFunc("@every 12h", syncNovelSource)
 		go syncNovelSource()
@@ -116,6 +123,21 @@ func updateAllNovelWordCount() {
 		)
 	} else {
 		logger.Info("update all novel word count done")
+	}
+}
+
+// newUpdateNovelChapterByWeight 创建更新小说章节任务
+func newUpdateNovelChapterByWeight(updatedWeight int) func() {
+	return func() {
+		srv := novel.Srv{}
+		err := srv.UpdateAllChaptersByWeight(updatedWeight)
+		if err != nil {
+			logger.Error("update novel chaptesr by weight fail",
+				zap.Error(err),
+			)
+		} else {
+			logger.Info("update novel chapters by weight success")
+		}
 	}
 }
 

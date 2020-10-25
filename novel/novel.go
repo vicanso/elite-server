@@ -311,11 +311,47 @@ func (srv *Srv) UpdateChapters(id int) (err error) {
 	return
 }
 
+// UpdateAllChaptersByWeight 根据更新权重更新所有小说章节
+func (srv *Srv) UpdateAllChaptersByWeight(minUpdatedWeight int) (err error) {
+	maxID, err := srv.GetMaxID()
+	if err != nil {
+		return
+	}
+	var item *ent.Novel
+	for i := 0; i < maxID; i++ {
+		// 小说id从1开始
+		id := i + 1
+		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(ctx, defaultQueryTimeout)
+		defer cancel()
+		item, err = getEntClient().Novel.Get(ctx, id)
+		if ent.IsNotFound(err) {
+			err = nil
+		}
+		if err != nil {
+			return
+		}
+		if item == nil {
+			continue
+		}
+		if item.UpdatedWeight >= minUpdatedWeight {
+			err = srv.UpdateChapters(id)
+			if ent.IsNotFound(err) {
+				err = nil
+			}
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
 // UpdateWordCount 更新总字数
 func (srv *Srv) UpdateWordCount(id int) (err error) {
 	chapters := make([]*ent.Chapter, 0)
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, defaultQueryTimeout)
 	defer cancel()
 	err = getEntClient().Chapter.Query().
 		Where(chapter.Novel(id)).
