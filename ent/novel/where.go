@@ -162,6 +162,13 @@ func Favorites(v int) predicate.Novel {
 	})
 }
 
+// UpdatedWeight applies equality check predicate on the "updated_weight" field. It's identical to UpdatedWeightEQ.
+func UpdatedWeight(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdatedWeight), v))
+	})
+}
+
 // Cover applies equality check predicate on the "cover" field. It's identical to CoverEQ.
 func Cover(v string) predicate.Novel {
 	return predicate.Novel(func(s *sql.Selector) {
@@ -1059,6 +1066,96 @@ func FavoritesIsNil() predicate.Novel {
 func FavoritesNotNil() predicate.Novel {
 	return predicate.Novel(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldFavorites)))
+	})
+}
+
+// UpdatedWeightEQ applies the EQ predicate on the "updated_weight" field.
+func UpdatedWeightEQ(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdatedWeight), v))
+	})
+}
+
+// UpdatedWeightNEQ applies the NEQ predicate on the "updated_weight" field.
+func UpdatedWeightNEQ(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldUpdatedWeight), v))
+	})
+}
+
+// UpdatedWeightIn applies the In predicate on the "updated_weight" field.
+func UpdatedWeightIn(vs ...int) predicate.Novel {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Novel(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldUpdatedWeight), v...))
+	})
+}
+
+// UpdatedWeightNotIn applies the NotIn predicate on the "updated_weight" field.
+func UpdatedWeightNotIn(vs ...int) predicate.Novel {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Novel(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldUpdatedWeight), v...))
+	})
+}
+
+// UpdatedWeightGT applies the GT predicate on the "updated_weight" field.
+func UpdatedWeightGT(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldUpdatedWeight), v))
+	})
+}
+
+// UpdatedWeightGTE applies the GTE predicate on the "updated_weight" field.
+func UpdatedWeightGTE(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldUpdatedWeight), v))
+	})
+}
+
+// UpdatedWeightLT applies the LT predicate on the "updated_weight" field.
+func UpdatedWeightLT(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldUpdatedWeight), v))
+	})
+}
+
+// UpdatedWeightLTE applies the LTE predicate on the "updated_weight" field.
+func UpdatedWeightLTE(v int) predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldUpdatedWeight), v))
+	})
+}
+
+// UpdatedWeightIsNil applies the IsNil predicate on the "updated_weight" field.
+func UpdatedWeightIsNil() predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldUpdatedWeight)))
+	})
+}
+
+// UpdatedWeightNotNil applies the NotNil predicate on the "updated_weight" field.
+func UpdatedWeightNotNil() predicate.Novel {
+	return predicate.Novel(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldUpdatedWeight)))
 	})
 }
 

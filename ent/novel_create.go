@@ -136,6 +136,20 @@ func (nc *NovelCreate) SetNillableFavorites(i *int) *NovelCreate {
 	return nc
 }
 
+// SetUpdatedWeight sets the updated_weight field.
+func (nc *NovelCreate) SetUpdatedWeight(i int) *NovelCreate {
+	nc.mutation.SetUpdatedWeight(i)
+	return nc
+}
+
+// SetNillableUpdatedWeight sets the updated_weight field if the given value is not nil.
+func (nc *NovelCreate) SetNillableUpdatedWeight(i *int) *NovelCreate {
+	if i != nil {
+		nc.SetUpdatedWeight(*i)
+	}
+	return nc
+}
+
 // SetCover sets the cover field.
 func (nc *NovelCreate) SetCover(s string) *NovelCreate {
 	nc.mutation.SetCover(s)
@@ -235,6 +249,10 @@ func (nc *NovelCreate) defaults() {
 	if _, ok := nc.mutation.Favorites(); !ok {
 		v := novel.DefaultFavorites
 		nc.mutation.SetFavorites(v)
+	}
+	if _, ok := nc.mutation.UpdatedWeight(); !ok {
+		v := novel.DefaultUpdatedWeight
+		nc.mutation.SetUpdatedWeight(v)
 	}
 }
 
@@ -387,6 +405,14 @@ func (nc *NovelCreate) createSpec() (*Novel, *sqlgraph.CreateSpec) {
 			Column: novel.FieldFavorites,
 		})
 		_node.Favorites = value
+	}
+	if value, ok := nc.mutation.UpdatedWeight(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldUpdatedWeight,
+		})
+		_node.UpdatedWeight = value
 	}
 	if value, ok := nc.mutation.Cover(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

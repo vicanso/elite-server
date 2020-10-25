@@ -156,6 +156,33 @@ func (nu *NovelUpdate) ClearFavorites() *NovelUpdate {
 	return nu
 }
 
+// SetUpdatedWeight sets the updated_weight field.
+func (nu *NovelUpdate) SetUpdatedWeight(i int) *NovelUpdate {
+	nu.mutation.ResetUpdatedWeight()
+	nu.mutation.SetUpdatedWeight(i)
+	return nu
+}
+
+// SetNillableUpdatedWeight sets the updated_weight field if the given value is not nil.
+func (nu *NovelUpdate) SetNillableUpdatedWeight(i *int) *NovelUpdate {
+	if i != nil {
+		nu.SetUpdatedWeight(*i)
+	}
+	return nu
+}
+
+// AddUpdatedWeight adds i to updated_weight.
+func (nu *NovelUpdate) AddUpdatedWeight(i int) *NovelUpdate {
+	nu.mutation.AddUpdatedWeight(i)
+	return nu
+}
+
+// ClearUpdatedWeight clears the value of updated_weight.
+func (nu *NovelUpdate) ClearUpdatedWeight() *NovelUpdate {
+	nu.mutation.ClearUpdatedWeight()
+	return nu
+}
+
 // SetCover sets the cover field.
 func (nu *NovelUpdate) SetCover(s string) *NovelUpdate {
 	nu.mutation.SetCover(s)
@@ -382,6 +409,26 @@ func (nu *NovelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: novel.FieldFavorites,
 		})
 	}
+	if value, ok := nu.mutation.UpdatedWeight(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldUpdatedWeight,
+		})
+	}
+	if value, ok := nu.mutation.AddedUpdatedWeight(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldUpdatedWeight,
+		})
+	}
+	if nu.mutation.UpdatedWeightCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: novel.FieldUpdatedWeight,
+		})
+	}
 	if value, ok := nu.mutation.Cover(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -546,6 +593,33 @@ func (nuo *NovelUpdateOne) AddFavorites(i int) *NovelUpdateOne {
 // ClearFavorites clears the value of favorites.
 func (nuo *NovelUpdateOne) ClearFavorites() *NovelUpdateOne {
 	nuo.mutation.ClearFavorites()
+	return nuo
+}
+
+// SetUpdatedWeight sets the updated_weight field.
+func (nuo *NovelUpdateOne) SetUpdatedWeight(i int) *NovelUpdateOne {
+	nuo.mutation.ResetUpdatedWeight()
+	nuo.mutation.SetUpdatedWeight(i)
+	return nuo
+}
+
+// SetNillableUpdatedWeight sets the updated_weight field if the given value is not nil.
+func (nuo *NovelUpdateOne) SetNillableUpdatedWeight(i *int) *NovelUpdateOne {
+	if i != nil {
+		nuo.SetUpdatedWeight(*i)
+	}
+	return nuo
+}
+
+// AddUpdatedWeight adds i to updated_weight.
+func (nuo *NovelUpdateOne) AddUpdatedWeight(i int) *NovelUpdateOne {
+	nuo.mutation.AddUpdatedWeight(i)
+	return nuo
+}
+
+// ClearUpdatedWeight clears the value of updated_weight.
+func (nuo *NovelUpdateOne) ClearUpdatedWeight() *NovelUpdateOne {
+	nuo.mutation.ClearUpdatedWeight()
 	return nuo
 }
 
@@ -771,6 +845,26 @@ func (nuo *NovelUpdateOne) sqlSave(ctx context.Context) (_node *Novel, err error
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: novel.FieldFavorites,
+		})
+	}
+	if value, ok := nuo.mutation.UpdatedWeight(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldUpdatedWeight,
+		})
+	}
+	if value, ok := nuo.mutation.AddedUpdatedWeight(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: novel.FieldUpdatedWeight,
+		})
+	}
+	if nuo.mutation.UpdatedWeightCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: novel.FieldUpdatedWeight,
 		})
 	}
 	if value, ok := nuo.mutation.Cover(); ok {

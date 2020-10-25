@@ -1576,30 +1576,32 @@ func (m *ConfigurationMutation) ResetEdge(name string) error {
 // nodes in the graph.
 type NovelMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	created_at    *time.Time
-	updated_at    *time.Time
-	name          *string
-	author        *string
-	source        *int
-	addsource     *int
-	status        *int
-	addstatus     *int
-	word_count    *int
-	addword_count *int
-	views         *int
-	addviews      *int
-	downloads     *int
-	adddownloads  *int
-	favorites     *int
-	addfavorites  *int
-	cover         *string
-	summary       *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Novel, error)
+	op                Op
+	typ               string
+	id                *int
+	created_at        *time.Time
+	updated_at        *time.Time
+	name              *string
+	author            *string
+	source            *int
+	addsource         *int
+	status            *int
+	addstatus         *int
+	word_count        *int
+	addword_count     *int
+	views             *int
+	addviews          *int
+	downloads         *int
+	adddownloads      *int
+	favorites         *int
+	addfavorites      *int
+	updated_weight    *int
+	addupdated_weight *int
+	cover             *string
+	summary           *string
+	clearedFields     map[string]struct{}
+	done              bool
+	oldValue          func(context.Context) (*Novel, error)
 }
 
 var _ ent.Mutation = (*NovelMutation)(nil)
@@ -2227,6 +2229,77 @@ func (m *NovelMutation) ResetFavorites() {
 	delete(m.clearedFields, novel.FieldFavorites)
 }
 
+// SetUpdatedWeight sets the updated_weight field.
+func (m *NovelMutation) SetUpdatedWeight(i int) {
+	m.updated_weight = &i
+	m.addupdated_weight = nil
+}
+
+// UpdatedWeight returns the updated_weight value in the mutation.
+func (m *NovelMutation) UpdatedWeight() (r int, exists bool) {
+	v := m.updated_weight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedWeight returns the old updated_weight value of the Novel.
+// If the Novel object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *NovelMutation) OldUpdatedWeight(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUpdatedWeight is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUpdatedWeight requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedWeight: %w", err)
+	}
+	return oldValue.UpdatedWeight, nil
+}
+
+// AddUpdatedWeight adds i to updated_weight.
+func (m *NovelMutation) AddUpdatedWeight(i int) {
+	if m.addupdated_weight != nil {
+		*m.addupdated_weight += i
+	} else {
+		m.addupdated_weight = &i
+	}
+}
+
+// AddedUpdatedWeight returns the value that was added to the updated_weight field in this mutation.
+func (m *NovelMutation) AddedUpdatedWeight() (r int, exists bool) {
+	v := m.addupdated_weight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearUpdatedWeight clears the value of updated_weight.
+func (m *NovelMutation) ClearUpdatedWeight() {
+	m.updated_weight = nil
+	m.addupdated_weight = nil
+	m.clearedFields[novel.FieldUpdatedWeight] = struct{}{}
+}
+
+// UpdatedWeightCleared returns if the field updated_weight was cleared in this mutation.
+func (m *NovelMutation) UpdatedWeightCleared() bool {
+	_, ok := m.clearedFields[novel.FieldUpdatedWeight]
+	return ok
+}
+
+// ResetUpdatedWeight reset all changes of the "updated_weight" field.
+func (m *NovelMutation) ResetUpdatedWeight() {
+	m.updated_weight = nil
+	m.addupdated_weight = nil
+	delete(m.clearedFields, novel.FieldUpdatedWeight)
+}
+
 // SetCover sets the cover field.
 func (m *NovelMutation) SetCover(s string) {
 	m.cover = &s
@@ -2328,7 +2401,7 @@ func (m *NovelMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *NovelMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, novel.FieldCreatedAt)
 	}
@@ -2358,6 +2431,9 @@ func (m *NovelMutation) Fields() []string {
 	}
 	if m.favorites != nil {
 		fields = append(fields, novel.FieldFavorites)
+	}
+	if m.updated_weight != nil {
+		fields = append(fields, novel.FieldUpdatedWeight)
 	}
 	if m.cover != nil {
 		fields = append(fields, novel.FieldCover)
@@ -2393,6 +2469,8 @@ func (m *NovelMutation) Field(name string) (ent.Value, bool) {
 		return m.Downloads()
 	case novel.FieldFavorites:
 		return m.Favorites()
+	case novel.FieldUpdatedWeight:
+		return m.UpdatedWeight()
 	case novel.FieldCover:
 		return m.Cover()
 	case novel.FieldSummary:
@@ -2426,6 +2504,8 @@ func (m *NovelMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldDownloads(ctx)
 	case novel.FieldFavorites:
 		return m.OldFavorites(ctx)
+	case novel.FieldUpdatedWeight:
+		return m.OldUpdatedWeight(ctx)
 	case novel.FieldCover:
 		return m.OldCover(ctx)
 	case novel.FieldSummary:
@@ -2509,6 +2589,13 @@ func (m *NovelMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetFavorites(v)
 		return nil
+	case novel.FieldUpdatedWeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedWeight(v)
+		return nil
 	case novel.FieldCover:
 		v, ok := value.(string)
 		if !ok {
@@ -2549,6 +2636,9 @@ func (m *NovelMutation) AddedFields() []string {
 	if m.addfavorites != nil {
 		fields = append(fields, novel.FieldFavorites)
 	}
+	if m.addupdated_weight != nil {
+		fields = append(fields, novel.FieldUpdatedWeight)
+	}
 	return fields
 }
 
@@ -2569,6 +2659,8 @@ func (m *NovelMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedDownloads()
 	case novel.FieldFavorites:
 		return m.AddedFavorites()
+	case novel.FieldUpdatedWeight:
+		return m.AddedUpdatedWeight()
 	}
 	return nil, false
 }
@@ -2620,6 +2712,13 @@ func (m *NovelMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddFavorites(v)
 		return nil
+	case novel.FieldUpdatedWeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUpdatedWeight(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Novel numeric field %s", name)
 }
@@ -2639,6 +2738,9 @@ func (m *NovelMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(novel.FieldFavorites) {
 		fields = append(fields, novel.FieldFavorites)
+	}
+	if m.FieldCleared(novel.FieldUpdatedWeight) {
+		fields = append(fields, novel.FieldUpdatedWeight)
 	}
 	if m.FieldCleared(novel.FieldCover) {
 		fields = append(fields, novel.FieldCover)
@@ -2668,6 +2770,9 @@ func (m *NovelMutation) ClearField(name string) error {
 		return nil
 	case novel.FieldFavorites:
 		m.ClearFavorites()
+		return nil
+	case novel.FieldUpdatedWeight:
+		m.ClearUpdatedWeight()
 		return nil
 	case novel.FieldCover:
 		m.ClearCover()
@@ -2710,6 +2815,9 @@ func (m *NovelMutation) ResetField(name string) error {
 		return nil
 	case novel.FieldFavorites:
 		m.ResetFavorites()
+		return nil
+	case novel.FieldUpdatedWeight:
+		m.ResetUpdatedWeight()
 		return nil
 	case novel.FieldCover:
 		m.ResetCover()

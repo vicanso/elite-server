@@ -348,15 +348,14 @@ func (srv *Srv) GetMaxID() (id int, err error) {
 		FirstID(ctx)
 }
 
-// UpdateAllWordCount 更新所有小说总字数
-func (srv *Srv) UpdateAllWordCount() (err error) {
+func (srv *Srv) doAll(fn func(int) error) (err error) {
 	maxID, err := srv.GetMaxID()
 	if err != nil {
 		return
 	}
 	for i := 0; i < maxID; i++ {
 		// 小说id从1开始
-		err = srv.UpdateWordCount(i + 1)
+		err = fn(i + 1)
 		if ent.IsNotFound(err) {
 			err = nil
 		}
@@ -365,6 +364,56 @@ func (srv *Srv) UpdateAllWordCount() (err error) {
 		}
 	}
 	return
+}
+
+// UpdateAllWordCount 更新所有小说总字数
+func (srv *Srv) UpdateAllWordCount() (err error) {
+	return srv.doAll(srv.UpdateWordCount)
+}
+
+// UpdateUpdatedWeight 更新小说权重
+func (srv *Srv) UpdateUpdatedWeight(id int) (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*defaultQueryTimeout)
+	defer cancel()
+
+	chapters := make([]*ent.Chapter, 0)
+	// 查询最新更新的10章
+	err = getEntClient().Chapter.Query().
+		Where(chapter.Novel(id)).
+		Order(ent.Desc("no")).
+		Limit(10).
+		Select("updated_at").
+		Scan(ctx, &chapters)
+	if err != nil {
+		return
+	}
+	current := time.Now()
+	oneDay := 24 * time.Hour
+	oneWeek := 7 * oneDay
+	oneMonth := 30 * oneDay
+	updatedWeight := 0
+	for _, item := range chapters {
+		subTime := current.Sub(item.UpdatedAt)
+		if subTime < oneDay {
+			updatedWeight += 10
+		} else if subTime < oneWeek {
+			updatedWeight += 2
+		} else if subTime < oneMonth {
+			updatedWeight++
+		}
+	}
+	_, err = getEntClient().Novel.UpdateOneID(id).
+		SetUpdatedWeight(updatedWeight).
+		Save(ctx)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// UpdateAllUpdatedWeight 更新所有小说更新权重
+func (srv *Srv) UpdateAllUpdatedWeight() (err error) {
+	return srv.doAll(srv.UpdateUpdatedWeight)
 }
 
 // FetchAllChapterContent 拉取所有章节内容

@@ -73,6 +73,12 @@ func (Novel) Fields() []ent.Field {
 			Optional().
 			Default(0).
 			Comment("小说收藏次数"),
+		// 根据更新频率计算权重
+		field.Int("updated_weight").
+			Optional().
+			Default(0).
+			StructTag(`json:"updatedWeight,omitempty" sql:"updated_weight"`).
+			Comment("小说更新权重"),
 		field.String("cover").
 			Optional().
 			Comment("小说封面"),

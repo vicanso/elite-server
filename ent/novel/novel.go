@@ -31,6 +31,8 @@ const (
 	FieldDownloads = "downloads"
 	// FieldFavorites holds the string denoting the favorites field in the database.
 	FieldFavorites = "favorites"
+	// FieldUpdatedWeight holds the string denoting the updated_weight field in the database.
+	FieldUpdatedWeight = "updated_weight"
 	// FieldCover holds the string denoting the cover field in the database.
 	FieldCover = "cover"
 	// FieldSummary holds the string denoting the summary field in the database.
@@ -53,6 +55,7 @@ var Columns = []string{
 	FieldViews,
 	FieldDownloads,
 	FieldFavorites,
+	FieldUpdatedWeight,
 	FieldCover,
 	FieldSummary,
 }
@@ -92,4 +95,6 @@ var (
 	DefaultDownloads int
 	// DefaultFavorites holds the default value on creation for the favorites field.
 	DefaultFavorites int
+	// DefaultUpdatedWeight holds the default value on creation for the updated_weight field.
+	DefaultUpdatedWeight int
 )

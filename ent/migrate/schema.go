@@ -78,6 +78,7 @@ var (
 		{Name: "views", Type: field.TypeInt, Nullable: true},
 		{Name: "downloads", Type: field.TypeInt, Nullable: true},
 		{Name: "favorites", Type: field.TypeInt, Nullable: true},
+		{Name: "updated_weight", Type: field.TypeInt, Nullable: true},
 		{Name: "cover", Type: field.TypeString, Nullable: true},
 		{Name: "summary", Type: field.TypeString},
 	}

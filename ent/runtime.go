@@ -113,6 +113,10 @@ func init() {
 	novelDescFavorites := novelFields[7].Descriptor()
 	// novel.DefaultFavorites holds the default value on creation for the favorites field.
 	novel.DefaultFavorites = novelDescFavorites.Default.(int)
+	// novelDescUpdatedWeight is the schema descriptor for updated_weight field.
+	novelDescUpdatedWeight := novelFields[8].Descriptor()
+	// novel.DefaultUpdatedWeight holds the default value on creation for the updated_weight field.
+	novel.DefaultUpdatedWeight = novelDescUpdatedWeight.Default.(int)
 	novelsourceMixin := schema.NovelSource{}.Mixin()
 	novelsourceMixinFields0 := novelsourceMixin[0].Fields()
 	novelsourceFields := schema.NovelSource{}.Fields()

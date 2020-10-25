@@ -36,6 +36,8 @@ type Novel struct {
 	Downloads int `json:"downloads,omitempty"`
 	// Favorites holds the value of the "favorites" field.
 	Favorites int `json:"favorites,omitempty"`
+	// UpdatedWeight holds the value of the "updated_weight" field.
+	UpdatedWeight int `json:"updatedWeight,omitempty" sql:"updated_weight"`
 	// Cover holds the value of the "cover" field.
 	Cover string `json:"cover,omitempty"`
 	// Summary holds the value of the "summary" field.
@@ -56,6 +58,7 @@ func (*Novel) scanValues() []interface{} {
 		&sql.NullInt64{},  // views
 		&sql.NullInt64{},  // downloads
 		&sql.NullInt64{},  // favorites
+		&sql.NullInt64{},  // updated_weight
 		&sql.NullString{}, // cover
 		&sql.NullString{}, // summary
 	}
@@ -123,13 +126,18 @@ func (n *Novel) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		n.Favorites = int(value.Int64)
 	}
-	if value, ok := values[10].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field cover", values[10])
+	if value, ok := values[10].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field updated_weight", values[10])
+	} else if value.Valid {
+		n.UpdatedWeight = int(value.Int64)
+	}
+	if value, ok := values[11].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field cover", values[11])
 	} else if value.Valid {
 		n.Cover = value.String
 	}
-	if value, ok := values[11].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field summary", values[11])
+	if value, ok := values[12].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field summary", values[12])
 	} else if value.Valid {
 		n.Summary = value.String
 	}
@@ -179,6 +187,8 @@ func (n *Novel) String() string {
 	builder.WriteString(fmt.Sprintf("%v", n.Downloads))
 	builder.WriteString(", favorites=")
 	builder.WriteString(fmt.Sprintf("%v", n.Favorites))
+	builder.WriteString(", updated_weight=")
+	builder.WriteString(fmt.Sprintf("%v", n.UpdatedWeight))
 	builder.WriteString(", cover=")
 	builder.WriteString(n.Cover)
 	builder.WriteString(", summary=")
