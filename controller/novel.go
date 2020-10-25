@@ -58,6 +58,11 @@ var (
 		StatusCode: http.StatusBadRequest,
 		Category:   errNovelCategory,
 	}
+	novelCoverNotFound = &hes.Error{
+		Message:    "无法更新封面",
+		StatusCode: http.StatusBadRequest,
+		Category:   errNovelCategory,
+	}
 )
 
 type (
@@ -189,6 +194,13 @@ func init() {
 	g.GET(
 		"/v1/{id}/cover",
 		ctrl.getCover,
+	)
+	// 更新小说封面
+	g.PATCH(
+		"/v1/{id}/cover",
+		loadUserSession,
+		shouldBeAdmin,
+		ctrl.updateCoverByID,
 	)
 	// 用户行为
 	g.POST(
@@ -494,6 +506,64 @@ func (*novelCtrl) updateByID(c *elton.Context) (err error) {
 	return
 }
 
+func updateCoverByURL(id int, coverURL string) (err error) {
+	resp, err := axios.Get(coverURL)
+	if err != nil {
+		return
+	}
+	contentType := resp.Headers.Get("Content-Type")
+	fileType := strings.Split(contentType, "/")[1]
+	if fileType == "html" {
+		err = errors.New("content type is invalid")
+		return
+	}
+	name := util.GenUlid() + "." + fileType
+	_, err = fileSrv.Upload(context.Background(), service.UploadParams{
+		Bucket: eliteCoverBucket,
+		Name:   name,
+		Reader: bytes.NewReader(resp.Data),
+		Size:   int64(len(resp.Data)),
+		Opts: minio.PutObjectOptions{
+			ContentType: contentType,
+		},
+	})
+	if err != nil {
+		return
+	}
+	_, err = getEntClient().Novel.UpdateOneID(id).
+		SetCover(name).Save(context.Background())
+	if err != nil {
+		return
+	}
+	return
+}
+
+// updateCoverByID 更新小说封面
+func (*novelCtrl) updateCoverByID(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	result, err := getEntClient().Novel.Get(c.Context(), id)
+	if err != nil {
+		return
+	}
+	qiDianResult, err := novel.NewQiDian().Search(result.Name, result.Author)
+	if err != nil {
+		return
+	}
+	if qiDianResult.CoverURL == "" {
+		err = novelCoverNotFound
+		return
+	}
+	err = updateCoverByURL(id, qiDianResult.CoverURL)
+	if err != nil {
+		return
+	}
+	c.NoContent()
+	return
+}
+
 func (*novelCtrl) publish(params novel.QueryParams) (result *ent.Novel, err error) {
 	result, err = novelSrv.Publish(params)
 	if err != nil {
@@ -503,48 +573,13 @@ func (*novelCtrl) publish(params novel.QueryParams) (result *ent.Novel, err erro
 	go func() {
 		// 如果是绝对地址（外网），则下载图片并保存
 		if strings.HasPrefix(result.Cover, "http") {
-			resp, err := axios.Get(result.Cover)
-			if err != nil {
-				logger.Error("get cover fail",
-					zap.String("name", params.Name),
-					zap.Error(err),
-				)
-				return
-			}
-			contentType := resp.Headers.Get("Content-Type")
-			fileType := strings.Split(contentType, "/")[1]
-			if fileType == "html" {
-				logger.Error("get cover fail",
-					zap.String("name", params.Name),
-					zap.Error(errors.New("type of cover is invalid")),
-				)
-				return
-			}
-			name := util.GenUlid() + "." + fileType
-			_, err = fileSrv.Upload(context.Background(), service.UploadParams{
-				Bucket: eliteCoverBucket,
-				Name:   name,
-				Reader: bytes.NewReader(resp.Data),
-				Size:   int64(len(resp.Data)),
-				Opts: minio.PutObjectOptions{
-					ContentType: contentType,
-				},
-			})
-			if err != nil {
-				logger.Error("upload cover fail",
-					zap.String("name", params.Name),
-				)
-				return
-			}
-			_, err = result.Update().
-				SetCover(name).Save(context.Background())
+			err := updateCoverByURL(result.ID, result.Cover)
 			if err != nil {
 				logger.Error("update cover fail",
-					zap.String("name", params.Name),
+					zap.String("name", result.Name),
+					zap.Error(err),
 				)
-				return
 			}
-
 		}
 	}()
 	return

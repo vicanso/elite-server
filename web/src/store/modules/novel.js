@@ -6,7 +6,8 @@ import {
   NOVELS_ID,
   NOVEL_CHAPTERS,
   NOVEL_CHAPTERS_UPDATE,
-  NOVEL_CHAPTERS_ID
+  NOVEL_CHAPTERS_ID,
+  NOVEL_COVER
 } from "@/constants/url";
 import { addNoCacheQueryParam, formatDate } from "@/helpers/util";
 
@@ -62,6 +63,8 @@ function adjustNovelFields(item) {
       item[key] = 0;
     }
   });
+  item.coverURL =
+    NOVEL_COVER.replace(":id", item.id) + "?quality=70&width=80&type=jpg";
   item.summaryCut = item.summary;
   const max = 40;
   if (item.summary || item.summary.length > max) {
@@ -229,6 +232,9 @@ export default {
     },
     async updateNovelChapterByID(_, { id, data }) {
       return request.patch(NOVEL_CHAPTERS_ID.replace(":id", id), data);
+    },
+    async updateNovelCoverByID(_, id) {
+      return request.patch(NOVEL_COVER.replace(":id", id));
     }
   }
 };

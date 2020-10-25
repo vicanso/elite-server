@@ -46,3 +46,4 @@ export const NOVELS_ID = "/novels/v1/:id";
 export const NOVEL_CHAPTERS = "/novels/v1/:id/chapters";
 export const NOVEL_CHAPTERS_UPDATE = "/novels/v1/:id/update-chapters";
 export const NOVEL_CHAPTERS_ID = "/novels/v1/chapters/:id";
+export const NOVEL_COVER = "/novels/v1/:id/cover";

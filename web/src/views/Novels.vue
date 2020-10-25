@@ -12,13 +12,18 @@
           stripe
           @sort-change="handleSortChange"
         >
-          <el-table-column prop="name" key="name" label="名称" width="200" />
+          <el-table-column prop="name" key="name" label="名称" width="150" />
+          <el-table-column prop="author" key="author" label="作者" width="90" />
           <el-table-column
-            prop="author"
-            key="author"
-            label="作者"
-            width="150"
-          />
+            prop="coverURL"
+            key="coverURL"
+            label="封面"
+            width="80"
+          >
+            <template slot-scope="scope">
+              <img :src="scope.row.coverURL" />
+            </template>
+          </el-table-column>
           <el-table-column prop="source" key="source" label="来源" width="80">
             <template slot-scope="scope">
               {{ sourceNameList[scope.row.source] || sourceNameList[0] }}
@@ -62,7 +67,7 @@
             </template>
           </el-table-column>
           <el-table-column prop="summaryCut" key="summaryCut" label="简介" />
-          <el-table-column label="操作" width="120">
+          <el-table-column label="操作" width="200">
             <template slot-scope="scope">
               <el-button
                 class="op"
@@ -77,6 +82,13 @@
                 size="small"
                 @click="updateChapter(scope.row)"
                 >更新章节</el-button
+              >
+              <el-button
+                class="op"
+                type="text"
+                size="small"
+                @click="updateCover(scope.row)"
+                >更新封面</el-button
               >
             </template>
           </el-table-column>
@@ -147,7 +159,7 @@ export default {
     })
   },
   methods: {
-    ...mapActions(["listNovel", "updateNovelChapters"]),
+    ...mapActions(["listNovel", "updateNovelChapters", "updateNovelCoverByID"]),
     async fetch() {
       const { query, processing } = this;
       if (processing) {
@@ -162,6 +174,13 @@ export default {
     async updateChapter({ id }) {
       try {
         await this.updateNovelChapters(id);
+      } catch (err) {
+        this.$message.error(err.message);
+      }
+    },
+    async updateCover({ id }) {
+      try {
+        await this.updateNovelCoverByID(id);
       } catch (err) {
         this.$message.error(err.message);
       }
