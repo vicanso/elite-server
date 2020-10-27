@@ -62,7 +62,7 @@ func init() {
 	c.Start()
 }
 
-func doTask(desc string, fn func() error) {
+func doTask(desc string, fn taskFn) {
 	startedAt := time.Now()
 	err := fn()
 	if err != nil {
