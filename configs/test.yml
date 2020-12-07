@@ -8,11 +8,11 @@ postgres:
 
 # influxdb 配置
 influxdb:
-  uri: http://192.168.1.6:8086
+  uri: http://192.168.1.2:8086
   token: 3sUoQjgCOQVNVWK5wU8fMvustzWuO-rhEHBTNBw6dnXjjWTTz5nJF3_b4YK7Wzi8MjpBzz75tG_Uj1TaK3EPjQ==
 
 # minio配置
 minio:
-  endpoint: 192.168.1.6:9000
+  endpoint: 192.168.1.2:9000
   accessKeyID: WQwoJN5Klf
   secretAccessKey: TCnTExhHte
