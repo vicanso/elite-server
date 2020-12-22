@@ -27,8 +27,8 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/vicanso/elton"
 	"github.com/vicanso/elite/config"
+	"github.com/vicanso/elton"
 )
 
 type (
@@ -47,10 +47,10 @@ type (
 	}
 )
 
-var defaultMinioClient = newMinioClientX()
+var defaultMinioClient = mustNewMinioClient()
 
-// newMinioClientX 初始化minio client
-func newMinioClientX() *minio.Client {
+// mustNewMinioClient 初始化minio client
+func mustNewMinioClient() *minio.Client {
 	minioConfig := config.GetMinioConfig()
 	c, err := minio.New(minioConfig.Endpoint, &minio.Options{
 		Secure: minioConfig.SSL,

@@ -16,14 +16,13 @@ import (
 // NovelSourceUpdate is the builder for updating NovelSource entities.
 type NovelSourceUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *NovelSourceMutation
-	predicates []predicate.NovelSource
+	hooks    []Hook
+	mutation *NovelSourceMutation
 }
 
 // Where adds a new predicate for the builder.
 func (nsu *NovelSourceUpdate) Where(ps ...predicate.NovelSource) *NovelSourceUpdate {
-	nsu.predicates = append(nsu.predicates, ps...)
+	nsu.mutation.predicates = append(nsu.mutation.predicates, ps...)
 	return nsu
 }
 
@@ -53,7 +52,7 @@ func (nsu *NovelSourceUpdate) Mutation() *NovelSourceMutation {
 	return nsu.mutation
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (nsu *NovelSourceUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -140,7 +139,7 @@ func (nsu *NovelSourceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := nsu.predicates; len(ps) > 0 {
+	if ps := nsu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

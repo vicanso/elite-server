@@ -20,7 +20,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elton"
 )
@@ -30,15 +29,15 @@ func TestCommonCtrl(t *testing.T) {
 	ctrl := commonCtrl{}
 
 	t.Run("ping", func(t *testing.T) {
-		originalStatus := config.GetApplicationStatus()
-		defer config.SetApplicationStatus(originalStatus)
+		originalStatus := service.GetApplicationStatus()
+		defer service.SetApplicationStatus(originalStatus)
 
-		config.SetApplicationStatus(config.ApplicationStatusStopped)
+		service.SetApplicationStatus(service.ApplicationStatusStopped)
 		c := elton.NewContext(httptest.NewRecorder(), nil)
 		err := ctrl.ping(c)
 		assert.Equal(errAppIsNotRunning, err)
 
-		config.SetApplicationStatus(config.ApplicationStatusRunning)
+		service.SetApplicationStatus(service.ApplicationStatusRunning)
 		err = ctrl.ping(c)
 		assert.Nil(err)
 		assert.Equal("pong", c.BodyBuffer.String())

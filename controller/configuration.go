@@ -21,7 +21,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/vicanso/elton"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/configuration"
@@ -29,6 +28,7 @@ import (
 	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/validate"
+	"github.com/vicanso/elton"
 	"github.com/vicanso/hes"
 )
 
@@ -222,7 +222,7 @@ func (*configurationCtrl) list(c *elton.Context) (err error) {
 		return
 	}
 	count := -1
-	if params.Countable() {
+	if params.ShouldCount() {
 		count, err = params.count(c.Context())
 		if err != nil {
 			return
@@ -265,9 +265,7 @@ func (*configurationCtrl) findByID(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	configuration, err := getEntClient().Configuration.Query().
-		Where(configuration.ID(id)).
-		First(c.Context())
+	configuration, err := getEntClient().Configuration.Get(c.Context(), id)
 	if err != nil {
 		return
 	}

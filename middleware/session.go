@@ -15,11 +15,11 @@
 package middleware
 
 import (
-	"github.com/vicanso/elton"
-	session "github.com/vicanso/elton-session"
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/util"
+	"github.com/vicanso/elton"
+	session "github.com/vicanso/elton-session"
 )
 
 // NewSession new session middleware

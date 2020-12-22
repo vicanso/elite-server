@@ -21,7 +21,6 @@ type ChapterQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Chapter
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -86,8 +85,8 @@ func (cq *ChapterQuery) FirstID(ctx context.Context) (id int, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (cq *ChapterQuery) FirstXID(ctx context.Context) int {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (cq *ChapterQuery) FirstIDX(ctx context.Context) int {
 	id, err := cq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -218,12 +217,14 @@ func (cq *ChapterQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (cq *ChapterQuery) Clone() *ChapterQuery {
+	if cq == nil {
+		return nil
+	}
 	return &ChapterQuery{
 		config:     cq.config,
 		limit:      cq.limit,
 		offset:     cq.offset,
 		order:      append([]OrderFunc{}, cq.order...),
-		unique:     append([]string{}, cq.unique...),
 		predicates: append([]predicate.Chapter{}, cq.predicates...),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),

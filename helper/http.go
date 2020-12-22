@@ -16,8 +16,10 @@ package helper
 
 import (
 	"errors"
+	"net"
 	"net/http"
-	"net/url"
+	"os"
+	"syscall"
 	"time"
 
 	"github.com/tidwall/gjson"
@@ -29,63 +31,85 @@ import (
 	"go.uber.org/zap"
 )
 
-func getHTTPStats(serviceName string, resp *axios.Response) (map[string]string, map[string]interface{}) {
-	conf := resp.Config
+const (
+	httpErrCategoryDNS     = "dns"
+	httpErrCategoryTimeout = "timeout"
+	httpErrCategoryAddr    = "addr"
+	httpErrCategoryAborted = "aborted"
+	httpErrCategoryRefused = "refused"
+	httpErrCategoryReset   = "reset"
+)
 
-	ht := conf.HTTPTrace
+func newHTTPOnDone(serviceName string) axios.OnDone {
+	return func(conf *axios.Config, resp *axios.Response, err error) {
+		ht := conf.HTTPTrace
 
-	reused := false
-	addr := ""
-	use := ""
-	ms := 0
-	id := conf.GetString(cs.CID)
-	if ht != nil {
-		reused = ht.Reused
-		addr = ht.Addr
-		timelineStats := ht.Stats()
-		use = timelineStats.String()
-		ms = int(timelineStats.Total.Milliseconds())
+		reused := false
+		addr := ""
+		use := ""
+		ms := 0
+		id := conf.GetString(cs.CID)
+		status := -1
+		if ht != nil {
+			reused = ht.Reused
+			addr = ht.Addr
+			timelineStats := ht.Stats()
+			use = timelineStats.String()
+			ms = int(timelineStats.Total.Milliseconds())
+		}
+		if resp != nil {
+			status = conf.Response.Status
+		}
+
+		tags := map[string]string{
+			"service": serviceName,
+			"route":   conf.Route,
+			"method":  conf.Method,
+		}
+		fields := map[string]interface{}{
+			"cid":    id,
+			"url":    conf.URL,
+			"status": status,
+			"addr":   addr,
+			"reused": reused,
+			"use":    ms,
+		}
+		message := ""
+		if err != nil {
+			message = err.Error()
+			fields["error"] = message
+			errCategory := getHTTPErrorCategory(err)
+			if errCategory != "" {
+				fields["errCategory"] = errCategory
+			}
+		}
+		// 输出响应数据，如果响应数据为隐私数据可不输出
+		var data interface{}
+		if resp != nil {
+			data = resp.UnmarshalData
+		}
+		logger.Info("http request stats",
+			zap.String("service", serviceName),
+			zap.String("cid", id),
+			zap.String("method", conf.Method),
+			zap.String("route", conf.Route),
+			zap.String("url", conf.URL),
+			zap.Any("params", conf.Params),
+			zap.Any("query", conf.Query),
+			zap.Any("data", data),
+			zap.Int("status", status),
+			zap.String("addr", addr),
+			zap.Bool("reused", reused),
+			zap.String("use", use),
+			zap.String("error", message),
+		)
+		GetInfluxSrv().Write(cs.MeasurementHTTPRequest, tags, fields)
+
 	}
-	logger.Info("http request stats",
-		zap.String("service", serviceName),
-		zap.String("cid", id),
-		zap.String("method", conf.Method),
-		zap.String("route", conf.Route),
-		zap.String("url", conf.URL),
-		zap.Any("params", conf.Params),
-		zap.Any("query", conf.Query),
-		zap.Int("status", resp.Status),
-		zap.String("addr", addr),
-		zap.Bool("reused", reused),
-		zap.String("use", use),
-	)
-	tags := map[string]string{
-		"service": serviceName,
-		"route":   conf.Route,
-		"method":  conf.Method,
-	}
-	fields := map[string]interface{}{
-		"cid":    id,
-		"url":    conf.URL,
-		"status": resp.Status,
-		"addr":   addr,
-		"reused": reused,
-		"use":    ms,
-	}
-	return tags, fields
 }
 
-// newHTTPStats http stats
-func newHTTPStats(serviceName string) axios.ResponseInterceptor {
-	return func(resp *axios.Response) (err error) {
-		tags, fields := getHTTPStats(serviceName, resp)
-		GetInfluxSrv().Write(cs.MeasurementHTTPRequest, fields, tags)
-		return
-	}
-}
-
-// newConvertResponseToError 将http响应码为>=400的转换为出错
-func newConvertResponseToError(serviceName string) axios.ResponseInterceptor {
+// newHTTPConvertResponseToError 将http响应码为>=400的转换为出错
+func newHTTPConvertResponseToError(serviceName string) axios.ResponseInterceptor {
 	return func(resp *axios.Response) (err error) {
 		if resp.Status >= 400 {
 			message := gjson.GetBytes(resp.Data, "message").String()
@@ -99,15 +123,54 @@ func newConvertResponseToError(serviceName string) axios.ResponseInterceptor {
 	}
 }
 
-// newOnError 新建error的处理函数
-func newOnError(serviceName string) axios.OnError {
+// getHTTPErrorCategory 获取出错的类型，主要分类DNS错误，addr错误以及一些系统调用的异常
+func getHTTPErrorCategory(err error) string {
+
+	netErr, ok := err.(net.Error)
+	if ok && netErr.Timeout() {
+		return httpErrCategoryTimeout
+	}
+
+	var dnsErr *net.DNSError
+	if errors.As(err, &dnsErr) {
+		return httpErrCategoryDNS
+	}
+	var addrErr *net.AddrError
+	if errors.As(err, &addrErr) {
+		return httpErrCategoryAddr
+	}
+
+	opErr, ok := netErr.(*net.OpError)
+	if !ok {
+		return ""
+	}
+	switch e := opErr.Err.(type) {
+	// 针对以下几种系统调用返回对应类型
+	case *os.SyscallError:
+		if no, ok := e.Err.(syscall.Errno); ok {
+			switch no {
+			case syscall.ECONNREFUSED:
+				return httpErrCategoryRefused
+			case syscall.ECONNABORTED:
+				return httpErrCategoryAborted
+			case syscall.ECONNRESET:
+				return httpErrCategoryReset
+			case syscall.ETIMEDOUT:
+				return httpErrCategoryTimeout
+			}
+		}
+	}
+
+	return ""
+}
+
+// newHTTPOnError 新建error的处理函数
+func newHTTPOnError(serviceName string) axios.OnError {
 	return func(err error, conf *axios.Config) (newErr error) {
-		id := conf.GetString(cs.CID)
 		code := -1
 		if conf.Response != nil {
 			code = conf.Response.Status
 		}
-
 		he := hes.Wrap(err)
 		if code >= http.StatusBadRequest {
 			he.StatusCode = code
@@ -121,39 +184,27 @@ func newOnError(serviceName string) axios.OnError {
 			he.Extra = make(map[string]interface{})
 		}
 
-		// 请求超时
-		e, ok := err.(*url.Error)
-		if ok && e.Timeout() {
-			he.Extra["category"] = "timeout"
-		}
+		he.Category = getHTTPErrorCategory(err)
+
 		if !util.IsProduction() {
 			he.Extra["requestRoute"] = conf.Route
 			he.Extra["requestService"] = serviceName
 			he.Extra["requestCURL"] = conf.CURL()
-			// TODO 是否非生产环境增加更多的信息，方便测试时确认问题
 		}
-		newErr = he
-		logger.Info("http error",
-			zap.String("service", serviceName),
-			zap.String("cid", id),
-			zap.String("method", conf.Method),
-			zap.String("url", conf.URL),
-			zap.String("error", err.Error()),
-		)
-		return
+		return he
 	}
 }
 
-// NewInstance 新建实例
-func NewInstance(serviceName, baseURL string, timeout time.Duration) *axios.Instance {
+// NewHTTPInstance 新建实例
+func NewHTTPInstance(serviceName, baseURL string, timeout time.Duration) *axios.Instance {
 	return axios.NewInstance(&axios.InstanceConfig{
 		EnableTrace: true,
 		Timeout:     timeout,
-		OnError:     newOnError(serviceName),
+		OnError:     newHTTPOnError(serviceName),
+		OnDone:      newHTTPOnDone(serviceName),
 		BaseURL:     baseURL,
 		ResponseInterceptors: []axios.ResponseInterceptor{
-			newHTTPStats(serviceName),
-			newConvertResponseToError(serviceName),
+			newHTTPConvertResponseToError(serviceName),
 		},
 	})
 }

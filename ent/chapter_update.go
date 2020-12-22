@@ -16,14 +16,13 @@ import (
 // ChapterUpdate is the builder for updating Chapter entities.
 type ChapterUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *ChapterMutation
-	predicates []predicate.Chapter
+	hooks    []Hook
+	mutation *ChapterMutation
 }
 
 // Where adds a new predicate for the builder.
 func (cu *ChapterUpdate) Where(ps ...predicate.Chapter) *ChapterUpdate {
-	cu.predicates = append(cu.predicates, ps...)
+	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
 	return cu
 }
 
@@ -111,7 +110,7 @@ func (cu *ChapterUpdate) Mutation() *ChapterMutation {
 	return cu.mutation
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *ChapterUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -182,7 +181,7 @@ func (cu *ChapterUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := cu.predicates; len(ps) > 0 {
+	if ps := cu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

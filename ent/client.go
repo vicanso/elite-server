@@ -173,7 +173,7 @@ func (c *ChapterClient) Create() *ChapterCreate {
 	return &ChapterCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Chapter entities.
+// CreateBulk returns a builder for creating a bulk of Chapter entities.
 func (c *ChapterClient) CreateBulk(builders ...*ChapterCreate) *ChapterCreateBulk {
 	return &ChapterCreateBulk{config: c.config, builders: builders}
 }
@@ -261,7 +261,7 @@ func (c *ConfigurationClient) Create() *ConfigurationCreate {
 	return &ConfigurationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Configuration entities.
+// CreateBulk returns a builder for creating a bulk of Configuration entities.
 func (c *ConfigurationClient) CreateBulk(builders ...*ConfigurationCreate) *ConfigurationCreateBulk {
 	return &ConfigurationCreateBulk{config: c.config, builders: builders}
 }
@@ -349,7 +349,7 @@ func (c *NovelClient) Create() *NovelCreate {
 	return &NovelCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Novel entities.
+// CreateBulk returns a builder for creating a bulk of Novel entities.
 func (c *NovelClient) CreateBulk(builders ...*NovelCreate) *NovelCreateBulk {
 	return &NovelCreateBulk{config: c.config, builders: builders}
 }
@@ -437,7 +437,7 @@ func (c *NovelSourceClient) Create() *NovelSourceCreate {
 	return &NovelSourceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of NovelSource entities.
+// CreateBulk returns a builder for creating a bulk of NovelSource entities.
 func (c *NovelSourceClient) CreateBulk(builders ...*NovelSourceCreate) *NovelSourceCreateBulk {
 	return &NovelSourceCreateBulk{config: c.config, builders: builders}
 }
@@ -525,7 +525,7 @@ func (c *UserClient) Create() *UserCreate {
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of User entities.
+// CreateBulk returns a builder for creating a bulk of User entities.
 func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
 	return &UserCreateBulk{config: c.config, builders: builders}
 }
@@ -613,7 +613,7 @@ func (c *UserLoginClient) Create() *UserLoginCreate {
 	return &UserLoginCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of UserLogin entities.
+// CreateBulk returns a builder for creating a bulk of UserLogin entities.
 func (c *UserLoginClient) CreateBulk(builders ...*UserLoginCreate) *UserLoginCreateBulk {
 	return &UserLoginCreateBulk{config: c.config, builders: builders}
 }

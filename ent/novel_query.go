@@ -21,7 +21,6 @@ type NovelQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Novel
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -86,8 +85,8 @@ func (nq *NovelQuery) FirstID(ctx context.Context) (id int, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (nq *NovelQuery) FirstXID(ctx context.Context) int {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (nq *NovelQuery) FirstIDX(ctx context.Context) int {
 	id, err := nq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -218,12 +217,14 @@ func (nq *NovelQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (nq *NovelQuery) Clone() *NovelQuery {
+	if nq == nil {
+		return nil
+	}
 	return &NovelQuery{
 		config:     nq.config,
 		limit:      nq.limit,
 		offset:     nq.offset,
 		order:      append([]OrderFunc{}, nq.order...),
-		unique:     append([]string{}, nq.unique...),
 		predicates: append([]predicate.Novel{}, nq.predicates...),
 		// clone intermediate query.
 		sql:  nq.sql.Clone(),

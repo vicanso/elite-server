@@ -22,10 +22,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqljson"
 	"github.com/tidwall/gjson"
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/ent"
+	"github.com/vicanso/elite/ent/predicate"
 	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/ent/user"
 	"github.com/vicanso/elite/ent/userlogin"
@@ -186,11 +189,12 @@ func init() {
 	// 用户登录
 	g.POST(
 		"/v1/me/login",
+		// 登录如果失败则最少等待1秒
 		middleware.WaitFor(time.Second, true),
 		newTracker(cs.ActionLogin),
 		captchaValidate,
 		shouldBeAnonymous,
-		// 限制3秒只能登录一次（无论成功还是失败）
+		// 同一个账号限制3秒只能登录一次（无论成功还是失败）
 		newConcurrentLimit([]string{
 			"account",
 		}, 3*time.Second, cs.ActionLogin),
@@ -228,6 +232,7 @@ func init() {
 	// 获取用户角色分组
 	noneSessionGroup.GET(
 		"/v1/roles",
+		noCacheIfRequestNoCache,
 		ctrl.getRoleList,
 	)
 }
@@ -324,9 +329,11 @@ func (params *userListParams) where(query *ent.UserQuery) *ent.UserQuery {
 	if params.Keyword != "" {
 		query = query.Where(user.AccountContains(params.Keyword))
 	}
-	// TODO role的查询
-	// if params.Role != "" {
-	// }
+	if params.Role != "" {
+		query = query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sqljson.ValueContains(user.FieldRoles, params.Role))
+		}))
+	}
 	if params.Status != "" {
 		v, _ := strconv.Atoi(params.Status)
 		query = query.Where(user.Status(schema.Status(v)))
@@ -404,7 +411,7 @@ func (*userCtrl) list(c *elton.Context) (err error) {
 		return
 	}
 	count := -1
-	if params.Countable() {
+	if params.ShouldCount() {
 		count, err = params.count(c.Context())
 		if err != nil {
 			return
@@ -487,7 +494,7 @@ func (*userCtrl) me(c *elton.Context) (err error) {
 				fields["city"] = location.City
 				fields["isp"] = location.ISP
 			}
-			getInfluxSrv().Write(cs.MeasurementUserAddTrack, fields, nil)
+			getInfluxSrv().Write(cs.MeasurementUserAddTrack, nil, fields)
 		}()
 	}
 	resp, err := pickUserInfo(c)
@@ -609,7 +616,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 			)
 		}
 		// 记录用户登录行为
-		getInfluxSrv().Write(cs.MeasurementUserLogin, fields, nil)
+		getInfluxSrv().Write(cs.MeasurementUserLogin, nil, fields)
 	}()
 
 	// 返回用户信息
@@ -715,7 +722,7 @@ func (ctrl userCtrl) listLoginRecord(c *elton.Context) (err error) {
 		return
 	}
 	count := -1
-	if params.Countable() {
+	if params.ShouldCount() {
 		count, err = params.count(c.Context())
 		if err != nil {
 			return

@@ -29,11 +29,11 @@ postgres:
 
 # influxdb 配置
 influxdb:
-  uri: http://127.0.0.1:9999
+  uri: http://127.0.0.1:8086
   bucket: elite 
   org: bigTree
-  token: vEne4wbhYbMOxU6rO2LhIp5ImN5Hah0GA5U35wP-Lq-xMVURCV0NUlVre1g_zLbiSI7JCRM1mRtULGdo4jL1oA==
-  batchSize: 100
+  token: AeSJbMPoFMmQ-tAaZdOefFZ8mIhe_TgxH8t0dMeBhKYmUyLZ8XOFCZsQqW8ptVflom6pgTlqYYiQUEUVMzgeYw==
+  batchSize: 1000
   flushInterval: 10s
   disabled: false 
 
@@ -64,7 +64,7 @@ minio:
 
 # tiny服务的配置
 tiny:
-  host: 127.0.0.1
+  host: 192.168.1.2
   port: 6002
   timeout: 10s
 
@@ -73,8 +73,6 @@ novel:
   biquge:
     baseURL: https://www.biquge.com.cn
     timeout: 10s
-    max: 50000
   qidian:
     baseURL: https://www.qidian.com
     timeout: 10s
-    max: 100

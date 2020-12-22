@@ -16,14 +16,13 @@ import (
 // NovelDelete is the builder for deleting a Novel entity.
 type NovelDelete struct {
 	config
-	hooks      []Hook
-	mutation   *NovelMutation
-	predicates []predicate.Novel
+	hooks    []Hook
+	mutation *NovelMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (nd *NovelDelete) Where(ps ...predicate.Novel) *NovelDelete {
-	nd.predicates = append(nd.predicates, ps...)
+	nd.mutation.predicates = append(nd.mutation.predicates, ps...)
 	return nd
 }
 
@@ -75,7 +74,7 @@ func (nd *NovelDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := nd.predicates; len(ps) > 0 {
+	if ps := nd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

@@ -15,38 +15,45 @@
 package helper
 
 import (
+	"os"
 	"time"
 
-	influxdb "github.com/influxdata/influxdb-client-go"
-	influxdbAPI "github.com/influxdata/influxdb-client-go/api"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	influxdbAPI "github.com/influxdata/influxdb-client-go/v2/api"
 	"github.com/vicanso/elite/config"
 	"go.uber.org/zap"
 )
 
 type (
 	InfluxSrv struct {
-		client influxdb.Client
+		client influxdb2.Client
 		writer influxdbAPI.WriteAPI
 	}
 )
 
-var defaultInfluxSrv = newInfluxSrvX()
+var hostname string
+var defaultInfluxSrv = mustNewInfluxSrv()
 
-// newInfluxSrvX 创建新的influx服务
-func newInfluxSrvX() *InfluxSrv {
+func init() {
+	hostname, _ = os.Hostname()
+}
+
+// mustNewInfluxSrv 创建新的influx服务
+func mustNewInfluxSrv() *InfluxSrv {
 	influxdbConfig := config.GetInfluxdbConfig()
 	if influxdbConfig.Disabled {
 
 		return new(InfluxSrv)
 	}
-	opts := influxdb.DefaultOptions()
+	opts := influxdb2.DefaultOptions()
 	// 设置批量提交的大小
 	opts.SetBatchSize(influxdbConfig.BatchSize)
 	// 如果定时提交间隔大于1秒，则设定定时提交间隔
-	if influxdbConfig.FlushInterval > time.Millisecond {
+	if influxdbConfig.FlushInterval > time.Second {
 		v := influxdbConfig.FlushInterval / time.Millisecond
 		opts.SetFlushInterval(uint(v))
 	}
+	opts.SetUseGZip(influxdbConfig.Gzip)
 	logger.Info("new influxdb client",
 		zap.String("uri", influxdbConfig.URI),
 		zap.String("org", influxdbConfig.Org),
@@ -55,9 +62,9 @@ func newInfluxSrvX() *InfluxSrv {
 		zap.String("token", influxdbConfig.Token[:5]+"..."),
 		zap.Duration("interval", influxdbConfig.FlushInterval),
 	)
-	c := influxdb.NewClientWithOptions(influxdbConfig.URI, influxdbConfig.Token, opts)
+	c := influxdb2.NewClientWithOptions(influxdbConfig.URI, influxdbConfig.Token, opts)
 	writer := c.WriteAPI(influxdbConfig.Org, influxdbConfig.Bucket)
-	newInfluxdbErrorLogger(writer)
+	go newInfluxdbErrorLogger(writer)
 	return &InfluxSrv{
 		client: c,
 		writer: writer,
@@ -66,13 +73,11 @@ func newInfluxSrvX() *InfluxSrv {
 
 // newInfluxdbErrorLogger 创建读取出错日志处理，需要注意此功能需要启用新的goroutine
 func newInfluxdbErrorLogger(writer influxdbAPI.WriteAPI) {
-	go func() {
-		for err := range writer.Errors() {
-			logger.Error("influxdb write fail",
-				zap.Error(err),
-			)
-		}
-	}()
+	for err := range writer.Errors() {
+		logger.Error("influxdb write fail",
+			zap.Error(err),
+		)
+	}
 }
 
 // GetInfluxSrv 获取默认的influxdb服务
@@ -81,7 +86,7 @@ func GetInfluxSrv() *InfluxSrv {
 }
 
 // Write 写入数据
-func (srv *InfluxSrv) Write(measurement string, fields map[string]interface{}, tags map[string]string, ts ...time.Time) {
+func (srv *InfluxSrv) Write(measurement string, tags map[string]string, fields map[string]interface{}, ts ...time.Time) {
 	if srv.writer == nil {
 		return
 	}
@@ -91,8 +96,13 @@ func (srv *InfluxSrv) Write(measurement string, fields map[string]interface{}, t
 	} else {
 		now = time.Now()
 	}
-
-	srv.writer.WritePoint(influxdb.NewPoint(measurement, tags, fields, now))
+	if fields == nil {
+		fields = make(map[string]interface{})
+	}
+	if hostname != "" && fields["hostname"] == nil {
+		fields["hostname"] = hostname
+	}
+	srv.writer.WritePoint(influxdb2.NewPoint(measurement, tags, fields, now))
 }
 
 // Close 关闭当前client

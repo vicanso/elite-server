@@ -36,10 +36,8 @@ type qiDian struct {
 
 // NewQiDian 初始化qidian小说网站实例
 func NewQiDian() *qiDian {
-	conf := getConfig(novelQiDianName)
-	ins := helper.NewInstance(conf.Name, conf.BaseURL, conf.Timeout)
 	return &qiDian{
-		ins: ins,
+		ins: helper.GetQidianInstance(),
 	}
 }
 

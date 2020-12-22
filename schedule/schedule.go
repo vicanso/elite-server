@@ -46,6 +46,8 @@ func init() {
 	_, _ = c.AddFunc("@every 5m", entStats)
 	_, _ = c.AddFunc("@every 30s", cpuUsageStats)
 	_, _ = c.AddFunc("@every 1m", performanceStats)
+	_, _ = c.AddFunc("@every 1m", httpInstanceStats)
+
 	_, _ = c.AddFunc("@every 24h", updateAllNovelWordCount)
 	_, _ = c.AddFunc("@every 24h", updateAllNovelUpdatedWeight)
 	// 每小时更新权重>=50的小说
@@ -103,7 +105,7 @@ func redisStats() {
 	doStatsTask("redis stats", func() map[string]interface{} {
 		// 统计中除了redis数据库的统计，还有当前实例的统计指标，因此所有实例都会写入统计
 		stats := helper.RedisStats()
-		helper.GetInfluxSrv().Write(cs.MeasurementRedisStats, stats, nil)
+		helper.GetInfluxSrv().Write(cs.MeasurementRedisStats, nil, stats)
 		return stats
 	})
 }
@@ -116,7 +118,7 @@ func entPing() {
 func entStats() {
 	doStatsTask("ent stats", func() map[string]interface{} {
 		stats := helper.EntGetStats()
-		helper.GetInfluxSrv().Write(cs.MeasurementEntStats, stats, nil)
+		helper.GetInfluxSrv().Write(cs.MeasurementEntStats, nil, stats)
 		return stats
 	})
 }
@@ -171,6 +173,7 @@ func performanceStats() {
 		fields := map[string]interface{}{
 			"goMaxProcs":   data.GoMaxProcs,
 			"concurrency":  data.Concurrency,
+			"threadCount":  data.ThreadCount,
 			"memSys":       data.MemSys,
 			"memHeapSys":   data.MemHeapSys,
 			"memHeapInuse": data.MemHeapInuse,
@@ -182,8 +185,18 @@ func performanceStats() {
 		}
 		prevMemFrees = data.MemFrees
 		prevNumGC = data.NumGC
+		prevPauseTotal = data.PauseTotalNs
 
-		helper.GetInfluxSrv().Write(cs.MeasurementPerformance, fields, nil)
+		helper.GetInfluxSrv().Write(cs.MeasurementPerformance, nil, fields)
+		return fields
+	})
+}
+
+// httpInstanceStats http instance stats
+func httpInstanceStats() {
+	doStatsTask("http instance stats", func() map[string]interface{} {
+		fields := helper.GetHTTPInstanceStats()
+		helper.GetInfluxSrv().Write(cs.MeasurementHTTPInstanceStats, nil, fields)
 		return fields
 	})
 }

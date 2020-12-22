@@ -16,14 +16,13 @@ import (
 // NovelSourceDelete is the builder for deleting a NovelSource entity.
 type NovelSourceDelete struct {
 	config
-	hooks      []Hook
-	mutation   *NovelSourceMutation
-	predicates []predicate.NovelSource
+	hooks    []Hook
+	mutation *NovelSourceMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (nsd *NovelSourceDelete) Where(ps ...predicate.NovelSource) *NovelSourceDelete {
-	nsd.predicates = append(nsd.predicates, ps...)
+	nsd.mutation.predicates = append(nsd.mutation.predicates, ps...)
 	return nsd
 }
 
@@ -75,7 +74,7 @@ func (nsd *NovelSourceDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := nsd.predicates; len(ps) > 0 {
+	if ps := nsd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

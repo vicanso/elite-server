@@ -16,14 +16,13 @@ import (
 // ChapterDelete is the builder for deleting a Chapter entity.
 type ChapterDelete struct {
 	config
-	hooks      []Hook
-	mutation   *ChapterMutation
-	predicates []predicate.Chapter
+	hooks    []Hook
+	mutation *ChapterMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (cd *ChapterDelete) Where(ps ...predicate.Chapter) *ChapterDelete {
-	cd.predicates = append(cd.predicates, ps...)
+	cd.mutation.predicates = append(cd.mutation.predicates, ps...)
 	return cd
 }
 
@@ -75,7 +74,7 @@ func (cd *ChapterDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := cd.predicates; len(ps) > 0 {
+	if ps := cd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

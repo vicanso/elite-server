@@ -80,8 +80,9 @@ var (
 	// 创建IP限制中间件
 	newIPLimit = middleware.NewIPLimit
 	// 创建出错限制中间件
-	newErrorLimit       = middleware.NewErrorLimit
-	setNoCacheIfMatched = middleware.NewNoCacheWithCondition("cacheControl", "noCache")
+	newErrorLimit = middleware.NewErrorLimit
+	// noCacheIfRequestNoCache 请求参数指定no cache，则设置no-cache
+	noCacheIfRequestNoCache = middleware.NewNoCacheWithCondition("cacheControl", "no-cache")
 
 	// 图形验证码校验
 	captchaValidate = newMagicalCaptchaValidate()
@@ -185,14 +186,14 @@ func newTracker(action string) elton.Handler {
 				fields = append(fields, zap.Error(info.Err))
 			}
 			logger.Info("tracker", fields...)
-			getInfluxSrv().Write(cs.MeasurementUserTracker, map[string]interface{}{
+			getInfluxSrv().Write(cs.MeasurementUserTracker, map[string]string{
+				"action": action,
+				"result": strconv.Itoa(info.Result),
+			}, map[string]interface{}{
 				"cid":     info.CID,
 				"account": account,
 				"ip":      ip,
 				"sid":     sid,
-			}, map[string]string{
-				"action": action,
-				"result": strconv.Itoa(info.Result),
 			})
 		},
 	})

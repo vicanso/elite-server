@@ -32,41 +32,6 @@ func TestConfigENV(t *testing.T) {
 	assert.Equal(env, GetENV())
 }
 
-func TestApplicationStatus(t *testing.T) {
-	assert := assert.New(t)
-	originalApplicationStatus := applicationStatusAtom.Load()
-	defer SetApplicationStatus(originalApplicationStatus)
-
-	assert.Equal(originalApplicationStatus, GetApplicationStatus())
-
-	SetApplicationStatus(ApplicationStatusStopped)
-	assert.False(ApplicationIsRunning())
-	SetApplicationStatus(ApplicationStatusStopping)
-	assert.False(ApplicationIsRunning())
-	SetApplicationStatus(ApplicationStatusRunning)
-	assert.True(ApplicationIsRunning())
-}
-
-func TestApplicationVersion(t *testing.T) {
-	assert := assert.New(t)
-	originalVersion := applicationVersion
-	defer SetApplicationVersion(originalVersion)
-
-	v := "2020"
-	SetApplicationVersion(v)
-	assert.Equal(v, GetApplicationVersion())
-}
-
-func TestApplicationBuildedAt(t *testing.T) {
-	assert := assert.New(t)
-	originalBuildedAt := applicationBuildedAt
-	defer SetApplicationBuildedAt(originalBuildedAt)
-
-	buildedAt := "2020"
-	SetApplicationBuildedAt(buildedAt)
-	assert.Equal(buildedAt, GetApplicationBuildedAt())
-}
-
 func TestBasicConfig(t *testing.T) {
 	assert := assert.New(t)
 
@@ -116,7 +81,7 @@ func TestInfluxdbConfig(t *testing.T) {
 	assert.Equal("elite", influxdbConfig.Bucket)
 	assert.Equal("bigTree", influxdbConfig.Org)
 	assert.NotEmpty(influxdbConfig.Token)
-	assert.Equal(uint(100), influxdbConfig.BatchSize)
+	assert.Equal(uint(1000), influxdbConfig.BatchSize)
 	assert.Equal(10*time.Second, influxdbConfig.FlushInterval)
 	assert.False(influxdbConfig.Disabled)
 }

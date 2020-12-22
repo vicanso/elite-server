@@ -16,12 +16,12 @@ package middleware
 
 import (
 	"github.com/dustin/go-humanize"
-	"github.com/vicanso/elton"
-	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/util"
+	"github.com/vicanso/elton"
+	M "github.com/vicanso/elton/middleware"
 	"go.uber.org/zap"
 )
 
@@ -58,12 +58,12 @@ func NewStats() elton.Handler {
 				"ip":         info.IP,
 				"sid":        sid,
 				"uri":        info.URI,
-				"status":     info.Status,
+				"statusCode": info.Status,
 				"use":        info.Consuming.Milliseconds(),
 				"size":       info.Size,
 				"connecting": info.Connecting,
 			}
-			helper.GetInfluxSrv().Write(cs.MeasurementHTTPStats, fields, tags)
+			helper.GetInfluxSrv().Write(cs.MeasurementHTTPStats, tags, fields)
 		},
 	})
 }

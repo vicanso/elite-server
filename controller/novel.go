@@ -145,7 +145,7 @@ type (
 func init() {
 	ctrl := novelCtrl{}
 
-	g := router.NewGroup("/novels", setNoCacheIfMatched)
+	g := router.NewGroup("/novels", noCacheIfRequestNoCache)
 
 	// 获取小说源列表
 	g.GET(
@@ -450,7 +450,7 @@ func (*novelCtrl) list(c *elton.Context) (err error) {
 			novels = novels[:limit]
 		}
 	} else {
-		if params.Countable() {
+		if params.ShouldCount() {
 			count, err = params.count(c.Context())
 			if err != nil {
 				return
@@ -712,7 +712,7 @@ func (*novelCtrl) listChapter(c *elton.Context) (err error) {
 	}
 	params.ID = id
 	count := -1
-	if params.Countable() {
+	if params.ShouldCount() {
 		count, err = params.count(c.Context())
 		if err != nil {
 			return
@@ -804,7 +804,7 @@ func (*novelCtrl) listSource(c *elton.Context) (err error) {
 		return
 	}
 	count := -1
-	if params.Countable() {
+	if params.ShouldCount() {
 		count, err = params.count(c.Context())
 		if err != nil {
 			return

@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/router"
@@ -101,12 +102,11 @@ func init() {
 		shouldBeAdmin,
 		ctrl.getProf,
 	)
-
 }
 
 // ping 用于检测服务是否可用
 func (*commonCtrl) ping(c *elton.Context) error {
-	if !config.ApplicationIsRunning() {
+	if !service.ApplicationIsRunning() {
 		return errAppIsNotRunning
 	}
 	c.BodyBuffer = bytes.NewBufferString("pong")
@@ -117,9 +117,9 @@ func (*commonCtrl) ping(c *elton.Context) error {
 func (*commonCtrl) getApplicationInfo(c *elton.Context) (err error) {
 	c.CacheMaxAge(time.Minute)
 	c.Body = &applicationInfoResp{
-		config.GetApplicationVersion(),
-		config.GetApplicationBuildedAt(),
-		time.Since(applicationStartedAt).String(),
+		service.GetApplicationVersion(),
+		service.GetApplicationBuildedAt(),
+		humanize.Time(applicationStartedAt),
 		runtime.GOOS,
 		runtime.Version(),
 		runtime.GOARCH,
@@ -147,12 +147,12 @@ func (*commonCtrl) getCaptcha(c *elton.Context) (err error) {
 	if fontColor == "" {
 		fontColor = "102,102,102"
 	}
-	info, err := service.GetCaptcha(fontColor, bgColor)
+	info, err := service.GetCaptcha(c.Context(), fontColor, bgColor)
 	if err != nil {
 		return
 	}
-	// c.SetContentTypeByExt(".jpeg")
-	// c.Body = info.Data
+	// 防止此字段未设置好，序列化至前端
+	info.Value = ""
 	c.NoStore()
 	c.Body = &info
 	return

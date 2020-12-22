@@ -52,11 +52,9 @@ type biQuGeNovel struct {
 
 // NewBiQuGe 初始化biquge小说网站实例
 func NewBiQuGe() *biQuGe {
-	conf := getConfig(novelBiQuGeName)
-	ins := helper.NewInstance(conf.Name, conf.BaseURL, conf.Timeout)
 	return &biQuGe{
-		ins:   ins,
-		max:   conf.Max,
+		ins:   helper.GetBiqugeInstance(),
+		max:   50000,
 		cache: lruttl.New(50, 5*time.Minute),
 	}
 }

@@ -54,11 +54,6 @@ var (
 	}
 )
 
-const (
-	novelBiQuGeName = "biquge"
-	novelQiDianName = "qidian"
-)
-
 // 小说来源
 const (
 	// NovelSourceBiQuGe biquge source
@@ -174,7 +169,9 @@ func (params *QueryParams) FirstNovelSource() (*ent.NovelSource, error) {
 func (*Srv) SyncSource() (err error) {
 	redisSrv := new(helper.Redis)
 	// 确保只有一个实例在更新
-	ok, done, err := redisSrv.LockWithDone("novel-sync-source", time.Hour)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	ok, done, err := redisSrv.LockWithDone(ctx, "novel-sync-source", time.Hour)
 	if err != nil || !ok {
 		return
 	}

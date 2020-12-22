@@ -16,14 +16,13 @@ import (
 // NovelUpdate is the builder for updating Novel entities.
 type NovelUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *NovelMutation
-	predicates []predicate.Novel
+	hooks    []Hook
+	mutation *NovelMutation
 }
 
 // Where adds a new predicate for the builder.
 func (nu *NovelUpdate) Where(ps ...predicate.Novel) *NovelUpdate {
-	nu.predicates = append(nu.predicates, ps...)
+	nu.mutation.predicates = append(nu.mutation.predicates, ps...)
 	return nu
 }
 
@@ -214,7 +213,7 @@ func (nu *NovelUpdate) Mutation() *NovelMutation {
 	return nu.mutation
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (nu *NovelUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -301,7 +300,7 @@ func (nu *NovelUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := nu.predicates; len(ps) > 0 {
+	if ps := nu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

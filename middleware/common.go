@@ -20,9 +20,10 @@ import (
 	"time"
 
 	warner "github.com/vicanso/count-warner"
-	"github.com/vicanso/elton"
+	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/service"
+	"github.com/vicanso/elton"
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
 )
@@ -85,7 +86,7 @@ func ValidateCaptcha(magicalCaptcha string) elton.Handler {
 		if magicalCaptcha != "" && arr[1] == magicalCaptcha {
 			return c.Next()
 		}
-		valid, err := service.ValidateCaptcha(arr[0], arr[1])
+		valid, err := service.ValidateCaptcha(c.Context(), arr[0], arr[1])
 		if err != nil {
 			if helper.RedisIsNilError(err) {
 				err = errCaptchaExpired
@@ -140,8 +141,9 @@ func NewNotFoundHandler() http.HandlerFunc {
 			zap.String("method", req.Method),
 			zap.String("uri", req.RequestURI),
 		)
+		status := http.StatusNotFound
 		resp.Header().Set(elton.HeaderContentType, elton.MIMEApplicationJSON)
-		resp.WriteHeader(http.StatusNotFound)
+		resp.WriteHeader(status)
 		_, err := resp.Write(notFoundErrBytes)
 		if err != nil {
 			logger.Info("404 response fail",
@@ -151,6 +153,16 @@ func NewNotFoundHandler() http.HandlerFunc {
 			)
 		}
 		warner404.Inc(ip, 1)
+
+		tags := map[string]string{
+			"method": req.Method,
+		}
+		fields := map[string]interface{}{
+			"ip":         ip,
+			"uri":        req.RequestURI,
+			"statusCode": status,
+		}
+		helper.GetInfluxSrv().Write(cs.MeasurementHTTPStats, tags, fields)
 	}
 }
 
@@ -170,7 +182,8 @@ func NewMethodNotAllowedHandler() http.HandlerFunc {
 			zap.String("uri", req.RequestURI),
 		)
 		resp.Header().Set(elton.HeaderContentType, elton.MIMEApplicationJSON)
-		resp.WriteHeader(http.StatusMethodNotAllowed)
+		status := http.StatusMethodNotAllowed
+		resp.WriteHeader(status)
 		_, err := resp.Write(methodNotAllowedErrBytes)
 		if err != nil {
 			logger.Info("method not allowed response fail",
@@ -179,5 +192,14 @@ func NewMethodNotAllowedHandler() http.HandlerFunc {
 				zap.Error(err),
 			)
 		}
+		tags := map[string]string{
+			"method": req.Method,
+		}
+		fields := map[string]interface{}{
+			"ip":         ip,
+			"uri":        req.RequestURI,
+			"statusCode": status,
+		}
+		helper.GetInfluxSrv().Write(cs.MeasurementHTTPStats, tags, fields)
 	}
 }

@@ -18,8 +18,8 @@ import (
 	"bytes"
 	"time"
 
-	"github.com/vicanso/elton"
 	"github.com/vicanso/elite/service"
+	"github.com/vicanso/elton"
 )
 
 type GetConfigFunc func(method, route string) *service.RouterConfig

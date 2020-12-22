@@ -82,8 +82,9 @@ func init() {
 		SMaxAge:             time.Hour,
 		DenyQueryString:     true,
 		DisableLastModified: true,
-		// 静态文件的etag则pike缓存生成
-		// EnableStrongETag: true,
+		EnableStrongETag:    true,
+		// 如果静态文件都有版本号，可以指定immutable
+		Immutable: true,
 	}))
 }
 

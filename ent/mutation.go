@@ -12,6 +12,7 @@ import (
 	"github.com/vicanso/elite/ent/configuration"
 	"github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/ent/novelsource"
+	"github.com/vicanso/elite/ent/predicate"
 	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/ent/user"
 	"github.com/vicanso/elite/ent/userlogin"
@@ -56,6 +57,7 @@ type ChapterMutation struct {
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Chapter, error)
+	predicates    []predicate.Chapter
 }
 
 var _ ent.Mutation = (*ChapterMutation)(nil)
@@ -63,7 +65,7 @@ var _ ent.Mutation = (*ChapterMutation)(nil)
 // chapterOption allows to manage the mutation configuration using functional options.
 type chapterOption func(*ChapterMutation)
 
-// newChapterMutation creates new mutation for $n.Name.
+// newChapterMutation creates new mutation for Chapter.
 func newChapterMutation(c config, op Op, opts ...chapterOption) *ChapterMutation {
 	m := &ChapterMutation{
 		config:        c,
@@ -823,6 +825,7 @@ type ConfigurationMutation struct {
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Configuration, error)
+	predicates    []predicate.Configuration
 }
 
 var _ ent.Mutation = (*ConfigurationMutation)(nil)
@@ -830,7 +833,7 @@ var _ ent.Mutation = (*ConfigurationMutation)(nil)
 // configurationOption allows to manage the mutation configuration using functional options.
 type configurationOption func(*ConfigurationMutation)
 
-// newConfigurationMutation creates new mutation for $n.Name.
+// newConfigurationMutation creates new mutation for Configuration.
 func newConfigurationMutation(c config, op Op, opts ...configurationOption) *ConfigurationMutation {
 	m := &ConfigurationMutation{
 		config:        c,
@@ -1602,6 +1605,7 @@ type NovelMutation struct {
 	clearedFields     map[string]struct{}
 	done              bool
 	oldValue          func(context.Context) (*Novel, error)
+	predicates        []predicate.Novel
 }
 
 var _ ent.Mutation = (*NovelMutation)(nil)
@@ -1609,7 +1613,7 @@ var _ ent.Mutation = (*NovelMutation)(nil)
 // novelOption allows to manage the mutation configuration using functional options.
 type novelOption func(*NovelMutation)
 
-// newNovelMutation creates new mutation for $n.Name.
+// newNovelMutation creates new mutation for Novel.
 func newNovelMutation(c config, op Op, opts ...novelOption) *NovelMutation {
 	m := &NovelMutation{
 		config:        c,
@@ -2901,6 +2905,7 @@ type NovelSourceMutation struct {
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*NovelSource, error)
+	predicates    []predicate.NovelSource
 }
 
 var _ ent.Mutation = (*NovelSourceMutation)(nil)
@@ -2908,7 +2913,7 @@ var _ ent.Mutation = (*NovelSourceMutation)(nil)
 // novelsourceOption allows to manage the mutation configuration using functional options.
 type novelsourceOption func(*NovelSourceMutation)
 
-// newNovelSourceMutation creates new mutation for $n.Name.
+// newNovelSourceMutation creates new mutation for NovelSource.
 func newNovelSourceMutation(c config, op Op, opts ...novelsourceOption) *NovelSourceMutation {
 	m := &NovelSourceMutation{
 		config:        c,
@@ -3626,6 +3631,7 @@ type UserMutation struct {
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*User, error)
+	predicates    []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -3633,7 +3639,7 @@ var _ ent.Mutation = (*UserMutation)(nil)
 // userOption allows to manage the mutation configuration using functional options.
 type userOption func(*UserMutation)
 
-// newUserMutation creates new mutation for $n.Name.
+// newUserMutation creates new mutation for User.
 func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	m := &UserMutation{
 		config:        c,
@@ -4476,6 +4482,7 @@ type UserLoginMutation struct {
 	clearedFields   map[string]struct{}
 	done            bool
 	oldValue        func(context.Context) (*UserLogin, error)
+	predicates      []predicate.UserLogin
 }
 
 var _ ent.Mutation = (*UserLoginMutation)(nil)
@@ -4483,7 +4490,7 @@ var _ ent.Mutation = (*UserLoginMutation)(nil)
 // userloginOption allows to manage the mutation configuration using functional options.
 type userloginOption func(*UserLoginMutation)
 
-// newUserLoginMutation creates new mutation for $n.Name.
+// newUserLoginMutation creates new mutation for UserLogin.
 func newUserLoginMutation(c config, op Op, opts ...userloginOption) *UserLoginMutation {
 	m := &UserLoginMutation{
 		config:        c,
