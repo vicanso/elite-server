@@ -1,4 +1,4 @@
-.PHONY: default test test-cover dev generate
+.PHONY: default test test-cover dev generate hooks
 
 # for dev
 dev:
