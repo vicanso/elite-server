@@ -34,3 +34,6 @@ clean:
 
 lint:
 	golangci-lint run --timeout 2m --skip-dirs /web
+
+hooks:
+	cp hooks/* .git/hooks/

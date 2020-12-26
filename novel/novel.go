@@ -20,7 +20,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/vicanso/elite/config"
+	"github.com/vicanso/elite/cache"
 	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/chapter"
 	"github.com/vicanso/elite/ent/novel"
@@ -31,8 +31,6 @@ import (
 	"github.com/vicanso/hes"
 	"go.uber.org/zap"
 )
-
-var novelConfigs = config.GetNovelConfigs()
 
 var (
 	getEntClient = helper.EntGetClient
@@ -92,16 +90,6 @@ type (
 		Source int
 	}
 )
-
-// getConfig 获取对应的novel配置
-func getConfig(name string) (conf config.NovelConfig) {
-	for _, item := range novelConfigs {
-		if item.Name == name {
-			conf = item
-		}
-	}
-	return
-}
 
 // AddToSource 添加至小说源
 func (novel *Novel) AddToSource() (source *ent.NovelSource, err error) {
@@ -167,7 +155,7 @@ func (params *QueryParams) FirstNovelSource() (*ent.NovelSource, error) {
 
 // SyncSource 同步小说
 func (*Srv) SyncSource() (err error) {
-	redisSrv := new(helper.Redis)
+	redisSrv := new(cache.Redis)
 	// 确保只有一个实例在更新
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

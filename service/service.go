@@ -15,13 +15,13 @@
 package service
 
 import (
-	"github.com/vicanso/elite/helper"
+	"github.com/vicanso/elite/cache"
 	"github.com/vicanso/elite/log"
 )
 
 var (
 	logger = log.Default()
 
-	redisSrv = &helper.Redis{}
+	redisSrv = &cache.Redis{}
 	fileSrv  = &FileSrv{}
 )

@@ -61,8 +61,8 @@
           layout="prev, pager, next, sizes"
           :current-page="currentPage"
           :page-size="query.limit"
-          :total="userCount"
           :page-sizes="pageSizes"
+          :total="userCount"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         />
@@ -155,14 +155,14 @@ export default {
   },
   async beforeMount() {
     try {
-      const { userRoles } = await this.listUserRole();
+      const { roles } = await this.listUserRole();
       const { statuses } = await this.listUserStatus();
       userRoles.length = 0;
       userRoles.push({
         name: "所有",
         value: ""
       });
-      userRoles.push(...userRoles);
+      userRoles.push(...roles);
 
       userStatuses.length = 0;
       userStatuses.push({
