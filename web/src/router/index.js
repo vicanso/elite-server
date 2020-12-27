@@ -14,6 +14,7 @@ import {
   USERS,
   PROFILE,
   LOGINS,
+  TRACKERS,
   NOVEL_SOURCES,
   NOVELS,
   NOVEL_CHAPTERS
@@ -29,6 +30,7 @@ import RouterConcurrency from "@/views/configs/RouterConcurrency.vue";
 import SessionInterceptor from "@/views/configs/SessionInterceptor.vue";
 import Users from "@/views/Users.vue";
 import Logins from "@/views/Logins.vue";
+import Trackers from "@/views/Trackers.vue";
 import NovelSources from "@/views/NovelSources.vue";
 import Novels from "@/views/Novels.vue";
 import NovelChapters from "@/views/Chapters";
@@ -111,6 +113,14 @@ const routes = [
     path: "/logins",
     name: LOGINS,
     component: Logins,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/trackers",
+    name: TRACKERS,
+    component: Trackers,
     meta: {
       requiresAuth: true
     }
