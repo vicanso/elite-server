@@ -158,6 +158,7 @@ func newTracker(action string) elton.Handler {
 		OnTrack: func(info *M.TrackerInfo, c *elton.Context) {
 			account := ""
 			us := service.NewUserSession(c)
+			tid := util.GetTrackID(c)
 			if us != nil && us.IsLogin() {
 				account = us.MustGetInfo().Account
 			}
@@ -176,6 +177,7 @@ func newTracker(action string) elton.Handler {
 				"account": account,
 				"ip":      ip,
 				"sid":     sid,
+				"tid":     tid,
 			}
 			if len(info.Query) != 0 {
 				zapFields = append(zapFields, zap.Any("query", info.Query))
