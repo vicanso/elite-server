@@ -15,6 +15,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -153,12 +154,16 @@ func newCheckRolesMiddleware(validRoles []string) elton.Handler {
 
 // newTracker 初始化用户行为跟踪中间件
 func newTracker(action string) elton.Handler {
+	marshalString := func(data interface{}) string {
+		buf, _ := json.Marshal(data)
+		return string(buf)
+	}
 	return M.NewTracker(M.TrackerConfig{
 		Mask: regexp.MustCompile(`(?i)password`),
 		OnTrack: func(info *M.TrackerInfo, c *elton.Context) {
 			account := ""
-			us := service.NewUserSession(c)
 			tid := util.GetTrackID(c)
+			us := service.NewUserSession(c)
 			if us != nil && us.IsLogin() {
 				account = us.MustGetInfo().Account
 			}
@@ -171,6 +176,7 @@ func newTracker(action string) elton.Handler {
 				zap.String("account", account),
 				zap.String("ip", ip),
 				zap.String("sid", sid),
+				zap.String("tid", tid),
 				zap.Int("result", info.Result),
 			)
 			fields := map[string]interface{}{
@@ -181,15 +187,15 @@ func newTracker(action string) elton.Handler {
 			}
 			if len(info.Query) != 0 {
 				zapFields = append(zapFields, zap.Any("query", info.Query))
-				fields["query"] = info.Query
+				fields["query"] = marshalString(info.Query)
 			}
 			if len(info.Params) != 0 {
 				zapFields = append(zapFields, zap.Any("params", info.Params))
-				fields["params"] = info.Params
+				fields["params"] = marshalString(info.Params)
 			}
 			if len(info.Form) != 0 {
 				zapFields = append(zapFields, zap.Any("form", info.Form))
-				fields["form"] = info.Form
+				fields["form"] = marshalString(info.Form)
 			}
 			if info.Err != nil {
 				zapFields = append(zapFields, zap.Error(info.Err))
