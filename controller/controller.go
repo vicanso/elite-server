@@ -37,35 +37,17 @@ import (
 type listParams = helper.EntListParams
 
 var (
-	errShouldLogin = &hes.Error{
-		Message:    "请先登录",
-		StatusCode: http.StatusBadRequest,
-		Category:   errUserCategory,
-	}
-	errLoginAlready = &hes.Error{
-		Message:    "已是登录状态，请先退出登录",
-		StatusCode: http.StatusBadRequest,
-		Category:   errUserCategory,
-	}
-	errForbidden = &hes.Error{
-		StatusCode: http.StatusForbidden,
-		Message:    "禁止使用该功能",
-		Category:   errUserCategory,
-	}
-)
-
-var (
 	logger       = log.Default()
 	getEntClient = helper.EntGetClient
 	now          = util.NowString
 
 	getUserSession = service.NewUserSession
 	// 加载用户session
-	loadUserSession = elton.Compose(sessionInterceptor, middleware.NewSession())
+	loadUserSession = elton.Compose(sessionInterceptorMiddleware, middleware.NewSession())
 	// 判断用户是否登录
-	shouldBeLogin = checkLogin
+	shouldBeLogin = checkLoginMiddleware
 	// 判断用户是否未登录
-	shouldBeAnonymous = checkAnonymous
+	shouldBeAnonymous = checkAnonymousMiddleware
 	// 判断用户是否admin权限
 	shouldBeAdmin = newCheckRolesMiddleware([]string{
 		schema.UserRoleSu,
@@ -113,19 +95,27 @@ func isLogin(c *elton.Context) bool {
 	return us.IsLogin()
 }
 
-// checkLogin 校验是否登录中间件
-func checkLogin(c *elton.Context) (err error) {
+func validateLogin(c *elton.Context) (err error) {
 	if !isLogin(c) {
-		err = errShouldLogin
+		err = hes.New("请先登录", errUserCategory)
+		return
+	}
+	return
+}
+
+// checkLoginMiddleware 校验是否登录中间件
+func checkLoginMiddleware(c *elton.Context) (err error) {
+	err = validateLogin(c)
+	if err != nil {
 		return
 	}
 	return c.Next()
 }
 
-// checkAnonymous 判断是匿名状态
-func checkAnonymous(c *elton.Context) (err error) {
+// checkAnonymousMiddleware 判断是匿名状态
+func checkAnonymousMiddleware(c *elton.Context) (err error) {
 	if isLogin(c) {
-		err = errLoginAlready
+		err = hes.New("已是登录状态，请先退出登录", errUserCategory)
 		return
 	}
 	return c.Next()
@@ -134,8 +124,8 @@ func checkAnonymous(c *elton.Context) (err error) {
 // newCheckRolesMiddleware 创建用户角色校验中间件
 func newCheckRolesMiddleware(validRoles []string) elton.Handler {
 	return func(c *elton.Context) (err error) {
-		if !isLogin(c) {
-			err = errShouldLogin
+		err = validateLogin(c)
+		if err != nil {
 			return
 		}
 		us := service.NewUserSession(c)
@@ -147,13 +137,13 @@ func newCheckRolesMiddleware(validRoles []string) elton.Handler {
 		if valid {
 			return c.Next()
 		}
-		err = errForbidden
+		err = hes.NewWithStatusCode("禁止使用该功能", http.StatusForbidden, errUserCategory)
 		return
 	}
 }
 
-// newTracker 初始化用户行为跟踪中间件
-func newTracker(action string) elton.Handler {
+// newTrackerMiddleware 初始化用户行为跟踪中间件
+func newTrackerMiddleware(action string) elton.Handler {
 	marshalString := func(data interface{}) string {
 		buf, _ := json.Marshal(data)
 		return string(buf)
@@ -221,13 +211,13 @@ func getIDFromParams(c *elton.Context) (id int, err error) {
 	return
 }
 
-// sessionInterceptor session的拦截
-func sessionInterceptor(c *elton.Context) error {
+// sessionInterceptorMiddleware session的拦截
+func sessionInterceptorMiddleware(c *elton.Context) error {
 	message, ok := service.GetSessionInterceptorMessage()
 	// 如果有配置拦截信息，则以出错返回
 	if ok {
 		he := hes.New(message)
-		he.Category = "sessionInterceptor"
+		he.Category = "sessionInterceptorMiddleware"
 		return he
 	}
 	return c.Next()

@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"net/http"
 	"time"
 
 	"github.com/vicanso/elite/cs"
@@ -72,14 +71,6 @@ const (
 	errConfigurationCategory = "configuration"
 )
 
-var (
-	errConfigurationExists = &hes.Error{
-		Message:    "该配置已存在",
-		StatusCode: http.StatusBadRequest,
-		Category:   errConfigurationCategory,
-	}
-)
-
 func init() {
 	g := router.NewGroup("/configurations", loadUserSession, shouldBeSu)
 	ctrl := configurationCtrl{}
@@ -93,14 +84,14 @@ func init() {
 	// 添加配置
 	g.POST(
 		"/v1",
-		newTracker(cs.ActionConfigurationAdd),
+		newTrackerMiddleware(cs.ActionConfigurationAdd),
 		ctrl.add,
 	)
 
 	// 更新配置
 	g.PATCH(
 		"/v1/{id}",
-		newTracker(cs.ActionConfigurationUpdate),
+		newTrackerMiddleware(cs.ActionConfigurationUpdate),
 		ctrl.update,
 	)
 
@@ -120,7 +111,7 @@ func (params *configurationAddParams) validateBeforeSave(ctx context.Context) (e
 		return
 	}
 	if exists {
-		err = errConfigurationExists
+		err = hes.New("该配置已存在", errConfigurationCategory)
 		return
 	}
 	return

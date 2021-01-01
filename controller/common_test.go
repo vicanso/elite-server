@@ -22,6 +22,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elton"
+	"github.com/vicanso/hes"
 )
 
 func TestCommonCtrl(t *testing.T) {
@@ -35,7 +36,7 @@ func TestCommonCtrl(t *testing.T) {
 		service.SetApplicationStatus(service.ApplicationStatusStopped)
 		c := elton.NewContext(httptest.NewRecorder(), nil)
 		err := ctrl.ping(c)
-		assert.Equal(errAppIsNotRunning, err)
+		assert.Equal("应用服务不可用", err.(*hes.Error).Message)
 
 		service.SetApplicationStatus(service.ApplicationStatusRunning)
 		err = ctrl.ping(c)

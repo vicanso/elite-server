@@ -116,6 +116,8 @@ type (
 			Route string `json:"route,omitempty" validate:"required,xUserActionRoute"`
 			// Time 记录的时间戳，单位秒
 			Time int64 `json:"time,omitempty" validate:"required"`
+			// Extra 其它额外信息
+			Extra map[string]interface{} `json:"extra,omitempty"`
 		} `json:"actions,omitempty" validate:"required,dive"`
 	}
 	// userTrackerListParams 查询用户tracker记录
@@ -133,34 +135,6 @@ var (
 
 const (
 	errUserCategory = "user"
-)
-
-var (
-	errLoginTokenNil = &hes.Error{
-		Message:    "登录令牌不能为空",
-		StatusCode: http.StatusBadRequest,
-		Category:   errUserCategory,
-	}
-	errAccountOrPasswordInvalid = &hes.Error{
-		Message:    "账户或者密码错误",
-		StatusCode: http.StatusBadRequest,
-		Category:   errUserCategory,
-	}
-	errOldPasswordWrong = &hes.Error{
-		Message:    "旧密码错误，请重新输入",
-		StatusCode: http.StatusBadRequest,
-		Category:   errUserCategory,
-	}
-	errUserStatusInvalid = &hes.Error{
-		Message:    "该账户不允许登录",
-		StatusCode: http.StatusBadRequest,
-		Category:   errUserCategory,
-	}
-	errUserAccountExists = &hes.Error{
-		Message:    "该账户已注册",
-		StatusCode: http.StatusBadRequest,
-		Category:   errUserCategory,
-	}
 )
 
 func init() {
@@ -210,7 +184,7 @@ func init() {
 		"/v1/me",
 		// 注册无论成功失败都最少等待1秒
 		middleware.WaitFor(time.Second),
-		newTracker(cs.ActionRegister),
+		newTrackerMiddleware(cs.ActionRegister),
 		captchaValidate,
 		// 限制相同IP在60秒之内只能调用5次
 		newIPLimit(5, 60*time.Second, cs.ActionRegister),
@@ -223,7 +197,7 @@ func init() {
 		"/v1/me/login",
 		// 登录如果失败则最少等待1秒
 		middleware.WaitFor(time.Second, true),
-		newTracker(cs.ActionLogin),
+		newTrackerMiddleware(cs.ActionLogin),
 		captchaValidate,
 		shouldBeAnonymous,
 		// 同一个账号限制3秒只能登录一次（无论成功还是失败）
@@ -242,14 +216,15 @@ func init() {
 	// 刷新user session的ttl
 	g.PATCH(
 		"/v1/me",
-		newTracker(cs.ActionUserMeUpdate),
+		newTrackerMiddleware(cs.ActionUserMeUpdate),
+		shouldBeLogin,
 		ctrl.updateMe,
 	)
 
 	// 用户退出登录
 	g.DELETE(
 		"/v1/me",
-		newTracker(cs.ActionLogout),
+		newTrackerMiddleware(cs.ActionLogout),
 		shouldBeLogin,
 		ctrl.logout,
 	)
@@ -293,7 +268,7 @@ func (params *userRegisterLoginParams) validateBeforeSave(ctx context.Context) (
 		return
 	}
 	if exists {
-		err = errUserAccountExists
+		err = hes.New("该账户已注册", errUserCategory)
 		return
 	}
 
@@ -317,6 +292,7 @@ func (params *userRegisterLoginParams) login(ctx context.Context, token string) 
 	u, err = getEntClient().User.Query().
 		Where(user.Account(params.Account)).
 		First(ctx)
+	errAccountOrPasswordInvalid := hes.New("账户或者密码错误", errUserCategory)
 	if err != nil {
 		// 如果登录时账号不存在
 		if ent.IsNotFound(err) {
@@ -335,7 +311,7 @@ func (params *userRegisterLoginParams) login(ctx context.Context, token string) 
 	}
 	// 禁止非正常状态用户登录
 	if u.Status != schema.StatusEnabled {
-		err = errUserStatusInvalid
+		err = hes.NewWithStatusCode("该账户不允许登录", http.StatusForbidden, errUserCategory)
 		return
 	}
 	return
@@ -353,7 +329,7 @@ func (params *userUpdateMeParams) updateOneAccount(ctx context.Context, account 
 	// 更新密码时需要先校验旧密码
 	if params.NewPassword != "" {
 		if u.Password != params.Password {
-			err = errOldPasswordWrong
+			err = hes.New("旧密码错误，请重新输入", errUserCategory)
 			return
 		}
 	}
@@ -621,7 +597,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 	}
 
 	if userInfo.Token == "" {
-		err = errLoginTokenNil
+		err = hes.New("登录令牌不能为空", errUserCategory)
 		return
 	}
 	// 登录
@@ -756,16 +732,7 @@ func (ctrl *userCtrl) updateMe(c *elton.Context) (err error) {
 		return ctrl.refresh(c)
 	}
 	us := getUserSession(c)
-	// 如果获取不到session，则直接返回
-	if us == nil {
-		c.NoContent()
-		return
-	}
-	// 如果未登录，无法修改用户信息
-	if !us.IsLogin() {
-		err = errShouldLogin
-		return
-	}
+
 	params := userUpdateMeParams{}
 	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
@@ -826,24 +793,29 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	account := us.MustGetInfo().Account
 
+	count := 0
 	for _, item := range params.Actions {
 		// 如果时间大于当前时间或者一天前，则忽略
 		if item.Time > now || item.Time < now-24*3600 {
 			continue
 		}
+		count++
 		// 由于客户端的统计时间精度只到second
 		// 随机生成nano second填充
 		nsec := rand.Int() % int(time.Second)
 		t := time.Unix(item.Time, int64(nsec))
-		getInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{
-			"category": item.Category,
-		}, map[string]interface{}{
+		fields := map[string]interface{}{
 			"account": account,
 			"route":   item.Route,
-		}, t)
+		}
+		fields = util.MergeMapStringInterface(fields, item.Extra)
+		getInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{
+			"category": item.Category,
+		}, fields, t)
 	}
-
-	c.NoContent()
+	c.Body = map[string]int{
+		"count": count,
+	}
 	return
 }
 

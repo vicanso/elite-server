@@ -44,14 +44,6 @@ const (
 	defaultQueryTimeout = 3 * time.Second
 )
 
-var (
-	errNovelSourceNotFound = &hes.Error{
-		Message:    "无法找到该小说的源",
-		StatusCode: 400,
-		Category:   errNovelCategory,
-	}
-)
-
 // 小说来源
 const (
 	// NovelSourceBiQuGe biquge source
@@ -200,7 +192,7 @@ func (*Srv) GetFetcher(params QueryParams) (fetcher Fetcher, err error) {
 		return
 	}
 	if novelSource == nil {
-		err = errNovelSourceNotFound
+		err = hes.New("无法找到该小说的源", errNovelCategory)
 		return
 	}
 	// TODO 后续添更多的源

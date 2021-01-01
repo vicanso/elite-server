@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -46,24 +45,6 @@ import (
 const eliteCoverBucket = "elite-covers"
 
 const errNovelCategory = "novel"
-
-var (
-	novelNoMatchRecord = &hes.Error{
-		Message:    "没有匹配的记录",
-		StatusCode: http.StatusBadRequest,
-		Category:   errNovelCategory,
-	}
-	novelIDInvalid = &hes.Error{
-		Message:    "ID不能为空",
-		StatusCode: http.StatusBadRequest,
-		Category:   errNovelCategory,
-	}
-	novelCoverNotFound = &hes.Error{
-		Message:    "无法更新封面",
-		StatusCode: http.StatusBadRequest,
-		Category:   errNovelCategory,
-	}
-)
 
 type (
 	novelCtrl struct{}
@@ -175,7 +156,7 @@ func init() {
 	// 单本小说更新
 	g.PATCH(
 		"/v1/{id}",
-		newTracker(cs.ActionNovelUpdate),
+		newTrackerMiddleware(cs.ActionNovelUpdate),
 		loadUserSession,
 		shouldBeAdmin,
 		ctrl.updateByID,
@@ -225,7 +206,7 @@ func init() {
 	// 指定小说更新所有章节
 	g.POST(
 		"/v1/{id}/update-chapters",
-		newTracker(cs.ActionNovelChaptersUpdate),
+		newTrackerMiddleware(cs.ActionNovelChaptersUpdate),
 		loadUserSession,
 		shouldBeAdmin,
 		ctrl.updateChaptersByID,
@@ -238,7 +219,7 @@ func init() {
 	// 根据ID更新小说章节
 	g.PATCH(
 		"/v1/chapters/{id}",
-		newTracker(cs.ActionNovelChapterUpdate),
+		newTrackerMiddleware(cs.ActionNovelChapterUpdate),
 		loadUserSession,
 		shouldBeAdmin,
 		ctrl.updateChapterByID,
@@ -350,7 +331,7 @@ func (params *novelSourceListParams) count(ctx context.Context) (count int, err 
 // update 更新小说
 func (params *novelUpdateParams) update(ctx context.Context) (err error) {
 	if params.ID == 0 {
-		err = novelIDInvalid
+		err = hes.New("小说ID不能为空", errNovelCategory)
 		return
 	}
 	update := getEntClient().Novel.UpdateOneID(params.ID)
@@ -365,7 +346,7 @@ func (params *novelUpdateParams) update(ctx context.Context) (err error) {
 		return
 	}
 	if result == nil {
-		err = novelNoMatchRecord
+		err = hes.New("无匹配的小说记录", errNovelCategory)
 		return
 	}
 	return
@@ -373,7 +354,7 @@ func (params *novelUpdateParams) update(ctx context.Context) (err error) {
 
 func (params *novelChapterUpdateParams) update(ctx context.Context) (err error) {
 	if params.ID == 0 {
-		err = novelIDInvalid
+		err = hes.New("小说章节ID不能为空", errNovelCategory)
 		return
 	}
 	update := getEntClient().Chapter.UpdateOneID(params.ID)
@@ -389,7 +370,7 @@ func (params *novelChapterUpdateParams) update(ctx context.Context) (err error) 
 		return
 	}
 	if result == nil {
-		err = novelNoMatchRecord
+		err = hes.New("无匹配的小说章节记录", errNovelCategory)
 		return
 	}
 	return
@@ -553,7 +534,7 @@ func (*novelCtrl) updateCoverByID(c *elton.Context) (err error) {
 		return
 	}
 	if qiDianResult.CoverURL == "" {
-		err = novelCoverNotFound
+		err = hes.New("无法获取小说封面", errNovelCategory)
 		return
 	}
 	err = updateCoverByURL(id, qiDianResult.CoverURL)
