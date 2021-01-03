@@ -176,6 +176,7 @@ func newOnErrorHandler(e *elton.Elton) {
 func main() {
 	e := elton.New()
 	e.Server.ConnState = service.GetHTTPServerConnState()
+	e.Server.ErrorLog = log.NewHTTPServerLogger()
 
 	logger := log.Default()
 	defer func() {

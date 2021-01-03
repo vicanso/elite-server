@@ -15,26 +15,43 @@
 package log
 
 import (
+	"log"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
 	"github.com/vicanso/elite/util"
 )
 
-var defaultLogger = newLoggerX()
+var defaultLogger = mustNewLogger()
 
-// newLoggerX 初始化logger
-func newLoggerX() *zap.Logger {
+type httpServerLogger struct{}
+
+func (hsl *httpServerLogger) Write(p []byte) (int, error) {
+	defaultLogger.Info(string(p),
+		zap.String("category", "httpServerLogger"),
+	)
+	return len(p), nil
+}
+
+// mustNewLogger 初始化logger
+func mustNewLogger() *zap.Logger {
 
 	if util.IsDevelopment() {
 		c := zap.NewDevelopmentConfig()
-		l, err := c.Build()
+		l, err := c.Build(zap.AddStacktrace(zap.ErrorLevel))
 		if err != nil {
 			panic(err)
 		}
 		return l
 	}
 	c := zap.NewProductionConfig()
+
+	// 在一秒钟内, 如果某个级别的日志输出量超过了 Initial, 那么在超过之后, 每 Thereafter 条日志才会输出一条, 其余的日志都将被删除
+	c.Sampling.Initial = 1000
+	// 如果不希望任何日志丢失，则设置为nil
+	// c.Sampling = nil
+
 	c.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	// 只针对panic 以上的日志增加stack trace
 	l, err := c.Build(zap.AddStacktrace(zap.DPanicLevel))
@@ -47,4 +64,9 @@ func newLoggerX() *zap.Logger {
 // Default 获取默认的logger
 func Default() *zap.Logger {
 	return defaultLogger
+}
+
+// NewHTTPServerLogger create a http server logger
+func NewHTTPServerLogger() *log.Logger {
+	return log.New(&httpServerLogger{}, "", 0)
 }
