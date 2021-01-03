@@ -22,6 +22,6 @@ import (
 var (
 	logger = log.Default()
 
-	redisSrv = &cache.Redis{}
+	redisSrv = cache.GetRedisCache()
 	fileSrv  = &FileSrv{}
 )

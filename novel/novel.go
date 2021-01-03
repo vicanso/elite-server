@@ -147,7 +147,7 @@ func (params *QueryParams) FirstNovelSource() (*ent.NovelSource, error) {
 
 // SyncSource 同步小说
 func (*Srv) SyncSource() (err error) {
-	redisSrv := new(cache.Redis)
+	redisSrv := cache.GetRedisCache()
 	// 确保只有一个实例在更新
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
