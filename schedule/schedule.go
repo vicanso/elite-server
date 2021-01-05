@@ -33,9 +33,9 @@ type (
 	statsTaskFn func() map[string]interface{}
 )
 
-var (
-	logger = log.Default()
-)
+var logger = log.Default()
+
+const logCategory = "schedule"
 
 func init() {
 	c := cron.New()
@@ -48,6 +48,7 @@ func init() {
 	_, _ = c.AddFunc("@every 30s", cpuUsageStats)
 	_, _ = c.AddFunc("@every 1m", performanceStats)
 	_, _ = c.AddFunc("@every 1m", httpInstanceStats)
+	_, _ = c.AddFunc("@every 1m", routerConcurrencyStats)
 
 	_, _ = c.AddFunc("@every 24h", updateAllNovelWordCount)
 	_, _ = c.AddFunc("@every 24h", updateAllNovelUpdatedWeight)
@@ -70,14 +71,14 @@ func doTask(desc string, fn taskFn) {
 	err := fn()
 	if err != nil {
 		logger.Error(desc+" fail",
-			zap.String("category", "schedule"),
+			zap.String("category", logCategory),
 			zap.Duration("use", time.Since(startedAt)),
 			zap.Error(err),
 		)
 		service.AlarmError(desc + " fail, " + err.Error())
 	} else {
 		logger.Info(desc+" success",
-			zap.String("category", "schedule"),
+			zap.String("category", logCategory),
 			zap.Duration("use", time.Since(startedAt)),
 		)
 	}
@@ -87,7 +88,7 @@ func doStatsTask(desc string, fn statsTaskFn) {
 	startedAt := time.Now()
 	stats := fn()
 	logger.Info(desc,
-		zap.String("category", "schedule"),
+		zap.String("category", logCategory),
 		zap.Duration("use", time.Since(startedAt)),
 		zap.Any("stats", stats),
 	)
@@ -205,4 +206,27 @@ func httpInstanceStats() {
 // influxdbPing influxdb ping
 func influxdbPing() {
 	doTask("influxdb ping", helper.GetInfluxSrv().Health)
+}
+
+// routerConcurrencyStats router concurrency stats
+func routerConcurrencyStats() {
+	doStatsTask("router concurrency stats", func() map[string]interface{} {
+		result := service.GetRouterConcurrencyLimiter().GetStats()
+		fields := make(map[string]interface{})
+
+		influxSrv := helper.GetInfluxSrv()
+		for key, value := range result {
+			// 如果并发为0，则不记录
+			if value == 0 {
+				continue
+			}
+			fields[key] = value
+			influxSrv.Write(cs.MeasurementRouterConcurrency, map[string]string{
+				"route": key,
+			}, map[string]interface{}{
+				"count": value,
+			})
+		}
+		return fields
+	})
 }

@@ -1,11 +1,11 @@
 import dayjs from "dayjs";
 import { sha256 } from "@/helpers/crypto";
 
-const hash = "JT";
+const hash = "ELITE";
 const oneDayMS = 24 * 3600 * 1000;
 
 export function generatePassword(pass) {
-  return sha256(pass + hash);
+  return sha256(hash + sha256(pass + hash));
 }
 
 // formatDate 格式化日期

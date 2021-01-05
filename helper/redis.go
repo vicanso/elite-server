@@ -23,6 +23,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/cs"
+	"github.com/vicanso/elite/log"
 	"github.com/vicanso/hes"
 	"go.uber.org/atomic"
 	"go.uber.org/zap"
@@ -30,8 +31,6 @@ import (
 
 var (
 	defaultRedisClient, defaultRedisHook = mustNewRedisClient()
-	// errRedisNil 为空是返回的出错
-	ErrRedisNil = hes.New("key is not exists or expired")
 	// ErrRedisTooManyProcessing 处理请求太多时的出错
 	ErrRedisTooManyProcessing = &hes.Error{
 		Message:    "too many processing",
@@ -62,6 +61,7 @@ func mustNewRedisClient() (*redis.Client, *redisHook) {
 		slow:          redisConfig.Slow,
 		maxProcessing: redisConfig.MaxProcessing,
 	}
+	redis.SetLogger(log.NewRedisLogger())
 	c := redis.NewClient(&redis.Options{
 		Addr:     redisConfig.Addr,
 		Password: redisConfig.Password,
@@ -69,6 +69,10 @@ func mustNewRedisClient() (*redis.Client, *redisHook) {
 		Limiter:  hook,
 		OnConnect: func(ctx context.Context, cn *redis.Conn) error {
 			logger.Info("redis new connection is established")
+			// TODO redis支持OnClose时，则增加count: -1的统计
+			GetInfluxSrv().Write(cs.MeasurementRedisConn, nil, map[string]interface{}{
+				"count": 1,
+			})
 			return nil
 		},
 	})
@@ -182,7 +186,7 @@ func RedisGetClient() *redis.Client {
 
 // RedisIsNilError 判断是否redis的nil error
 func RedisIsNilError(err error) bool {
-	return err == ErrRedisNil || err == redis.Nil
+	return err == redis.Nil
 }
 
 // RedisStats 获取redis的性能统计
