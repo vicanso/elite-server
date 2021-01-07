@@ -37,8 +37,7 @@ const (
 	TypeUserLogin     = "UserLogin"
 )
 
-// ChapterMutation represents an operation that mutate the Chapters
-// nodes in the graph.
+// ChapterMutation represents an operation that mutates the Chapter nodes in the graph.
 type ChapterMutation struct {
 	config
 	op            Op
@@ -62,10 +61,10 @@ type ChapterMutation struct {
 
 var _ ent.Mutation = (*ChapterMutation)(nil)
 
-// chapterOption allows to manage the mutation configuration using functional options.
+// chapterOption allows management of the mutation configuration using functional options.
 type chapterOption func(*ChapterMutation)
 
-// newChapterMutation creates new mutation for Chapter.
+// newChapterMutation creates new mutation for the Chapter entity.
 func newChapterMutation(c config, op Op, opts ...chapterOption) *ChapterMutation {
 	m := &ChapterMutation{
 		config:        c,
@@ -79,7 +78,7 @@ func newChapterMutation(c config, op Op, opts ...chapterOption) *ChapterMutation
 	return m
 }
 
-// withChapterID sets the id field of the mutation.
+// withChapterID sets the ID field of the mutation.
 func withChapterID(id int) chapterOption {
 	return func(m *ChapterMutation) {
 		var (
@@ -130,8 +129,8 @@ func (m ChapterMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the id value in the mutation. Note that, the id
-// is available only if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID
+// is only available if it was provided to the builder.
 func (m *ChapterMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -139,12 +138,12 @@ func (m *ChapterMutation) ID() (id int, exists bool) {
 	return *m.id, true
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (m *ChapterMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
-// CreatedAt returns the created_at value in the mutation.
+// CreatedAt returns the value of the "created_at" field in the mutation.
 func (m *ChapterMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
@@ -153,13 +152,12 @@ func (m *ChapterMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old created_at value of the Chapter.
-// If the Chapter object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldCreatedAt returns the old "created_at" field's value of the Chapter entity.
+// If the Chapter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ChapterMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
@@ -171,17 +169,17 @@ func (m *ChapterMutation) OldCreatedAt(ctx context.Context) (v time.Time, err er
 	return oldValue.CreatedAt, nil
 }
 
-// ResetCreatedAt reset all changes of the "created_at" field.
+// ResetCreatedAt resets all changes to the "created_at" field.
 func (m *ChapterMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetUpdatedAt sets the updated_at field.
+// SetUpdatedAt sets the "updated_at" field.
 func (m *ChapterMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
 }
 
-// UpdatedAt returns the updated_at value in the mutation.
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
 func (m *ChapterMutation) UpdatedAt() (r time.Time, exists bool) {
 	v := m.updated_at
 	if v == nil {
@@ -190,13 +188,12 @@ func (m *ChapterMutation) UpdatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old updated_at value of the Chapter.
-// If the Chapter object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldUpdatedAt returns the old "updated_at" field's value of the Chapter entity.
+// If the Chapter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ChapterMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
@@ -208,18 +205,18 @@ func (m *ChapterMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err er
 	return oldValue.UpdatedAt, nil
 }
 
-// ResetUpdatedAt reset all changes of the "updated_at" field.
+// ResetUpdatedAt resets all changes to the "updated_at" field.
 func (m *ChapterMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetNovel sets the novel field.
+// SetNovel sets the "novel" field.
 func (m *ChapterMutation) SetNovel(i int) {
 	m.novel = &i
 	m.addnovel = nil
 }
 
-// Novel returns the novel value in the mutation.
+// Novel returns the value of the "novel" field in the mutation.
 func (m *ChapterMutation) Novel() (r int, exists bool) {
 	v := m.novel
 	if v == nil {
@@ -228,13 +225,12 @@ func (m *ChapterMutation) Novel() (r int, exists bool) {
 	return *v, true
 }
 
-// OldNovel returns the old novel value of the Chapter.
-// If the Chapter object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldNovel returns the old "novel" field's value of the Chapter entity.
+// If the Chapter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ChapterMutation) OldNovel(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldNovel is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldNovel is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldNovel requires an ID field in the mutation")
@@ -246,7 +242,7 @@ func (m *ChapterMutation) OldNovel(ctx context.Context) (v int, err error) {
 	return oldValue.Novel, nil
 }
 
-// AddNovel adds i to novel.
+// AddNovel adds i to the "novel" field.
 func (m *ChapterMutation) AddNovel(i int) {
 	if m.addnovel != nil {
 		*m.addnovel += i
@@ -255,7 +251,7 @@ func (m *ChapterMutation) AddNovel(i int) {
 	}
 }
 
-// AddedNovel returns the value that was added to the novel field in this mutation.
+// AddedNovel returns the value that was added to the "novel" field in this mutation.
 func (m *ChapterMutation) AddedNovel() (r int, exists bool) {
 	v := m.addnovel
 	if v == nil {
@@ -264,19 +260,19 @@ func (m *ChapterMutation) AddedNovel() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetNovel reset all changes of the "novel" field.
+// ResetNovel resets all changes to the "novel" field.
 func (m *ChapterMutation) ResetNovel() {
 	m.novel = nil
 	m.addnovel = nil
 }
 
-// SetNo sets the no field.
+// SetNo sets the "no" field.
 func (m *ChapterMutation) SetNo(i int) {
 	m.no = &i
 	m.addno = nil
 }
 
-// No returns the no value in the mutation.
+// No returns the value of the "no" field in the mutation.
 func (m *ChapterMutation) No() (r int, exists bool) {
 	v := m.no
 	if v == nil {
@@ -285,13 +281,12 @@ func (m *ChapterMutation) No() (r int, exists bool) {
 	return *v, true
 }
 
-// OldNo returns the old no value of the Chapter.
-// If the Chapter object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldNo returns the old "no" field's value of the Chapter entity.
+// If the Chapter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ChapterMutation) OldNo(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldNo is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldNo is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldNo requires an ID field in the mutation")
@@ -303,7 +298,7 @@ func (m *ChapterMutation) OldNo(ctx context.Context) (v int, err error) {
 	return oldValue.No, nil
 }
 
-// AddNo adds i to no.
+// AddNo adds i to the "no" field.
 func (m *ChapterMutation) AddNo(i int) {
 	if m.addno != nil {
 		*m.addno += i
@@ -312,7 +307,7 @@ func (m *ChapterMutation) AddNo(i int) {
 	}
 }
 
-// AddedNo returns the value that was added to the no field in this mutation.
+// AddedNo returns the value that was added to the "no" field in this mutation.
 func (m *ChapterMutation) AddedNo() (r int, exists bool) {
 	v := m.addno
 	if v == nil {
@@ -321,18 +316,18 @@ func (m *ChapterMutation) AddedNo() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetNo reset all changes of the "no" field.
+// ResetNo resets all changes to the "no" field.
 func (m *ChapterMutation) ResetNo() {
 	m.no = nil
 	m.addno = nil
 }
 
-// SetTitle sets the title field.
+// SetTitle sets the "title" field.
 func (m *ChapterMutation) SetTitle(s string) {
 	m.title = &s
 }
 
-// Title returns the title value in the mutation.
+// Title returns the value of the "title" field in the mutation.
 func (m *ChapterMutation) Title() (r string, exists bool) {
 	v := m.title
 	if v == nil {
@@ -341,13 +336,12 @@ func (m *ChapterMutation) Title() (r string, exists bool) {
 	return *v, true
 }
 
-// OldTitle returns the old title value of the Chapter.
-// If the Chapter object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldTitle returns the old "title" field's value of the Chapter entity.
+// If the Chapter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ChapterMutation) OldTitle(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldTitle is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldTitle is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldTitle requires an ID field in the mutation")
@@ -359,17 +353,17 @@ func (m *ChapterMutation) OldTitle(ctx context.Context) (v string, err error) {
 	return oldValue.Title, nil
 }
 
-// ResetTitle reset all changes of the "title" field.
+// ResetTitle resets all changes to the "title" field.
 func (m *ChapterMutation) ResetTitle() {
 	m.title = nil
 }
 
-// SetContent sets the content field.
+// SetContent sets the "content" field.
 func (m *ChapterMutation) SetContent(s string) {
 	m.content = &s
 }
 
-// Content returns the content value in the mutation.
+// Content returns the value of the "content" field in the mutation.
 func (m *ChapterMutation) Content() (r string, exists bool) {
 	v := m.content
 	if v == nil {
@@ -378,13 +372,12 @@ func (m *ChapterMutation) Content() (r string, exists bool) {
 	return *v, true
 }
 
-// OldContent returns the old content value of the Chapter.
-// If the Chapter object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldContent returns the old "content" field's value of the Chapter entity.
+// If the Chapter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ChapterMutation) OldContent(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldContent is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldContent is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldContent requires an ID field in the mutation")
@@ -396,31 +389,31 @@ func (m *ChapterMutation) OldContent(ctx context.Context) (v string, err error) 
 	return oldValue.Content, nil
 }
 
-// ClearContent clears the value of content.
+// ClearContent clears the value of the "content" field.
 func (m *ChapterMutation) ClearContent() {
 	m.content = nil
 	m.clearedFields[chapter.FieldContent] = struct{}{}
 }
 
-// ContentCleared returns if the field content was cleared in this mutation.
+// ContentCleared returns if the "content" field was cleared in this mutation.
 func (m *ChapterMutation) ContentCleared() bool {
 	_, ok := m.clearedFields[chapter.FieldContent]
 	return ok
 }
 
-// ResetContent reset all changes of the "content" field.
+// ResetContent resets all changes to the "content" field.
 func (m *ChapterMutation) ResetContent() {
 	m.content = nil
 	delete(m.clearedFields, chapter.FieldContent)
 }
 
-// SetWordCount sets the word_count field.
+// SetWordCount sets the "word_count" field.
 func (m *ChapterMutation) SetWordCount(i int) {
 	m.word_count = &i
 	m.addword_count = nil
 }
 
-// WordCount returns the word_count value in the mutation.
+// WordCount returns the value of the "word_count" field in the mutation.
 func (m *ChapterMutation) WordCount() (r int, exists bool) {
 	v := m.word_count
 	if v == nil {
@@ -429,13 +422,12 @@ func (m *ChapterMutation) WordCount() (r int, exists bool) {
 	return *v, true
 }
 
-// OldWordCount returns the old word_count value of the Chapter.
-// If the Chapter object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldWordCount returns the old "word_count" field's value of the Chapter entity.
+// If the Chapter object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ChapterMutation) OldWordCount(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldWordCount is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldWordCount is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldWordCount requires an ID field in the mutation")
@@ -447,7 +439,7 @@ func (m *ChapterMutation) OldWordCount(ctx context.Context) (v int, err error) {
 	return oldValue.WordCount, nil
 }
 
-// AddWordCount adds i to word_count.
+// AddWordCount adds i to the "word_count" field.
 func (m *ChapterMutation) AddWordCount(i int) {
 	if m.addword_count != nil {
 		*m.addword_count += i
@@ -456,7 +448,7 @@ func (m *ChapterMutation) AddWordCount(i int) {
 	}
 }
 
-// AddedWordCount returns the value that was added to the word_count field in this mutation.
+// AddedWordCount returns the value that was added to the "word_count" field in this mutation.
 func (m *ChapterMutation) AddedWordCount() (r int, exists bool) {
 	v := m.addword_count
 	if v == nil {
@@ -465,20 +457,20 @@ func (m *ChapterMutation) AddedWordCount() (r int, exists bool) {
 	return *v, true
 }
 
-// ClearWordCount clears the value of word_count.
+// ClearWordCount clears the value of the "word_count" field.
 func (m *ChapterMutation) ClearWordCount() {
 	m.word_count = nil
 	m.addword_count = nil
 	m.clearedFields[chapter.FieldWordCount] = struct{}{}
 }
 
-// WordCountCleared returns if the field word_count was cleared in this mutation.
+// WordCountCleared returns if the "word_count" field was cleared in this mutation.
 func (m *ChapterMutation) WordCountCleared() bool {
 	_, ok := m.clearedFields[chapter.FieldWordCount]
 	return ok
 }
 
-// ResetWordCount reset all changes of the "word_count" field.
+// ResetWordCount resets all changes to the "word_count" field.
 func (m *ChapterMutation) ResetWordCount() {
 	m.word_count = nil
 	m.addword_count = nil
@@ -495,9 +487,9 @@ func (m *ChapterMutation) Type() string {
 	return m.typ
 }
 
-// Fields returns all fields that were changed during
-// this mutation. Note that, in order to get all numeric
-// fields that were in/decremented, call AddedFields().
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
 func (m *ChapterMutation) Fields() []string {
 	fields := make([]string, 0, 7)
 	if m.created_at != nil {
@@ -524,9 +516,9 @@ func (m *ChapterMutation) Fields() []string {
 	return fields
 }
 
-// Field returns the value of a field with the given name.
-// The second boolean value indicates that this field was
-// not set, or was not define in the schema.
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
 func (m *ChapterMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case chapter.FieldCreatedAt:
@@ -547,9 +539,9 @@ func (m *ChapterMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
-// OldField returns the old value of the field from the database.
-// An error is returned if the mutation operation is not UpdateOne,
-// or the query to the database was failed.
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
 func (m *ChapterMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
 	case chapter.FieldCreatedAt:
@@ -570,9 +562,9 @@ func (m *ChapterMutation) OldField(ctx context.Context, name string) (ent.Value,
 	return nil, fmt.Errorf("unknown Chapter field %s", name)
 }
 
-// SetField sets the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
 func (m *ChapterMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case chapter.FieldCreatedAt:
@@ -628,8 +620,8 @@ func (m *ChapterMutation) SetField(name string, value ent.Value) error {
 	return fmt.Errorf("unknown Chapter field %s", name)
 }
 
-// AddedFields returns all numeric fields that were incremented
-// or decremented during this mutation.
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
 func (m *ChapterMutation) AddedFields() []string {
 	var fields []string
 	if m.addnovel != nil {
@@ -644,9 +636,9 @@ func (m *ChapterMutation) AddedFields() []string {
 	return fields
 }
 
-// AddedField returns the numeric value that was in/decremented
-// from a field with the given name. The second value indicates
-// that this field was not set, or was not define in the schema.
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
 func (m *ChapterMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case chapter.FieldNovel:
@@ -659,9 +651,9 @@ func (m *ChapterMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
-// AddField adds the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
 func (m *ChapterMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case chapter.FieldNovel:
@@ -689,8 +681,8 @@ func (m *ChapterMutation) AddField(name string, value ent.Value) error {
 	return fmt.Errorf("unknown Chapter numeric field %s", name)
 }
 
-// ClearedFields returns all nullable fields that were cleared
-// during this mutation.
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
 func (m *ChapterMutation) ClearedFields() []string {
 	var fields []string
 	if m.FieldCleared(chapter.FieldContent) {
@@ -702,14 +694,14 @@ func (m *ChapterMutation) ClearedFields() []string {
 	return fields
 }
 
-// FieldCleared returns a boolean indicates if this field was
+// FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
 func (m *ChapterMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
-// ClearField clears the value for the given name. It returns an
+// ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ChapterMutation) ClearField(name string) error {
 	switch name {
@@ -723,9 +715,8 @@ func (m *ChapterMutation) ClearField(name string) error {
 	return fmt.Errorf("unknown Chapter nullable field %s", name)
 }
 
-// ResetField resets all changes in the mutation regarding the
-// given field name. It returns an error if the field is not
-// defined in the schema.
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
 func (m *ChapterMutation) ResetField(name string) error {
 	switch name {
 	case chapter.FieldCreatedAt:
@@ -753,60 +744,55 @@ func (m *ChapterMutation) ResetField(name string) error {
 	return fmt.Errorf("unknown Chapter field %s", name)
 }
 
-// AddedEdges returns all edge names that were set/added in this
-// mutation.
+// AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ChapterMutation) AddedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// AddedIDs returns all ids (to other nodes) that were added for
-// the given edge name.
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
 func (m *ChapterMutation) AddedIDs(name string) []ent.Value {
 	return nil
 }
 
-// RemovedEdges returns all edge names that were removed in this
-// mutation.
+// RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ChapterMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// RemovedIDs returns all ids (to other nodes) that were removed for
-// the given edge name.
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
 func (m *ChapterMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
-// ClearedEdges returns all edge names that were cleared in this
-// mutation.
+// ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ChapterMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// EdgeCleared returns a boolean indicates if this edge was
-// cleared in this mutation.
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
 func (m *ChapterMutation) EdgeCleared(name string) bool {
 	return false
 }
 
-// ClearEdge clears the value for the given name. It returns an
-// error if the edge name is not defined in the schema.
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
 func (m *ChapterMutation) ClearEdge(name string) error {
 	return fmt.Errorf("unknown Chapter unique edge %s", name)
 }
 
-// ResetEdge resets all changes in the mutation regarding the
-// given edge name. It returns an error if the edge is not
-// defined in the schema.
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
 func (m *ChapterMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Chapter edge %s", name)
 }
 
-// ConfigurationMutation represents an operation that mutate the Configurations
-// nodes in the graph.
+// ConfigurationMutation represents an operation that mutates the Configuration nodes in the graph.
 type ConfigurationMutation struct {
 	config
 	op            Op
@@ -830,10 +816,10 @@ type ConfigurationMutation struct {
 
 var _ ent.Mutation = (*ConfigurationMutation)(nil)
 
-// configurationOption allows to manage the mutation configuration using functional options.
+// configurationOption allows management of the mutation configuration using functional options.
 type configurationOption func(*ConfigurationMutation)
 
-// newConfigurationMutation creates new mutation for Configuration.
+// newConfigurationMutation creates new mutation for the Configuration entity.
 func newConfigurationMutation(c config, op Op, opts ...configurationOption) *ConfigurationMutation {
 	m := &ConfigurationMutation{
 		config:        c,
@@ -847,7 +833,7 @@ func newConfigurationMutation(c config, op Op, opts ...configurationOption) *Con
 	return m
 }
 
-// withConfigurationID sets the id field of the mutation.
+// withConfigurationID sets the ID field of the mutation.
 func withConfigurationID(id int) configurationOption {
 	return func(m *ConfigurationMutation) {
 		var (
@@ -898,8 +884,8 @@ func (m ConfigurationMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the id value in the mutation. Note that, the id
-// is available only if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID
+// is only available if it was provided to the builder.
 func (m *ConfigurationMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -907,12 +893,12 @@ func (m *ConfigurationMutation) ID() (id int, exists bool) {
 	return *m.id, true
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (m *ConfigurationMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
-// CreatedAt returns the created_at value in the mutation.
+// CreatedAt returns the value of the "created_at" field in the mutation.
 func (m *ConfigurationMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
@@ -921,13 +907,12 @@ func (m *ConfigurationMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old created_at value of the Configuration.
-// If the Configuration object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldCreatedAt returns the old "created_at" field's value of the Configuration entity.
+// If the Configuration object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ConfigurationMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
@@ -939,17 +924,17 @@ func (m *ConfigurationMutation) OldCreatedAt(ctx context.Context) (v time.Time, 
 	return oldValue.CreatedAt, nil
 }
 
-// ResetCreatedAt reset all changes of the "created_at" field.
+// ResetCreatedAt resets all changes to the "created_at" field.
 func (m *ConfigurationMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetUpdatedAt sets the updated_at field.
+// SetUpdatedAt sets the "updated_at" field.
 func (m *ConfigurationMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
 }
 
-// UpdatedAt returns the updated_at value in the mutation.
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
 func (m *ConfigurationMutation) UpdatedAt() (r time.Time, exists bool) {
 	v := m.updated_at
 	if v == nil {
@@ -958,13 +943,12 @@ func (m *ConfigurationMutation) UpdatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old updated_at value of the Configuration.
-// If the Configuration object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldUpdatedAt returns the old "updated_at" field's value of the Configuration entity.
+// If the Configuration object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ConfigurationMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
@@ -976,18 +960,18 @@ func (m *ConfigurationMutation) OldUpdatedAt(ctx context.Context) (v time.Time, 
 	return oldValue.UpdatedAt, nil
 }
 
-// ResetUpdatedAt reset all changes of the "updated_at" field.
+// ResetUpdatedAt resets all changes to the "updated_at" field.
 func (m *ConfigurationMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (m *ConfigurationMutation) SetStatus(s schema.Status) {
 	m.status = &s
 	m.addstatus = nil
 }
 
-// Status returns the status value in the mutation.
+// Status returns the value of the "status" field in the mutation.
 func (m *ConfigurationMutation) Status() (r schema.Status, exists bool) {
 	v := m.status
 	if v == nil {
@@ -996,13 +980,12 @@ func (m *ConfigurationMutation) Status() (r schema.Status, exists bool) {
 	return *v, true
 }
 
-// OldStatus returns the old status value of the Configuration.
-// If the Configuration object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldStatus returns the old "status" field's value of the Configuration entity.
+// If the Configuration object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ConfigurationMutation) OldStatus(ctx context.Context) (v schema.Status, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldStatus is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldStatus is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldStatus requires an ID field in the mutation")
@@ -1014,7 +997,7 @@ func (m *ConfigurationMutation) OldStatus(ctx context.Context) (v schema.Status,
 	return oldValue.Status, nil
 }
 
-// AddStatus adds s to status.
+// AddStatus adds s to the "status" field.
 func (m *ConfigurationMutation) AddStatus(s schema.Status) {
 	if m.addstatus != nil {
 		*m.addstatus += s
@@ -1023,7 +1006,7 @@ func (m *ConfigurationMutation) AddStatus(s schema.Status) {
 	}
 }
 
-// AddedStatus returns the value that was added to the status field in this mutation.
+// AddedStatus returns the value that was added to the "status" field in this mutation.
 func (m *ConfigurationMutation) AddedStatus() (r schema.Status, exists bool) {
 	v := m.addstatus
 	if v == nil {
@@ -1032,18 +1015,18 @@ func (m *ConfigurationMutation) AddedStatus() (r schema.Status, exists bool) {
 	return *v, true
 }
 
-// ResetStatus reset all changes of the "status" field.
+// ResetStatus resets all changes to the "status" field.
 func (m *ConfigurationMutation) ResetStatus() {
 	m.status = nil
 	m.addstatus = nil
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (m *ConfigurationMutation) SetName(s string) {
 	m.name = &s
 }
 
-// Name returns the name value in the mutation.
+// Name returns the value of the "name" field in the mutation.
 func (m *ConfigurationMutation) Name() (r string, exists bool) {
 	v := m.name
 	if v == nil {
@@ -1052,13 +1035,12 @@ func (m *ConfigurationMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value of the Configuration.
-// If the Configuration object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldName returns the old "name" field's value of the Configuration entity.
+// If the Configuration object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ConfigurationMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldName is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldName requires an ID field in the mutation")
@@ -1070,17 +1052,17 @@ func (m *ConfigurationMutation) OldName(ctx context.Context) (v string, err erro
 	return oldValue.Name, nil
 }
 
-// ResetName reset all changes of the "name" field.
+// ResetName resets all changes to the "name" field.
 func (m *ConfigurationMutation) ResetName() {
 	m.name = nil
 }
 
-// SetCategory sets the category field.
+// SetCategory sets the "category" field.
 func (m *ConfigurationMutation) SetCategory(c configuration.Category) {
 	m.category = &c
 }
 
-// Category returns the category value in the mutation.
+// Category returns the value of the "category" field in the mutation.
 func (m *ConfigurationMutation) Category() (r configuration.Category, exists bool) {
 	v := m.category
 	if v == nil {
@@ -1089,13 +1071,12 @@ func (m *ConfigurationMutation) Category() (r configuration.Category, exists boo
 	return *v, true
 }
 
-// OldCategory returns the old category value of the Configuration.
-// If the Configuration object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldCategory returns the old "category" field's value of the Configuration entity.
+// If the Configuration object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ConfigurationMutation) OldCategory(ctx context.Context) (v configuration.Category, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCategory is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldCategory is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldCategory requires an ID field in the mutation")
@@ -1107,17 +1088,17 @@ func (m *ConfigurationMutation) OldCategory(ctx context.Context) (v configuratio
 	return oldValue.Category, nil
 }
 
-// ResetCategory reset all changes of the "category" field.
+// ResetCategory resets all changes to the "category" field.
 func (m *ConfigurationMutation) ResetCategory() {
 	m.category = nil
 }
 
-// SetOwner sets the owner field.
+// SetOwner sets the "owner" field.
 func (m *ConfigurationMutation) SetOwner(s string) {
 	m.owner = &s
 }
 
-// Owner returns the owner value in the mutation.
+// Owner returns the value of the "owner" field in the mutation.
 func (m *ConfigurationMutation) Owner() (r string, exists bool) {
 	v := m.owner
 	if v == nil {
@@ -1126,13 +1107,12 @@ func (m *ConfigurationMutation) Owner() (r string, exists bool) {
 	return *v, true
 }
 
-// OldOwner returns the old owner value of the Configuration.
-// If the Configuration object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldOwner returns the old "owner" field's value of the Configuration entity.
+// If the Configuration object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ConfigurationMutation) OldOwner(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldOwner is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldOwner is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldOwner requires an ID field in the mutation")
@@ -1144,17 +1124,17 @@ func (m *ConfigurationMutation) OldOwner(ctx context.Context) (v string, err err
 	return oldValue.Owner, nil
 }
 
-// ResetOwner reset all changes of the "owner" field.
+// ResetOwner resets all changes to the "owner" field.
 func (m *ConfigurationMutation) ResetOwner() {
 	m.owner = nil
 }
 
-// SetData sets the data field.
+// SetData sets the "data" field.
 func (m *ConfigurationMutation) SetData(s string) {
 	m.data = &s
 }
 
-// Data returns the data value in the mutation.
+// Data returns the value of the "data" field in the mutation.
 func (m *ConfigurationMutation) Data() (r string, exists bool) {
 	v := m.data
 	if v == nil {
@@ -1163,13 +1143,12 @@ func (m *ConfigurationMutation) Data() (r string, exists bool) {
 	return *v, true
 }
 
-// OldData returns the old data value of the Configuration.
-// If the Configuration object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldData returns the old "data" field's value of the Configuration entity.
+// If the Configuration object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ConfigurationMutation) OldData(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldData is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldData is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldData requires an ID field in the mutation")
@@ -1181,17 +1160,17 @@ func (m *ConfigurationMutation) OldData(ctx context.Context) (v string, err erro
 	return oldValue.Data, nil
 }
 
-// ResetData reset all changes of the "data" field.
+// ResetData resets all changes to the "data" field.
 func (m *ConfigurationMutation) ResetData() {
 	m.data = nil
 }
 
-// SetStartedAt sets the started_at field.
+// SetStartedAt sets the "started_at" field.
 func (m *ConfigurationMutation) SetStartedAt(t time.Time) {
 	m.started_at = &t
 }
 
-// StartedAt returns the started_at value in the mutation.
+// StartedAt returns the value of the "started_at" field in the mutation.
 func (m *ConfigurationMutation) StartedAt() (r time.Time, exists bool) {
 	v := m.started_at
 	if v == nil {
@@ -1200,13 +1179,12 @@ func (m *ConfigurationMutation) StartedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldStartedAt returns the old started_at value of the Configuration.
-// If the Configuration object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldStartedAt returns the old "started_at" field's value of the Configuration entity.
+// If the Configuration object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ConfigurationMutation) OldStartedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldStartedAt is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldStartedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldStartedAt requires an ID field in the mutation")
@@ -1218,17 +1196,17 @@ func (m *ConfigurationMutation) OldStartedAt(ctx context.Context) (v time.Time, 
 	return oldValue.StartedAt, nil
 }
 
-// ResetStartedAt reset all changes of the "started_at" field.
+// ResetStartedAt resets all changes to the "started_at" field.
 func (m *ConfigurationMutation) ResetStartedAt() {
 	m.started_at = nil
 }
 
-// SetEndedAt sets the ended_at field.
+// SetEndedAt sets the "ended_at" field.
 func (m *ConfigurationMutation) SetEndedAt(t time.Time) {
 	m.ended_at = &t
 }
 
-// EndedAt returns the ended_at value in the mutation.
+// EndedAt returns the value of the "ended_at" field in the mutation.
 func (m *ConfigurationMutation) EndedAt() (r time.Time, exists bool) {
 	v := m.ended_at
 	if v == nil {
@@ -1237,13 +1215,12 @@ func (m *ConfigurationMutation) EndedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldEndedAt returns the old ended_at value of the Configuration.
-// If the Configuration object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldEndedAt returns the old "ended_at" field's value of the Configuration entity.
+// If the Configuration object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *ConfigurationMutation) OldEndedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldEndedAt is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldEndedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldEndedAt requires an ID field in the mutation")
@@ -1255,7 +1232,7 @@ func (m *ConfigurationMutation) OldEndedAt(ctx context.Context) (v time.Time, er
 	return oldValue.EndedAt, nil
 }
 
-// ResetEndedAt reset all changes of the "ended_at" field.
+// ResetEndedAt resets all changes to the "ended_at" field.
 func (m *ConfigurationMutation) ResetEndedAt() {
 	m.ended_at = nil
 }
@@ -1270,9 +1247,9 @@ func (m *ConfigurationMutation) Type() string {
 	return m.typ
 }
 
-// Fields returns all fields that were changed during
-// this mutation. Note that, in order to get all numeric
-// fields that were in/decremented, call AddedFields().
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
 func (m *ConfigurationMutation) Fields() []string {
 	fields := make([]string, 0, 9)
 	if m.created_at != nil {
@@ -1305,9 +1282,9 @@ func (m *ConfigurationMutation) Fields() []string {
 	return fields
 }
 
-// Field returns the value of a field with the given name.
-// The second boolean value indicates that this field was
-// not set, or was not define in the schema.
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
 func (m *ConfigurationMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case configuration.FieldCreatedAt:
@@ -1332,9 +1309,9 @@ func (m *ConfigurationMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
-// OldField returns the old value of the field from the database.
-// An error is returned if the mutation operation is not UpdateOne,
-// or the query to the database was failed.
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
 func (m *ConfigurationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
 	case configuration.FieldCreatedAt:
@@ -1359,9 +1336,9 @@ func (m *ConfigurationMutation) OldField(ctx context.Context, name string) (ent.
 	return nil, fmt.Errorf("unknown Configuration field %s", name)
 }
 
-// SetField sets the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
 func (m *ConfigurationMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case configuration.FieldCreatedAt:
@@ -1431,8 +1408,8 @@ func (m *ConfigurationMutation) SetField(name string, value ent.Value) error {
 	return fmt.Errorf("unknown Configuration field %s", name)
 }
 
-// AddedFields returns all numeric fields that were incremented
-// or decremented during this mutation.
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
 func (m *ConfigurationMutation) AddedFields() []string {
 	var fields []string
 	if m.addstatus != nil {
@@ -1441,9 +1418,9 @@ func (m *ConfigurationMutation) AddedFields() []string {
 	return fields
 }
 
-// AddedField returns the numeric value that was in/decremented
-// from a field with the given name. The second value indicates
-// that this field was not set, or was not define in the schema.
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
 func (m *ConfigurationMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case configuration.FieldStatus:
@@ -1452,9 +1429,9 @@ func (m *ConfigurationMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
-// AddField adds the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
 func (m *ConfigurationMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case configuration.FieldStatus:
@@ -1468,28 +1445,27 @@ func (m *ConfigurationMutation) AddField(name string, value ent.Value) error {
 	return fmt.Errorf("unknown Configuration numeric field %s", name)
 }
 
-// ClearedFields returns all nullable fields that were cleared
-// during this mutation.
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
 func (m *ConfigurationMutation) ClearedFields() []string {
 	return nil
 }
 
-// FieldCleared returns a boolean indicates if this field was
+// FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
 func (m *ConfigurationMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
-// ClearField clears the value for the given name. It returns an
+// ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ConfigurationMutation) ClearField(name string) error {
 	return fmt.Errorf("unknown Configuration nullable field %s", name)
 }
 
-// ResetField resets all changes in the mutation regarding the
-// given field name. It returns an error if the field is not
-// defined in the schema.
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
 func (m *ConfigurationMutation) ResetField(name string) error {
 	switch name {
 	case configuration.FieldCreatedAt:
@@ -1523,60 +1499,55 @@ func (m *ConfigurationMutation) ResetField(name string) error {
 	return fmt.Errorf("unknown Configuration field %s", name)
 }
 
-// AddedEdges returns all edge names that were set/added in this
-// mutation.
+// AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ConfigurationMutation) AddedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// AddedIDs returns all ids (to other nodes) that were added for
-// the given edge name.
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
 func (m *ConfigurationMutation) AddedIDs(name string) []ent.Value {
 	return nil
 }
 
-// RemovedEdges returns all edge names that were removed in this
-// mutation.
+// RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ConfigurationMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// RemovedIDs returns all ids (to other nodes) that were removed for
-// the given edge name.
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
 func (m *ConfigurationMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
-// ClearedEdges returns all edge names that were cleared in this
-// mutation.
+// ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ConfigurationMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// EdgeCleared returns a boolean indicates if this edge was
-// cleared in this mutation.
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
 func (m *ConfigurationMutation) EdgeCleared(name string) bool {
 	return false
 }
 
-// ClearEdge clears the value for the given name. It returns an
-// error if the edge name is not defined in the schema.
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
 func (m *ConfigurationMutation) ClearEdge(name string) error {
 	return fmt.Errorf("unknown Configuration unique edge %s", name)
 }
 
-// ResetEdge resets all changes in the mutation regarding the
-// given edge name. It returns an error if the edge is not
-// defined in the schema.
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
 func (m *ConfigurationMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Configuration edge %s", name)
 }
 
-// NovelMutation represents an operation that mutate the Novels
-// nodes in the graph.
+// NovelMutation represents an operation that mutates the Novel nodes in the graph.
 type NovelMutation struct {
 	config
 	op                Op
@@ -1610,10 +1581,10 @@ type NovelMutation struct {
 
 var _ ent.Mutation = (*NovelMutation)(nil)
 
-// novelOption allows to manage the mutation configuration using functional options.
+// novelOption allows management of the mutation configuration using functional options.
 type novelOption func(*NovelMutation)
 
-// newNovelMutation creates new mutation for Novel.
+// newNovelMutation creates new mutation for the Novel entity.
 func newNovelMutation(c config, op Op, opts ...novelOption) *NovelMutation {
 	m := &NovelMutation{
 		config:        c,
@@ -1627,7 +1598,7 @@ func newNovelMutation(c config, op Op, opts ...novelOption) *NovelMutation {
 	return m
 }
 
-// withNovelID sets the id field of the mutation.
+// withNovelID sets the ID field of the mutation.
 func withNovelID(id int) novelOption {
 	return func(m *NovelMutation) {
 		var (
@@ -1678,8 +1649,8 @@ func (m NovelMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the id value in the mutation. Note that, the id
-// is available only if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID
+// is only available if it was provided to the builder.
 func (m *NovelMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -1687,12 +1658,12 @@ func (m *NovelMutation) ID() (id int, exists bool) {
 	return *m.id, true
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (m *NovelMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
-// CreatedAt returns the created_at value in the mutation.
+// CreatedAt returns the value of the "created_at" field in the mutation.
 func (m *NovelMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
@@ -1701,13 +1672,12 @@ func (m *NovelMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old created_at value of the Novel.
-// If the Novel object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldCreatedAt returns the old "created_at" field's value of the Novel entity.
+// If the Novel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
@@ -1719,17 +1689,17 @@ func (m *NovelMutation) OldCreatedAt(ctx context.Context) (v time.Time, err erro
 	return oldValue.CreatedAt, nil
 }
 
-// ResetCreatedAt reset all changes of the "created_at" field.
+// ResetCreatedAt resets all changes to the "created_at" field.
 func (m *NovelMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetUpdatedAt sets the updated_at field.
+// SetUpdatedAt sets the "updated_at" field.
 func (m *NovelMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
 }
 
-// UpdatedAt returns the updated_at value in the mutation.
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
 func (m *NovelMutation) UpdatedAt() (r time.Time, exists bool) {
 	v := m.updated_at
 	if v == nil {
@@ -1738,13 +1708,12 @@ func (m *NovelMutation) UpdatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old updated_at value of the Novel.
-// If the Novel object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldUpdatedAt returns the old "updated_at" field's value of the Novel entity.
+// If the Novel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
@@ -1756,17 +1725,17 @@ func (m *NovelMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err erro
 	return oldValue.UpdatedAt, nil
 }
 
-// ResetUpdatedAt reset all changes of the "updated_at" field.
+// ResetUpdatedAt resets all changes to the "updated_at" field.
 func (m *NovelMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (m *NovelMutation) SetName(s string) {
 	m.name = &s
 }
 
-// Name returns the name value in the mutation.
+// Name returns the value of the "name" field in the mutation.
 func (m *NovelMutation) Name() (r string, exists bool) {
 	v := m.name
 	if v == nil {
@@ -1775,13 +1744,12 @@ func (m *NovelMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value of the Novel.
-// If the Novel object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldName returns the old "name" field's value of the Novel entity.
+// If the Novel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldName is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldName requires an ID field in the mutation")
@@ -1793,17 +1761,17 @@ func (m *NovelMutation) OldName(ctx context.Context) (v string, err error) {
 	return oldValue.Name, nil
 }
 
-// ResetName reset all changes of the "name" field.
+// ResetName resets all changes to the "name" field.
 func (m *NovelMutation) ResetName() {
 	m.name = nil
 }
 
-// SetAuthor sets the author field.
+// SetAuthor sets the "author" field.
 func (m *NovelMutation) SetAuthor(s string) {
 	m.author = &s
 }
 
-// Author returns the author value in the mutation.
+// Author returns the value of the "author" field in the mutation.
 func (m *NovelMutation) Author() (r string, exists bool) {
 	v := m.author
 	if v == nil {
@@ -1812,13 +1780,12 @@ func (m *NovelMutation) Author() (r string, exists bool) {
 	return *v, true
 }
 
-// OldAuthor returns the old author value of the Novel.
-// If the Novel object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldAuthor returns the old "author" field's value of the Novel entity.
+// If the Novel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelMutation) OldAuthor(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldAuthor is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldAuthor is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldAuthor requires an ID field in the mutation")
@@ -1830,18 +1797,18 @@ func (m *NovelMutation) OldAuthor(ctx context.Context) (v string, err error) {
 	return oldValue.Author, nil
 }
 
-// ResetAuthor reset all changes of the "author" field.
+// ResetAuthor resets all changes to the "author" field.
 func (m *NovelMutation) ResetAuthor() {
 	m.author = nil
 }
 
-// SetSource sets the source field.
+// SetSource sets the "source" field.
 func (m *NovelMutation) SetSource(i int) {
 	m.source = &i
 	m.addsource = nil
 }
 
-// Source returns the source value in the mutation.
+// Source returns the value of the "source" field in the mutation.
 func (m *NovelMutation) Source() (r int, exists bool) {
 	v := m.source
 	if v == nil {
@@ -1850,13 +1817,12 @@ func (m *NovelMutation) Source() (r int, exists bool) {
 	return *v, true
 }
 
-// OldSource returns the old source value of the Novel.
-// If the Novel object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldSource returns the old "source" field's value of the Novel entity.
+// If the Novel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelMutation) OldSource(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldSource is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldSource is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldSource requires an ID field in the mutation")
@@ -1868,7 +1834,7 @@ func (m *NovelMutation) OldSource(ctx context.Context) (v int, err error) {
 	return oldValue.Source, nil
 }
 
-// AddSource adds i to source.
+// AddSource adds i to the "source" field.
 func (m *NovelMutation) AddSource(i int) {
 	if m.addsource != nil {
 		*m.addsource += i
@@ -1877,7 +1843,7 @@ func (m *NovelMutation) AddSource(i int) {
 	}
 }
 
-// AddedSource returns the value that was added to the source field in this mutation.
+// AddedSource returns the value that was added to the "source" field in this mutation.
 func (m *NovelMutation) AddedSource() (r int, exists bool) {
 	v := m.addsource
 	if v == nil {
@@ -1886,19 +1852,19 @@ func (m *NovelMutation) AddedSource() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetSource reset all changes of the "source" field.
+// ResetSource resets all changes to the "source" field.
 func (m *NovelMutation) ResetSource() {
 	m.source = nil
 	m.addsource = nil
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (m *NovelMutation) SetStatus(i int) {
 	m.status = &i
 	m.addstatus = nil
 }
 
-// Status returns the status value in the mutation.
+// Status returns the value of the "status" field in the mutation.
 func (m *NovelMutation) Status() (r int, exists bool) {
 	v := m.status
 	if v == nil {
@@ -1907,13 +1873,12 @@ func (m *NovelMutation) Status() (r int, exists bool) {
 	return *v, true
 }
 
-// OldStatus returns the old status value of the Novel.
-// If the Novel object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldStatus returns the old "status" field's value of the Novel entity.
+// If the Novel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelMutation) OldStatus(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldStatus is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldStatus is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldStatus requires an ID field in the mutation")
@@ -1925,7 +1890,7 @@ func (m *NovelMutation) OldStatus(ctx context.Context) (v int, err error) {
 	return oldValue.Status, nil
 }
 
-// AddStatus adds i to status.
+// AddStatus adds i to the "status" field.
 func (m *NovelMutation) AddStatus(i int) {
 	if m.addstatus != nil {
 		*m.addstatus += i
@@ -1934,7 +1899,7 @@ func (m *NovelMutation) AddStatus(i int) {
 	}
 }
 
-// AddedStatus returns the value that was added to the status field in this mutation.
+// AddedStatus returns the value that was added to the "status" field in this mutation.
 func (m *NovelMutation) AddedStatus() (r int, exists bool) {
 	v := m.addstatus
 	if v == nil {
@@ -1943,19 +1908,19 @@ func (m *NovelMutation) AddedStatus() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetStatus reset all changes of the "status" field.
+// ResetStatus resets all changes to the "status" field.
 func (m *NovelMutation) ResetStatus() {
 	m.status = nil
 	m.addstatus = nil
 }
 
-// SetWordCount sets the word_count field.
+// SetWordCount sets the "word_count" field.
 func (m *NovelMutation) SetWordCount(i int) {
 	m.word_count = &i
 	m.addword_count = nil
 }
 
-// WordCount returns the word_count value in the mutation.
+// WordCount returns the value of the "word_count" field in the mutation.
 func (m *NovelMutation) WordCount() (r int, exists bool) {
 	v := m.word_count
 	if v == nil {
@@ -1964,13 +1929,12 @@ func (m *NovelMutation) WordCount() (r int, exists bool) {
 	return *v, true
 }
 
-// OldWordCount returns the old word_count value of the Novel.
-// If the Novel object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldWordCount returns the old "word_count" field's value of the Novel entity.
+// If the Novel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelMutation) OldWordCount(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldWordCount is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldWordCount is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldWordCount requires an ID field in the mutation")
@@ -1982,7 +1946,7 @@ func (m *NovelMutation) OldWordCount(ctx context.Context) (v int, err error) {
 	return oldValue.WordCount, nil
 }
 
-// AddWordCount adds i to word_count.
+// AddWordCount adds i to the "word_count" field.
 func (m *NovelMutation) AddWordCount(i int) {
 	if m.addword_count != nil {
 		*m.addword_count += i
@@ -1991,7 +1955,7 @@ func (m *NovelMutation) AddWordCount(i int) {
 	}
 }
 
-// AddedWordCount returns the value that was added to the word_count field in this mutation.
+// AddedWordCount returns the value that was added to the "word_count" field in this mutation.
 func (m *NovelMutation) AddedWordCount() (r int, exists bool) {
 	v := m.addword_count
 	if v == nil {
@@ -2000,33 +1964,33 @@ func (m *NovelMutation) AddedWordCount() (r int, exists bool) {
 	return *v, true
 }
 
-// ClearWordCount clears the value of word_count.
+// ClearWordCount clears the value of the "word_count" field.
 func (m *NovelMutation) ClearWordCount() {
 	m.word_count = nil
 	m.addword_count = nil
 	m.clearedFields[novel.FieldWordCount] = struct{}{}
 }
 
-// WordCountCleared returns if the field word_count was cleared in this mutation.
+// WordCountCleared returns if the "word_count" field was cleared in this mutation.
 func (m *NovelMutation) WordCountCleared() bool {
 	_, ok := m.clearedFields[novel.FieldWordCount]
 	return ok
 }
 
-// ResetWordCount reset all changes of the "word_count" field.
+// ResetWordCount resets all changes to the "word_count" field.
 func (m *NovelMutation) ResetWordCount() {
 	m.word_count = nil
 	m.addword_count = nil
 	delete(m.clearedFields, novel.FieldWordCount)
 }
 
-// SetViews sets the views field.
+// SetViews sets the "views" field.
 func (m *NovelMutation) SetViews(i int) {
 	m.views = &i
 	m.addviews = nil
 }
 
-// Views returns the views value in the mutation.
+// Views returns the value of the "views" field in the mutation.
 func (m *NovelMutation) Views() (r int, exists bool) {
 	v := m.views
 	if v == nil {
@@ -2035,13 +1999,12 @@ func (m *NovelMutation) Views() (r int, exists bool) {
 	return *v, true
 }
 
-// OldViews returns the old views value of the Novel.
-// If the Novel object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldViews returns the old "views" field's value of the Novel entity.
+// If the Novel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelMutation) OldViews(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldViews is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldViews is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldViews requires an ID field in the mutation")
@@ -2053,7 +2016,7 @@ func (m *NovelMutation) OldViews(ctx context.Context) (v int, err error) {
 	return oldValue.Views, nil
 }
 
-// AddViews adds i to views.
+// AddViews adds i to the "views" field.
 func (m *NovelMutation) AddViews(i int) {
 	if m.addviews != nil {
 		*m.addviews += i
@@ -2062,7 +2025,7 @@ func (m *NovelMutation) AddViews(i int) {
 	}
 }
 
-// AddedViews returns the value that was added to the views field in this mutation.
+// AddedViews returns the value that was added to the "views" field in this mutation.
 func (m *NovelMutation) AddedViews() (r int, exists bool) {
 	v := m.addviews
 	if v == nil {
@@ -2071,33 +2034,33 @@ func (m *NovelMutation) AddedViews() (r int, exists bool) {
 	return *v, true
 }
 
-// ClearViews clears the value of views.
+// ClearViews clears the value of the "views" field.
 func (m *NovelMutation) ClearViews() {
 	m.views = nil
 	m.addviews = nil
 	m.clearedFields[novel.FieldViews] = struct{}{}
 }
 
-// ViewsCleared returns if the field views was cleared in this mutation.
+// ViewsCleared returns if the "views" field was cleared in this mutation.
 func (m *NovelMutation) ViewsCleared() bool {
 	_, ok := m.clearedFields[novel.FieldViews]
 	return ok
 }
 
-// ResetViews reset all changes of the "views" field.
+// ResetViews resets all changes to the "views" field.
 func (m *NovelMutation) ResetViews() {
 	m.views = nil
 	m.addviews = nil
 	delete(m.clearedFields, novel.FieldViews)
 }
 
-// SetDownloads sets the downloads field.
+// SetDownloads sets the "downloads" field.
 func (m *NovelMutation) SetDownloads(i int) {
 	m.downloads = &i
 	m.adddownloads = nil
 }
 
-// Downloads returns the downloads value in the mutation.
+// Downloads returns the value of the "downloads" field in the mutation.
 func (m *NovelMutation) Downloads() (r int, exists bool) {
 	v := m.downloads
 	if v == nil {
@@ -2106,13 +2069,12 @@ func (m *NovelMutation) Downloads() (r int, exists bool) {
 	return *v, true
 }
 
-// OldDownloads returns the old downloads value of the Novel.
-// If the Novel object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldDownloads returns the old "downloads" field's value of the Novel entity.
+// If the Novel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelMutation) OldDownloads(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldDownloads is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldDownloads is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldDownloads requires an ID field in the mutation")
@@ -2124,7 +2086,7 @@ func (m *NovelMutation) OldDownloads(ctx context.Context) (v int, err error) {
 	return oldValue.Downloads, nil
 }
 
-// AddDownloads adds i to downloads.
+// AddDownloads adds i to the "downloads" field.
 func (m *NovelMutation) AddDownloads(i int) {
 	if m.adddownloads != nil {
 		*m.adddownloads += i
@@ -2133,7 +2095,7 @@ func (m *NovelMutation) AddDownloads(i int) {
 	}
 }
 
-// AddedDownloads returns the value that was added to the downloads field in this mutation.
+// AddedDownloads returns the value that was added to the "downloads" field in this mutation.
 func (m *NovelMutation) AddedDownloads() (r int, exists bool) {
 	v := m.adddownloads
 	if v == nil {
@@ -2142,33 +2104,33 @@ func (m *NovelMutation) AddedDownloads() (r int, exists bool) {
 	return *v, true
 }
 
-// ClearDownloads clears the value of downloads.
+// ClearDownloads clears the value of the "downloads" field.
 func (m *NovelMutation) ClearDownloads() {
 	m.downloads = nil
 	m.adddownloads = nil
 	m.clearedFields[novel.FieldDownloads] = struct{}{}
 }
 
-// DownloadsCleared returns if the field downloads was cleared in this mutation.
+// DownloadsCleared returns if the "downloads" field was cleared in this mutation.
 func (m *NovelMutation) DownloadsCleared() bool {
 	_, ok := m.clearedFields[novel.FieldDownloads]
 	return ok
 }
 
-// ResetDownloads reset all changes of the "downloads" field.
+// ResetDownloads resets all changes to the "downloads" field.
 func (m *NovelMutation) ResetDownloads() {
 	m.downloads = nil
 	m.adddownloads = nil
 	delete(m.clearedFields, novel.FieldDownloads)
 }
 
-// SetFavorites sets the favorites field.
+// SetFavorites sets the "favorites" field.
 func (m *NovelMutation) SetFavorites(i int) {
 	m.favorites = &i
 	m.addfavorites = nil
 }
 
-// Favorites returns the favorites value in the mutation.
+// Favorites returns the value of the "favorites" field in the mutation.
 func (m *NovelMutation) Favorites() (r int, exists bool) {
 	v := m.favorites
 	if v == nil {
@@ -2177,13 +2139,12 @@ func (m *NovelMutation) Favorites() (r int, exists bool) {
 	return *v, true
 }
 
-// OldFavorites returns the old favorites value of the Novel.
-// If the Novel object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldFavorites returns the old "favorites" field's value of the Novel entity.
+// If the Novel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelMutation) OldFavorites(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldFavorites is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldFavorites is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldFavorites requires an ID field in the mutation")
@@ -2195,7 +2156,7 @@ func (m *NovelMutation) OldFavorites(ctx context.Context) (v int, err error) {
 	return oldValue.Favorites, nil
 }
 
-// AddFavorites adds i to favorites.
+// AddFavorites adds i to the "favorites" field.
 func (m *NovelMutation) AddFavorites(i int) {
 	if m.addfavorites != nil {
 		*m.addfavorites += i
@@ -2204,7 +2165,7 @@ func (m *NovelMutation) AddFavorites(i int) {
 	}
 }
 
-// AddedFavorites returns the value that was added to the favorites field in this mutation.
+// AddedFavorites returns the value that was added to the "favorites" field in this mutation.
 func (m *NovelMutation) AddedFavorites() (r int, exists bool) {
 	v := m.addfavorites
 	if v == nil {
@@ -2213,33 +2174,33 @@ func (m *NovelMutation) AddedFavorites() (r int, exists bool) {
 	return *v, true
 }
 
-// ClearFavorites clears the value of favorites.
+// ClearFavorites clears the value of the "favorites" field.
 func (m *NovelMutation) ClearFavorites() {
 	m.favorites = nil
 	m.addfavorites = nil
 	m.clearedFields[novel.FieldFavorites] = struct{}{}
 }
 
-// FavoritesCleared returns if the field favorites was cleared in this mutation.
+// FavoritesCleared returns if the "favorites" field was cleared in this mutation.
 func (m *NovelMutation) FavoritesCleared() bool {
 	_, ok := m.clearedFields[novel.FieldFavorites]
 	return ok
 }
 
-// ResetFavorites reset all changes of the "favorites" field.
+// ResetFavorites resets all changes to the "favorites" field.
 func (m *NovelMutation) ResetFavorites() {
 	m.favorites = nil
 	m.addfavorites = nil
 	delete(m.clearedFields, novel.FieldFavorites)
 }
 
-// SetUpdatedWeight sets the updated_weight field.
+// SetUpdatedWeight sets the "updated_weight" field.
 func (m *NovelMutation) SetUpdatedWeight(i int) {
 	m.updated_weight = &i
 	m.addupdated_weight = nil
 }
 
-// UpdatedWeight returns the updated_weight value in the mutation.
+// UpdatedWeight returns the value of the "updated_weight" field in the mutation.
 func (m *NovelMutation) UpdatedWeight() (r int, exists bool) {
 	v := m.updated_weight
 	if v == nil {
@@ -2248,13 +2209,12 @@ func (m *NovelMutation) UpdatedWeight() (r int, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedWeight returns the old updated_weight value of the Novel.
-// If the Novel object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldUpdatedWeight returns the old "updated_weight" field's value of the Novel entity.
+// If the Novel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelMutation) OldUpdatedWeight(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedWeight is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldUpdatedWeight is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldUpdatedWeight requires an ID field in the mutation")
@@ -2266,7 +2226,7 @@ func (m *NovelMutation) OldUpdatedWeight(ctx context.Context) (v int, err error)
 	return oldValue.UpdatedWeight, nil
 }
 
-// AddUpdatedWeight adds i to updated_weight.
+// AddUpdatedWeight adds i to the "updated_weight" field.
 func (m *NovelMutation) AddUpdatedWeight(i int) {
 	if m.addupdated_weight != nil {
 		*m.addupdated_weight += i
@@ -2275,7 +2235,7 @@ func (m *NovelMutation) AddUpdatedWeight(i int) {
 	}
 }
 
-// AddedUpdatedWeight returns the value that was added to the updated_weight field in this mutation.
+// AddedUpdatedWeight returns the value that was added to the "updated_weight" field in this mutation.
 func (m *NovelMutation) AddedUpdatedWeight() (r int, exists bool) {
 	v := m.addupdated_weight
 	if v == nil {
@@ -2284,32 +2244,32 @@ func (m *NovelMutation) AddedUpdatedWeight() (r int, exists bool) {
 	return *v, true
 }
 
-// ClearUpdatedWeight clears the value of updated_weight.
+// ClearUpdatedWeight clears the value of the "updated_weight" field.
 func (m *NovelMutation) ClearUpdatedWeight() {
 	m.updated_weight = nil
 	m.addupdated_weight = nil
 	m.clearedFields[novel.FieldUpdatedWeight] = struct{}{}
 }
 
-// UpdatedWeightCleared returns if the field updated_weight was cleared in this mutation.
+// UpdatedWeightCleared returns if the "updated_weight" field was cleared in this mutation.
 func (m *NovelMutation) UpdatedWeightCleared() bool {
 	_, ok := m.clearedFields[novel.FieldUpdatedWeight]
 	return ok
 }
 
-// ResetUpdatedWeight reset all changes of the "updated_weight" field.
+// ResetUpdatedWeight resets all changes to the "updated_weight" field.
 func (m *NovelMutation) ResetUpdatedWeight() {
 	m.updated_weight = nil
 	m.addupdated_weight = nil
 	delete(m.clearedFields, novel.FieldUpdatedWeight)
 }
 
-// SetCover sets the cover field.
+// SetCover sets the "cover" field.
 func (m *NovelMutation) SetCover(s string) {
 	m.cover = &s
 }
 
-// Cover returns the cover value in the mutation.
+// Cover returns the value of the "cover" field in the mutation.
 func (m *NovelMutation) Cover() (r string, exists bool) {
 	v := m.cover
 	if v == nil {
@@ -2318,13 +2278,12 @@ func (m *NovelMutation) Cover() (r string, exists bool) {
 	return *v, true
 }
 
-// OldCover returns the old cover value of the Novel.
-// If the Novel object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldCover returns the old "cover" field's value of the Novel entity.
+// If the Novel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelMutation) OldCover(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCover is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldCover is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldCover requires an ID field in the mutation")
@@ -2336,30 +2295,30 @@ func (m *NovelMutation) OldCover(ctx context.Context) (v string, err error) {
 	return oldValue.Cover, nil
 }
 
-// ClearCover clears the value of cover.
+// ClearCover clears the value of the "cover" field.
 func (m *NovelMutation) ClearCover() {
 	m.cover = nil
 	m.clearedFields[novel.FieldCover] = struct{}{}
 }
 
-// CoverCleared returns if the field cover was cleared in this mutation.
+// CoverCleared returns if the "cover" field was cleared in this mutation.
 func (m *NovelMutation) CoverCleared() bool {
 	_, ok := m.clearedFields[novel.FieldCover]
 	return ok
 }
 
-// ResetCover reset all changes of the "cover" field.
+// ResetCover resets all changes to the "cover" field.
 func (m *NovelMutation) ResetCover() {
 	m.cover = nil
 	delete(m.clearedFields, novel.FieldCover)
 }
 
-// SetSummary sets the summary field.
+// SetSummary sets the "summary" field.
 func (m *NovelMutation) SetSummary(s string) {
 	m.summary = &s
 }
 
-// Summary returns the summary value in the mutation.
+// Summary returns the value of the "summary" field in the mutation.
 func (m *NovelMutation) Summary() (r string, exists bool) {
 	v := m.summary
 	if v == nil {
@@ -2368,13 +2327,12 @@ func (m *NovelMutation) Summary() (r string, exists bool) {
 	return *v, true
 }
 
-// OldSummary returns the old summary value of the Novel.
-// If the Novel object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldSummary returns the old "summary" field's value of the Novel entity.
+// If the Novel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelMutation) OldSummary(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldSummary is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldSummary is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldSummary requires an ID field in the mutation")
@@ -2386,7 +2344,7 @@ func (m *NovelMutation) OldSummary(ctx context.Context) (v string, err error) {
 	return oldValue.Summary, nil
 }
 
-// ResetSummary reset all changes of the "summary" field.
+// ResetSummary resets all changes to the "summary" field.
 func (m *NovelMutation) ResetSummary() {
 	m.summary = nil
 }
@@ -2401,9 +2359,9 @@ func (m *NovelMutation) Type() string {
 	return m.typ
 }
 
-// Fields returns all fields that were changed during
-// this mutation. Note that, in order to get all numeric
-// fields that were in/decremented, call AddedFields().
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
 func (m *NovelMutation) Fields() []string {
 	fields := make([]string, 0, 13)
 	if m.created_at != nil {
@@ -2448,9 +2406,9 @@ func (m *NovelMutation) Fields() []string {
 	return fields
 }
 
-// Field returns the value of a field with the given name.
-// The second boolean value indicates that this field was
-// not set, or was not define in the schema.
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
 func (m *NovelMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case novel.FieldCreatedAt:
@@ -2483,9 +2441,9 @@ func (m *NovelMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
-// OldField returns the old value of the field from the database.
-// An error is returned if the mutation operation is not UpdateOne,
-// or the query to the database was failed.
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
 func (m *NovelMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
 	case novel.FieldCreatedAt:
@@ -2518,9 +2476,9 @@ func (m *NovelMutation) OldField(ctx context.Context, name string) (ent.Value, e
 	return nil, fmt.Errorf("unknown Novel field %s", name)
 }
 
-// SetField sets the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
 func (m *NovelMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case novel.FieldCreatedAt:
@@ -2618,8 +2576,8 @@ func (m *NovelMutation) SetField(name string, value ent.Value) error {
 	return fmt.Errorf("unknown Novel field %s", name)
 }
 
-// AddedFields returns all numeric fields that were incremented
-// or decremented during this mutation.
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
 func (m *NovelMutation) AddedFields() []string {
 	var fields []string
 	if m.addsource != nil {
@@ -2646,9 +2604,9 @@ func (m *NovelMutation) AddedFields() []string {
 	return fields
 }
 
-// AddedField returns the numeric value that was in/decremented
-// from a field with the given name. The second value indicates
-// that this field was not set, or was not define in the schema.
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
 func (m *NovelMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case novel.FieldSource:
@@ -2669,9 +2627,9 @@ func (m *NovelMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
-// AddField adds the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
 func (m *NovelMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case novel.FieldSource:
@@ -2727,8 +2685,8 @@ func (m *NovelMutation) AddField(name string, value ent.Value) error {
 	return fmt.Errorf("unknown Novel numeric field %s", name)
 }
 
-// ClearedFields returns all nullable fields that were cleared
-// during this mutation.
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
 func (m *NovelMutation) ClearedFields() []string {
 	var fields []string
 	if m.FieldCleared(novel.FieldWordCount) {
@@ -2752,14 +2710,14 @@ func (m *NovelMutation) ClearedFields() []string {
 	return fields
 }
 
-// FieldCleared returns a boolean indicates if this field was
+// FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
 func (m *NovelMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
-// ClearField clears the value for the given name. It returns an
+// ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *NovelMutation) ClearField(name string) error {
 	switch name {
@@ -2785,9 +2743,8 @@ func (m *NovelMutation) ClearField(name string) error {
 	return fmt.Errorf("unknown Novel nullable field %s", name)
 }
 
-// ResetField resets all changes in the mutation regarding the
-// given field name. It returns an error if the field is not
-// defined in the schema.
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
 func (m *NovelMutation) ResetField(name string) error {
 	switch name {
 	case novel.FieldCreatedAt:
@@ -2833,60 +2790,55 @@ func (m *NovelMutation) ResetField(name string) error {
 	return fmt.Errorf("unknown Novel field %s", name)
 }
 
-// AddedEdges returns all edge names that were set/added in this
-// mutation.
+// AddedEdges returns all edge names that were set/added in this mutation.
 func (m *NovelMutation) AddedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// AddedIDs returns all ids (to other nodes) that were added for
-// the given edge name.
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
 func (m *NovelMutation) AddedIDs(name string) []ent.Value {
 	return nil
 }
 
-// RemovedEdges returns all edge names that were removed in this
-// mutation.
+// RemovedEdges returns all edge names that were removed in this mutation.
 func (m *NovelMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// RemovedIDs returns all ids (to other nodes) that were removed for
-// the given edge name.
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
 func (m *NovelMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
-// ClearedEdges returns all edge names that were cleared in this
-// mutation.
+// ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *NovelMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// EdgeCleared returns a boolean indicates if this edge was
-// cleared in this mutation.
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
 func (m *NovelMutation) EdgeCleared(name string) bool {
 	return false
 }
 
-// ClearEdge clears the value for the given name. It returns an
-// error if the edge name is not defined in the schema.
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
 func (m *NovelMutation) ClearEdge(name string) error {
 	return fmt.Errorf("unknown Novel unique edge %s", name)
 }
 
-// ResetEdge resets all changes in the mutation regarding the
-// given edge name. It returns an error if the edge is not
-// defined in the schema.
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
 func (m *NovelMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Novel edge %s", name)
 }
 
-// NovelSourceMutation represents an operation that mutate the NovelSources
-// nodes in the graph.
+// NovelSourceMutation represents an operation that mutates the NovelSource nodes in the graph.
 type NovelSourceMutation struct {
 	config
 	op            Op
@@ -2910,10 +2862,10 @@ type NovelSourceMutation struct {
 
 var _ ent.Mutation = (*NovelSourceMutation)(nil)
 
-// novelsourceOption allows to manage the mutation configuration using functional options.
+// novelsourceOption allows management of the mutation configuration using functional options.
 type novelsourceOption func(*NovelSourceMutation)
 
-// newNovelSourceMutation creates new mutation for NovelSource.
+// newNovelSourceMutation creates new mutation for the NovelSource entity.
 func newNovelSourceMutation(c config, op Op, opts ...novelsourceOption) *NovelSourceMutation {
 	m := &NovelSourceMutation{
 		config:        c,
@@ -2927,7 +2879,7 @@ func newNovelSourceMutation(c config, op Op, opts ...novelsourceOption) *NovelSo
 	return m
 }
 
-// withNovelSourceID sets the id field of the mutation.
+// withNovelSourceID sets the ID field of the mutation.
 func withNovelSourceID(id int) novelsourceOption {
 	return func(m *NovelSourceMutation) {
 		var (
@@ -2978,8 +2930,8 @@ func (m NovelSourceMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the id value in the mutation. Note that, the id
-// is available only if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID
+// is only available if it was provided to the builder.
 func (m *NovelSourceMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -2987,12 +2939,12 @@ func (m *NovelSourceMutation) ID() (id int, exists bool) {
 	return *m.id, true
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (m *NovelSourceMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
-// CreatedAt returns the created_at value in the mutation.
+// CreatedAt returns the value of the "created_at" field in the mutation.
 func (m *NovelSourceMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
@@ -3001,13 +2953,12 @@ func (m *NovelSourceMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old created_at value of the NovelSource.
-// If the NovelSource object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldCreatedAt returns the old "created_at" field's value of the NovelSource entity.
+// If the NovelSource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelSourceMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
@@ -3019,17 +2970,17 @@ func (m *NovelSourceMutation) OldCreatedAt(ctx context.Context) (v time.Time, er
 	return oldValue.CreatedAt, nil
 }
 
-// ResetCreatedAt reset all changes of the "created_at" field.
+// ResetCreatedAt resets all changes to the "created_at" field.
 func (m *NovelSourceMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetUpdatedAt sets the updated_at field.
+// SetUpdatedAt sets the "updated_at" field.
 func (m *NovelSourceMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
 }
 
-// UpdatedAt returns the updated_at value in the mutation.
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
 func (m *NovelSourceMutation) UpdatedAt() (r time.Time, exists bool) {
 	v := m.updated_at
 	if v == nil {
@@ -3038,13 +2989,12 @@ func (m *NovelSourceMutation) UpdatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old updated_at value of the NovelSource.
-// If the NovelSource object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldUpdatedAt returns the old "updated_at" field's value of the NovelSource entity.
+// If the NovelSource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelSourceMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
@@ -3056,17 +3006,17 @@ func (m *NovelSourceMutation) OldUpdatedAt(ctx context.Context) (v time.Time, er
 	return oldValue.UpdatedAt, nil
 }
 
-// ResetUpdatedAt reset all changes of the "updated_at" field.
+// ResetUpdatedAt resets all changes to the "updated_at" field.
 func (m *NovelSourceMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (m *NovelSourceMutation) SetName(s string) {
 	m.name = &s
 }
 
-// Name returns the name value in the mutation.
+// Name returns the value of the "name" field in the mutation.
 func (m *NovelSourceMutation) Name() (r string, exists bool) {
 	v := m.name
 	if v == nil {
@@ -3075,13 +3025,12 @@ func (m *NovelSourceMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value of the NovelSource.
-// If the NovelSource object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldName returns the old "name" field's value of the NovelSource entity.
+// If the NovelSource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelSourceMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldName is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldName requires an ID field in the mutation")
@@ -3093,17 +3042,17 @@ func (m *NovelSourceMutation) OldName(ctx context.Context) (v string, err error)
 	return oldValue.Name, nil
 }
 
-// ResetName reset all changes of the "name" field.
+// ResetName resets all changes to the "name" field.
 func (m *NovelSourceMutation) ResetName() {
 	m.name = nil
 }
 
-// SetAuthor sets the author field.
+// SetAuthor sets the "author" field.
 func (m *NovelSourceMutation) SetAuthor(s string) {
 	m.author = &s
 }
 
-// Author returns the author value in the mutation.
+// Author returns the value of the "author" field in the mutation.
 func (m *NovelSourceMutation) Author() (r string, exists bool) {
 	v := m.author
 	if v == nil {
@@ -3112,13 +3061,12 @@ func (m *NovelSourceMutation) Author() (r string, exists bool) {
 	return *v, true
 }
 
-// OldAuthor returns the old author value of the NovelSource.
-// If the NovelSource object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldAuthor returns the old "author" field's value of the NovelSource entity.
+// If the NovelSource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelSourceMutation) OldAuthor(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldAuthor is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldAuthor is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldAuthor requires an ID field in the mutation")
@@ -3130,18 +3078,18 @@ func (m *NovelSourceMutation) OldAuthor(ctx context.Context) (v string, err erro
 	return oldValue.Author, nil
 }
 
-// ResetAuthor reset all changes of the "author" field.
+// ResetAuthor resets all changes to the "author" field.
 func (m *NovelSourceMutation) ResetAuthor() {
 	m.author = nil
 }
 
-// SetSource sets the source field.
+// SetSource sets the "source" field.
 func (m *NovelSourceMutation) SetSource(i int) {
 	m.source = &i
 	m.addsource = nil
 }
 
-// Source returns the source value in the mutation.
+// Source returns the value of the "source" field in the mutation.
 func (m *NovelSourceMutation) Source() (r int, exists bool) {
 	v := m.source
 	if v == nil {
@@ -3150,13 +3098,12 @@ func (m *NovelSourceMutation) Source() (r int, exists bool) {
 	return *v, true
 }
 
-// OldSource returns the old source value of the NovelSource.
-// If the NovelSource object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldSource returns the old "source" field's value of the NovelSource entity.
+// If the NovelSource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelSourceMutation) OldSource(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldSource is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldSource is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldSource requires an ID field in the mutation")
@@ -3168,7 +3115,7 @@ func (m *NovelSourceMutation) OldSource(ctx context.Context) (v int, err error) 
 	return oldValue.Source, nil
 }
 
-// AddSource adds i to source.
+// AddSource adds i to the "source" field.
 func (m *NovelSourceMutation) AddSource(i int) {
 	if m.addsource != nil {
 		*m.addsource += i
@@ -3177,7 +3124,7 @@ func (m *NovelSourceMutation) AddSource(i int) {
 	}
 }
 
-// AddedSource returns the value that was added to the source field in this mutation.
+// AddedSource returns the value that was added to the "source" field in this mutation.
 func (m *NovelSourceMutation) AddedSource() (r int, exists bool) {
 	v := m.addsource
 	if v == nil {
@@ -3186,19 +3133,19 @@ func (m *NovelSourceMutation) AddedSource() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetSource reset all changes of the "source" field.
+// ResetSource resets all changes to the "source" field.
 func (m *NovelSourceMutation) ResetSource() {
 	m.source = nil
 	m.addsource = nil
 }
 
-// SetSourceID sets the source_id field.
+// SetSourceID sets the "source_id" field.
 func (m *NovelSourceMutation) SetSourceID(i int) {
 	m.source_id = &i
 	m.addsource_id = nil
 }
 
-// SourceID returns the source_id value in the mutation.
+// SourceID returns the value of the "source_id" field in the mutation.
 func (m *NovelSourceMutation) SourceID() (r int, exists bool) {
 	v := m.source_id
 	if v == nil {
@@ -3207,13 +3154,12 @@ func (m *NovelSourceMutation) SourceID() (r int, exists bool) {
 	return *v, true
 }
 
-// OldSourceID returns the old source_id value of the NovelSource.
-// If the NovelSource object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldSourceID returns the old "source_id" field's value of the NovelSource entity.
+// If the NovelSource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelSourceMutation) OldSourceID(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldSourceID is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldSourceID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldSourceID requires an ID field in the mutation")
@@ -3225,7 +3171,7 @@ func (m *NovelSourceMutation) OldSourceID(ctx context.Context) (v int, err error
 	return oldValue.SourceID, nil
 }
 
-// AddSourceID adds i to source_id.
+// AddSourceID adds i to the "source_id" field.
 func (m *NovelSourceMutation) AddSourceID(i int) {
 	if m.addsource_id != nil {
 		*m.addsource_id += i
@@ -3234,7 +3180,7 @@ func (m *NovelSourceMutation) AddSourceID(i int) {
 	}
 }
 
-// AddedSourceID returns the value that was added to the source_id field in this mutation.
+// AddedSourceID returns the value that was added to the "source_id" field in this mutation.
 func (m *NovelSourceMutation) AddedSourceID() (r int, exists bool) {
 	v := m.addsource_id
 	if v == nil {
@@ -3243,19 +3189,19 @@ func (m *NovelSourceMutation) AddedSourceID() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetSourceID reset all changes of the "source_id" field.
+// ResetSourceID resets all changes to the "source_id" field.
 func (m *NovelSourceMutation) ResetSourceID() {
 	m.source_id = nil
 	m.addsource_id = nil
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (m *NovelSourceMutation) SetStatus(i int) {
 	m.status = &i
 	m.addstatus = nil
 }
 
-// Status returns the status value in the mutation.
+// Status returns the value of the "status" field in the mutation.
 func (m *NovelSourceMutation) Status() (r int, exists bool) {
 	v := m.status
 	if v == nil {
@@ -3264,13 +3210,12 @@ func (m *NovelSourceMutation) Status() (r int, exists bool) {
 	return *v, true
 }
 
-// OldStatus returns the old status value of the NovelSource.
-// If the NovelSource object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldStatus returns the old "status" field's value of the NovelSource entity.
+// If the NovelSource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NovelSourceMutation) OldStatus(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldStatus is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldStatus is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldStatus requires an ID field in the mutation")
@@ -3282,7 +3227,7 @@ func (m *NovelSourceMutation) OldStatus(ctx context.Context) (v int, err error) 
 	return oldValue.Status, nil
 }
 
-// AddStatus adds i to status.
+// AddStatus adds i to the "status" field.
 func (m *NovelSourceMutation) AddStatus(i int) {
 	if m.addstatus != nil {
 		*m.addstatus += i
@@ -3291,7 +3236,7 @@ func (m *NovelSourceMutation) AddStatus(i int) {
 	}
 }
 
-// AddedStatus returns the value that was added to the status field in this mutation.
+// AddedStatus returns the value that was added to the "status" field in this mutation.
 func (m *NovelSourceMutation) AddedStatus() (r int, exists bool) {
 	v := m.addstatus
 	if v == nil {
@@ -3300,7 +3245,7 @@ func (m *NovelSourceMutation) AddedStatus() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetStatus reset all changes of the "status" field.
+// ResetStatus resets all changes to the "status" field.
 func (m *NovelSourceMutation) ResetStatus() {
 	m.status = nil
 	m.addstatus = nil
@@ -3316,9 +3261,9 @@ func (m *NovelSourceMutation) Type() string {
 	return m.typ
 }
 
-// Fields returns all fields that were changed during
-// this mutation. Note that, in order to get all numeric
-// fields that were in/decremented, call AddedFields().
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
 func (m *NovelSourceMutation) Fields() []string {
 	fields := make([]string, 0, 7)
 	if m.created_at != nil {
@@ -3345,9 +3290,9 @@ func (m *NovelSourceMutation) Fields() []string {
 	return fields
 }
 
-// Field returns the value of a field with the given name.
-// The second boolean value indicates that this field was
-// not set, or was not define in the schema.
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
 func (m *NovelSourceMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case novelsource.FieldCreatedAt:
@@ -3368,9 +3313,9 @@ func (m *NovelSourceMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
-// OldField returns the old value of the field from the database.
-// An error is returned if the mutation operation is not UpdateOne,
-// or the query to the database was failed.
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
 func (m *NovelSourceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
 	case novelsource.FieldCreatedAt:
@@ -3391,9 +3336,9 @@ func (m *NovelSourceMutation) OldField(ctx context.Context, name string) (ent.Va
 	return nil, fmt.Errorf("unknown NovelSource field %s", name)
 }
 
-// SetField sets the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
 func (m *NovelSourceMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case novelsource.FieldCreatedAt:
@@ -3449,8 +3394,8 @@ func (m *NovelSourceMutation) SetField(name string, value ent.Value) error {
 	return fmt.Errorf("unknown NovelSource field %s", name)
 }
 
-// AddedFields returns all numeric fields that were incremented
-// or decremented during this mutation.
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
 func (m *NovelSourceMutation) AddedFields() []string {
 	var fields []string
 	if m.addsource != nil {
@@ -3465,9 +3410,9 @@ func (m *NovelSourceMutation) AddedFields() []string {
 	return fields
 }
 
-// AddedField returns the numeric value that was in/decremented
-// from a field with the given name. The second value indicates
-// that this field was not set, or was not define in the schema.
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
 func (m *NovelSourceMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case novelsource.FieldSource:
@@ -3480,9 +3425,9 @@ func (m *NovelSourceMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
-// AddField adds the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
 func (m *NovelSourceMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case novelsource.FieldSource:
@@ -3510,28 +3455,27 @@ func (m *NovelSourceMutation) AddField(name string, value ent.Value) error {
 	return fmt.Errorf("unknown NovelSource numeric field %s", name)
 }
 
-// ClearedFields returns all nullable fields that were cleared
-// during this mutation.
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
 func (m *NovelSourceMutation) ClearedFields() []string {
 	return nil
 }
 
-// FieldCleared returns a boolean indicates if this field was
+// FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
 func (m *NovelSourceMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
-// ClearField clears the value for the given name. It returns an
+// ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *NovelSourceMutation) ClearField(name string) error {
 	return fmt.Errorf("unknown NovelSource nullable field %s", name)
 }
 
-// ResetField resets all changes in the mutation regarding the
-// given field name. It returns an error if the field is not
-// defined in the schema.
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
 func (m *NovelSourceMutation) ResetField(name string) error {
 	switch name {
 	case novelsource.FieldCreatedAt:
@@ -3559,60 +3503,55 @@ func (m *NovelSourceMutation) ResetField(name string) error {
 	return fmt.Errorf("unknown NovelSource field %s", name)
 }
 
-// AddedEdges returns all edge names that were set/added in this
-// mutation.
+// AddedEdges returns all edge names that were set/added in this mutation.
 func (m *NovelSourceMutation) AddedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// AddedIDs returns all ids (to other nodes) that were added for
-// the given edge name.
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
 func (m *NovelSourceMutation) AddedIDs(name string) []ent.Value {
 	return nil
 }
 
-// RemovedEdges returns all edge names that were removed in this
-// mutation.
+// RemovedEdges returns all edge names that were removed in this mutation.
 func (m *NovelSourceMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// RemovedIDs returns all ids (to other nodes) that were removed for
-// the given edge name.
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
 func (m *NovelSourceMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
-// ClearedEdges returns all edge names that were cleared in this
-// mutation.
+// ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *NovelSourceMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// EdgeCleared returns a boolean indicates if this edge was
-// cleared in this mutation.
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
 func (m *NovelSourceMutation) EdgeCleared(name string) bool {
 	return false
 }
 
-// ClearEdge clears the value for the given name. It returns an
-// error if the edge name is not defined in the schema.
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
 func (m *NovelSourceMutation) ClearEdge(name string) error {
 	return fmt.Errorf("unknown NovelSource unique edge %s", name)
 }
 
-// ResetEdge resets all changes in the mutation regarding the
-// given edge name. It returns an error if the edge is not
-// defined in the schema.
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
 func (m *NovelSourceMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown NovelSource edge %s", name)
 }
 
-// UserMutation represents an operation that mutate the Users
-// nodes in the graph.
+// UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
 	op            Op
@@ -3636,10 +3575,10 @@ type UserMutation struct {
 
 var _ ent.Mutation = (*UserMutation)(nil)
 
-// userOption allows to manage the mutation configuration using functional options.
+// userOption allows management of the mutation configuration using functional options.
 type userOption func(*UserMutation)
 
-// newUserMutation creates new mutation for User.
+// newUserMutation creates new mutation for the User entity.
 func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	m := &UserMutation{
 		config:        c,
@@ -3653,7 +3592,7 @@ func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	return m
 }
 
-// withUserID sets the id field of the mutation.
+// withUserID sets the ID field of the mutation.
 func withUserID(id int) userOption {
 	return func(m *UserMutation) {
 		var (
@@ -3704,8 +3643,8 @@ func (m UserMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the id value in the mutation. Note that, the id
-// is available only if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID
+// is only available if it was provided to the builder.
 func (m *UserMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -3713,12 +3652,12 @@ func (m *UserMutation) ID() (id int, exists bool) {
 	return *m.id, true
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (m *UserMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
-// CreatedAt returns the created_at value in the mutation.
+// CreatedAt returns the value of the "created_at" field in the mutation.
 func (m *UserMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
@@ -3727,13 +3666,12 @@ func (m *UserMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old created_at value of the User.
-// If the User object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldCreatedAt returns the old "created_at" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
@@ -3745,17 +3683,17 @@ func (m *UserMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error
 	return oldValue.CreatedAt, nil
 }
 
-// ResetCreatedAt reset all changes of the "created_at" field.
+// ResetCreatedAt resets all changes to the "created_at" field.
 func (m *UserMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetUpdatedAt sets the updated_at field.
+// SetUpdatedAt sets the "updated_at" field.
 func (m *UserMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
 }
 
-// UpdatedAt returns the updated_at value in the mutation.
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
 func (m *UserMutation) UpdatedAt() (r time.Time, exists bool) {
 	v := m.updated_at
 	if v == nil {
@@ -3764,13 +3702,12 @@ func (m *UserMutation) UpdatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old updated_at value of the User.
-// If the User object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldUpdatedAt returns the old "updated_at" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
@@ -3782,18 +3719,18 @@ func (m *UserMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error
 	return oldValue.UpdatedAt, nil
 }
 
-// ResetUpdatedAt reset all changes of the "updated_at" field.
+// ResetUpdatedAt resets all changes to the "updated_at" field.
 func (m *UserMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (m *UserMutation) SetStatus(s schema.Status) {
 	m.status = &s
 	m.addstatus = nil
 }
 
-// Status returns the status value in the mutation.
+// Status returns the value of the "status" field in the mutation.
 func (m *UserMutation) Status() (r schema.Status, exists bool) {
 	v := m.status
 	if v == nil {
@@ -3802,13 +3739,12 @@ func (m *UserMutation) Status() (r schema.Status, exists bool) {
 	return *v, true
 }
 
-// OldStatus returns the old status value of the User.
-// If the User object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldStatus returns the old "status" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldStatus(ctx context.Context) (v schema.Status, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldStatus is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldStatus is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldStatus requires an ID field in the mutation")
@@ -3820,7 +3756,7 @@ func (m *UserMutation) OldStatus(ctx context.Context) (v schema.Status, err erro
 	return oldValue.Status, nil
 }
 
-// AddStatus adds s to status.
+// AddStatus adds s to the "status" field.
 func (m *UserMutation) AddStatus(s schema.Status) {
 	if m.addstatus != nil {
 		*m.addstatus += s
@@ -3829,7 +3765,7 @@ func (m *UserMutation) AddStatus(s schema.Status) {
 	}
 }
 
-// AddedStatus returns the value that was added to the status field in this mutation.
+// AddedStatus returns the value that was added to the "status" field in this mutation.
 func (m *UserMutation) AddedStatus() (r schema.Status, exists bool) {
 	v := m.addstatus
 	if v == nil {
@@ -3838,18 +3774,18 @@ func (m *UserMutation) AddedStatus() (r schema.Status, exists bool) {
 	return *v, true
 }
 
-// ResetStatus reset all changes of the "status" field.
+// ResetStatus resets all changes to the "status" field.
 func (m *UserMutation) ResetStatus() {
 	m.status = nil
 	m.addstatus = nil
 }
 
-// SetAccount sets the account field.
+// SetAccount sets the "account" field.
 func (m *UserMutation) SetAccount(s string) {
 	m.account = &s
 }
 
-// Account returns the account value in the mutation.
+// Account returns the value of the "account" field in the mutation.
 func (m *UserMutation) Account() (r string, exists bool) {
 	v := m.account
 	if v == nil {
@@ -3858,13 +3794,12 @@ func (m *UserMutation) Account() (r string, exists bool) {
 	return *v, true
 }
 
-// OldAccount returns the old account value of the User.
-// If the User object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldAccount returns the old "account" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldAccount(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldAccount is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldAccount is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldAccount requires an ID field in the mutation")
@@ -3876,17 +3811,17 @@ func (m *UserMutation) OldAccount(ctx context.Context) (v string, err error) {
 	return oldValue.Account, nil
 }
 
-// ResetAccount reset all changes of the "account" field.
+// ResetAccount resets all changes to the "account" field.
 func (m *UserMutation) ResetAccount() {
 	m.account = nil
 }
 
-// SetPassword sets the password field.
+// SetPassword sets the "password" field.
 func (m *UserMutation) SetPassword(s string) {
 	m.password = &s
 }
 
-// Password returns the password value in the mutation.
+// Password returns the value of the "password" field in the mutation.
 func (m *UserMutation) Password() (r string, exists bool) {
 	v := m.password
 	if v == nil {
@@ -3895,13 +3830,12 @@ func (m *UserMutation) Password() (r string, exists bool) {
 	return *v, true
 }
 
-// OldPassword returns the old password value of the User.
-// If the User object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldPassword returns the old "password" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldPassword(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldPassword is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldPassword is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldPassword requires an ID field in the mutation")
@@ -3913,17 +3847,17 @@ func (m *UserMutation) OldPassword(ctx context.Context) (v string, err error) {
 	return oldValue.Password, nil
 }
 
-// ResetPassword reset all changes of the "password" field.
+// ResetPassword resets all changes to the "password" field.
 func (m *UserMutation) ResetPassword() {
 	m.password = nil
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (m *UserMutation) SetName(s string) {
 	m.name = &s
 }
 
-// Name returns the name value in the mutation.
+// Name returns the value of the "name" field in the mutation.
 func (m *UserMutation) Name() (r string, exists bool) {
 	v := m.name
 	if v == nil {
@@ -3932,13 +3866,12 @@ func (m *UserMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value of the User.
-// If the User object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldName returns the old "name" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldName is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldName requires an ID field in the mutation")
@@ -3950,30 +3883,30 @@ func (m *UserMutation) OldName(ctx context.Context) (v string, err error) {
 	return oldValue.Name, nil
 }
 
-// ClearName clears the value of name.
+// ClearName clears the value of the "name" field.
 func (m *UserMutation) ClearName() {
 	m.name = nil
 	m.clearedFields[user.FieldName] = struct{}{}
 }
 
-// NameCleared returns if the field name was cleared in this mutation.
+// NameCleared returns if the "name" field was cleared in this mutation.
 func (m *UserMutation) NameCleared() bool {
 	_, ok := m.clearedFields[user.FieldName]
 	return ok
 }
 
-// ResetName reset all changes of the "name" field.
+// ResetName resets all changes to the "name" field.
 func (m *UserMutation) ResetName() {
 	m.name = nil
 	delete(m.clearedFields, user.FieldName)
 }
 
-// SetRoles sets the roles field.
+// SetRoles sets the "roles" field.
 func (m *UserMutation) SetRoles(s []string) {
 	m.roles = &s
 }
 
-// Roles returns the roles value in the mutation.
+// Roles returns the value of the "roles" field in the mutation.
 func (m *UserMutation) Roles() (r []string, exists bool) {
 	v := m.roles
 	if v == nil {
@@ -3982,13 +3915,12 @@ func (m *UserMutation) Roles() (r []string, exists bool) {
 	return *v, true
 }
 
-// OldRoles returns the old roles value of the User.
-// If the User object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldRoles returns the old "roles" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldRoles(ctx context.Context) (v []string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldRoles is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldRoles is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldRoles requires an ID field in the mutation")
@@ -4000,30 +3932,30 @@ func (m *UserMutation) OldRoles(ctx context.Context) (v []string, err error) {
 	return oldValue.Roles, nil
 }
 
-// ClearRoles clears the value of roles.
+// ClearRoles clears the value of the "roles" field.
 func (m *UserMutation) ClearRoles() {
 	m.roles = nil
 	m.clearedFields[user.FieldRoles] = struct{}{}
 }
 
-// RolesCleared returns if the field roles was cleared in this mutation.
+// RolesCleared returns if the "roles" field was cleared in this mutation.
 func (m *UserMutation) RolesCleared() bool {
 	_, ok := m.clearedFields[user.FieldRoles]
 	return ok
 }
 
-// ResetRoles reset all changes of the "roles" field.
+// ResetRoles resets all changes to the "roles" field.
 func (m *UserMutation) ResetRoles() {
 	m.roles = nil
 	delete(m.clearedFields, user.FieldRoles)
 }
 
-// SetGroups sets the groups field.
+// SetGroups sets the "groups" field.
 func (m *UserMutation) SetGroups(s []string) {
 	m.groups = &s
 }
 
-// Groups returns the groups value in the mutation.
+// Groups returns the value of the "groups" field in the mutation.
 func (m *UserMutation) Groups() (r []string, exists bool) {
 	v := m.groups
 	if v == nil {
@@ -4032,13 +3964,12 @@ func (m *UserMutation) Groups() (r []string, exists bool) {
 	return *v, true
 }
 
-// OldGroups returns the old groups value of the User.
-// If the User object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldGroups returns the old "groups" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldGroups(ctx context.Context) (v []string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldGroups is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldGroups is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldGroups requires an ID field in the mutation")
@@ -4050,30 +3981,30 @@ func (m *UserMutation) OldGroups(ctx context.Context) (v []string, err error) {
 	return oldValue.Groups, nil
 }
 
-// ClearGroups clears the value of groups.
+// ClearGroups clears the value of the "groups" field.
 func (m *UserMutation) ClearGroups() {
 	m.groups = nil
 	m.clearedFields[user.FieldGroups] = struct{}{}
 }
 
-// GroupsCleared returns if the field groups was cleared in this mutation.
+// GroupsCleared returns if the "groups" field was cleared in this mutation.
 func (m *UserMutation) GroupsCleared() bool {
 	_, ok := m.clearedFields[user.FieldGroups]
 	return ok
 }
 
-// ResetGroups reset all changes of the "groups" field.
+// ResetGroups resets all changes to the "groups" field.
 func (m *UserMutation) ResetGroups() {
 	m.groups = nil
 	delete(m.clearedFields, user.FieldGroups)
 }
 
-// SetEmail sets the email field.
+// SetEmail sets the "email" field.
 func (m *UserMutation) SetEmail(s string) {
 	m.email = &s
 }
 
-// Email returns the email value in the mutation.
+// Email returns the value of the "email" field in the mutation.
 func (m *UserMutation) Email() (r string, exists bool) {
 	v := m.email
 	if v == nil {
@@ -4082,13 +4013,12 @@ func (m *UserMutation) Email() (r string, exists bool) {
 	return *v, true
 }
 
-// OldEmail returns the old email value of the User.
-// If the User object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldEmail returns the old "email" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldEmail(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldEmail is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldEmail is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldEmail requires an ID field in the mutation")
@@ -4100,19 +4030,19 @@ func (m *UserMutation) OldEmail(ctx context.Context) (v string, err error) {
 	return oldValue.Email, nil
 }
 
-// ClearEmail clears the value of email.
+// ClearEmail clears the value of the "email" field.
 func (m *UserMutation) ClearEmail() {
 	m.email = nil
 	m.clearedFields[user.FieldEmail] = struct{}{}
 }
 
-// EmailCleared returns if the field email was cleared in this mutation.
+// EmailCleared returns if the "email" field was cleared in this mutation.
 func (m *UserMutation) EmailCleared() bool {
 	_, ok := m.clearedFields[user.FieldEmail]
 	return ok
 }
 
-// ResetEmail reset all changes of the "email" field.
+// ResetEmail resets all changes to the "email" field.
 func (m *UserMutation) ResetEmail() {
 	m.email = nil
 	delete(m.clearedFields, user.FieldEmail)
@@ -4128,9 +4058,9 @@ func (m *UserMutation) Type() string {
 	return m.typ
 }
 
-// Fields returns all fields that were changed during
-// this mutation. Note that, in order to get all numeric
-// fields that were in/decremented, call AddedFields().
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
 func (m *UserMutation) Fields() []string {
 	fields := make([]string, 0, 9)
 	if m.created_at != nil {
@@ -4163,9 +4093,9 @@ func (m *UserMutation) Fields() []string {
 	return fields
 }
 
-// Field returns the value of a field with the given name.
-// The second boolean value indicates that this field was
-// not set, or was not define in the schema.
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case user.FieldCreatedAt:
@@ -4190,9 +4120,9 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
-// OldField returns the old value of the field from the database.
-// An error is returned if the mutation operation is not UpdateOne,
-// or the query to the database was failed.
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
 	case user.FieldCreatedAt:
@@ -4217,9 +4147,9 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
 
-// SetField sets the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case user.FieldCreatedAt:
@@ -4289,8 +4219,8 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 	return fmt.Errorf("unknown User field %s", name)
 }
 
-// AddedFields returns all numeric fields that were incremented
-// or decremented during this mutation.
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
 func (m *UserMutation) AddedFields() []string {
 	var fields []string
 	if m.addstatus != nil {
@@ -4299,9 +4229,9 @@ func (m *UserMutation) AddedFields() []string {
 	return fields
 }
 
-// AddedField returns the numeric value that was in/decremented
-// from a field with the given name. The second value indicates
-// that this field was not set, or was not define in the schema.
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
 func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case user.FieldStatus:
@@ -4310,9 +4240,9 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
-// AddField adds the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case user.FieldStatus:
@@ -4326,8 +4256,8 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
 
-// ClearedFields returns all nullable fields that were cleared
-// during this mutation.
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
 func (m *UserMutation) ClearedFields() []string {
 	var fields []string
 	if m.FieldCleared(user.FieldName) {
@@ -4345,14 +4275,14 @@ func (m *UserMutation) ClearedFields() []string {
 	return fields
 }
 
-// FieldCleared returns a boolean indicates if this field was
+// FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
 func (m *UserMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
-// ClearField clears the value for the given name. It returns an
+// ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
 	switch name {
@@ -4372,9 +4302,8 @@ func (m *UserMutation) ClearField(name string) error {
 	return fmt.Errorf("unknown User nullable field %s", name)
 }
 
-// ResetField resets all changes in the mutation regarding the
-// given field name. It returns an error if the field is not
-// defined in the schema.
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
 	switch name {
 	case user.FieldCreatedAt:
@@ -4408,60 +4337,55 @@ func (m *UserMutation) ResetField(name string) error {
 	return fmt.Errorf("unknown User field %s", name)
 }
 
-// AddedEdges returns all edge names that were set/added in this
-// mutation.
+// AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// AddedIDs returns all ids (to other nodes) that were added for
-// the given edge name.
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	return nil
 }
 
-// RemovedEdges returns all edge names that were removed in this
-// mutation.
+// RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// RemovedIDs returns all ids (to other nodes) that were removed for
-// the given edge name.
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
-// ClearedEdges returns all edge names that were cleared in this
-// mutation.
+// ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// EdgeCleared returns a boolean indicates if this edge was
-// cleared in this mutation.
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	return false
 }
 
-// ClearEdge clears the value for the given name. It returns an
-// error if the edge name is not defined in the schema.
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
 func (m *UserMutation) ClearEdge(name string) error {
 	return fmt.Errorf("unknown User unique edge %s", name)
 }
 
-// ResetEdge resets all changes in the mutation regarding the
-// given edge name. It returns an error if the edge is not
-// defined in the schema.
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown User edge %s", name)
 }
 
-// UserLoginMutation represents an operation that mutate the UserLogins
-// nodes in the graph.
+// UserLoginMutation represents an operation that mutates the UserLogin nodes in the graph.
 type UserLoginMutation struct {
 	config
 	op              Op
@@ -4487,10 +4411,10 @@ type UserLoginMutation struct {
 
 var _ ent.Mutation = (*UserLoginMutation)(nil)
 
-// userloginOption allows to manage the mutation configuration using functional options.
+// userloginOption allows management of the mutation configuration using functional options.
 type userloginOption func(*UserLoginMutation)
 
-// newUserLoginMutation creates new mutation for UserLogin.
+// newUserLoginMutation creates new mutation for the UserLogin entity.
 func newUserLoginMutation(c config, op Op, opts ...userloginOption) *UserLoginMutation {
 	m := &UserLoginMutation{
 		config:        c,
@@ -4504,7 +4428,7 @@ func newUserLoginMutation(c config, op Op, opts ...userloginOption) *UserLoginMu
 	return m
 }
 
-// withUserLoginID sets the id field of the mutation.
+// withUserLoginID sets the ID field of the mutation.
 func withUserLoginID(id int) userloginOption {
 	return func(m *UserLoginMutation) {
 		var (
@@ -4555,8 +4479,8 @@ func (m UserLoginMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the id value in the mutation. Note that, the id
-// is available only if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID
+// is only available if it was provided to the builder.
 func (m *UserLoginMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -4564,12 +4488,12 @@ func (m *UserLoginMutation) ID() (id int, exists bool) {
 	return *m.id, true
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (m *UserLoginMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
-// CreatedAt returns the created_at value in the mutation.
+// CreatedAt returns the value of the "created_at" field in the mutation.
 func (m *UserLoginMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
@@ -4578,13 +4502,12 @@ func (m *UserLoginMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old created_at value of the UserLogin.
-// If the UserLogin object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldCreatedAt returns the old "created_at" field's value of the UserLogin entity.
+// If the UserLogin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserLoginMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
@@ -4596,17 +4519,17 @@ func (m *UserLoginMutation) OldCreatedAt(ctx context.Context) (v time.Time, err 
 	return oldValue.CreatedAt, nil
 }
 
-// ResetCreatedAt reset all changes of the "created_at" field.
+// ResetCreatedAt resets all changes to the "created_at" field.
 func (m *UserLoginMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetUpdatedAt sets the updated_at field.
+// SetUpdatedAt sets the "updated_at" field.
 func (m *UserLoginMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
 }
 
-// UpdatedAt returns the updated_at value in the mutation.
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
 func (m *UserLoginMutation) UpdatedAt() (r time.Time, exists bool) {
 	v := m.updated_at
 	if v == nil {
@@ -4615,13 +4538,12 @@ func (m *UserLoginMutation) UpdatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old updated_at value of the UserLogin.
-// If the UserLogin object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldUpdatedAt returns the old "updated_at" field's value of the UserLogin entity.
+// If the UserLogin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserLoginMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
@@ -4633,17 +4555,17 @@ func (m *UserLoginMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err 
 	return oldValue.UpdatedAt, nil
 }
 
-// ResetUpdatedAt reset all changes of the "updated_at" field.
+// ResetUpdatedAt resets all changes to the "updated_at" field.
 func (m *UserLoginMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetAccount sets the account field.
+// SetAccount sets the "account" field.
 func (m *UserLoginMutation) SetAccount(s string) {
 	m.account = &s
 }
 
-// Account returns the account value in the mutation.
+// Account returns the value of the "account" field in the mutation.
 func (m *UserLoginMutation) Account() (r string, exists bool) {
 	v := m.account
 	if v == nil {
@@ -4652,13 +4574,12 @@ func (m *UserLoginMutation) Account() (r string, exists bool) {
 	return *v, true
 }
 
-// OldAccount returns the old account value of the UserLogin.
-// If the UserLogin object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldAccount returns the old "account" field's value of the UserLogin entity.
+// If the UserLogin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserLoginMutation) OldAccount(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldAccount is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldAccount is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldAccount requires an ID field in the mutation")
@@ -4670,17 +4591,17 @@ func (m *UserLoginMutation) OldAccount(ctx context.Context) (v string, err error
 	return oldValue.Account, nil
 }
 
-// ResetAccount reset all changes of the "account" field.
+// ResetAccount resets all changes to the "account" field.
 func (m *UserLoginMutation) ResetAccount() {
 	m.account = nil
 }
 
-// SetUserAgent sets the user_agent field.
+// SetUserAgent sets the "user_agent" field.
 func (m *UserLoginMutation) SetUserAgent(s string) {
 	m.user_agent = &s
 }
 
-// UserAgent returns the user_agent value in the mutation.
+// UserAgent returns the value of the "user_agent" field in the mutation.
 func (m *UserLoginMutation) UserAgent() (r string, exists bool) {
 	v := m.user_agent
 	if v == nil {
@@ -4689,13 +4610,12 @@ func (m *UserLoginMutation) UserAgent() (r string, exists bool) {
 	return *v, true
 }
 
-// OldUserAgent returns the old user_agent value of the UserLogin.
-// If the UserLogin object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldUserAgent returns the old "user_agent" field's value of the UserLogin entity.
+// If the UserLogin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserLoginMutation) OldUserAgent(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUserAgent is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldUserAgent is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldUserAgent requires an ID field in the mutation")
@@ -4707,30 +4627,30 @@ func (m *UserLoginMutation) OldUserAgent(ctx context.Context) (v string, err err
 	return oldValue.UserAgent, nil
 }
 
-// ClearUserAgent clears the value of user_agent.
+// ClearUserAgent clears the value of the "user_agent" field.
 func (m *UserLoginMutation) ClearUserAgent() {
 	m.user_agent = nil
 	m.clearedFields[userlogin.FieldUserAgent] = struct{}{}
 }
 
-// UserAgentCleared returns if the field user_agent was cleared in this mutation.
+// UserAgentCleared returns if the "user_agent" field was cleared in this mutation.
 func (m *UserLoginMutation) UserAgentCleared() bool {
 	_, ok := m.clearedFields[userlogin.FieldUserAgent]
 	return ok
 }
 
-// ResetUserAgent reset all changes of the "user_agent" field.
+// ResetUserAgent resets all changes to the "user_agent" field.
 func (m *UserLoginMutation) ResetUserAgent() {
 	m.user_agent = nil
 	delete(m.clearedFields, userlogin.FieldUserAgent)
 }
 
-// SetIP sets the ip field.
+// SetIP sets the "ip" field.
 func (m *UserLoginMutation) SetIP(s string) {
 	m.ip = &s
 }
 
-// IP returns the ip value in the mutation.
+// IP returns the value of the "ip" field in the mutation.
 func (m *UserLoginMutation) IP() (r string, exists bool) {
 	v := m.ip
 	if v == nil {
@@ -4739,13 +4659,12 @@ func (m *UserLoginMutation) IP() (r string, exists bool) {
 	return *v, true
 }
 
-// OldIP returns the old ip value of the UserLogin.
-// If the UserLogin object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldIP returns the old "ip" field's value of the UserLogin entity.
+// If the UserLogin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserLoginMutation) OldIP(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldIP is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldIP is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldIP requires an ID field in the mutation")
@@ -4757,30 +4676,30 @@ func (m *UserLoginMutation) OldIP(ctx context.Context) (v string, err error) {
 	return oldValue.IP, nil
 }
 
-// ClearIP clears the value of ip.
+// ClearIP clears the value of the "ip" field.
 func (m *UserLoginMutation) ClearIP() {
 	m.ip = nil
 	m.clearedFields[userlogin.FieldIP] = struct{}{}
 }
 
-// IPCleared returns if the field ip was cleared in this mutation.
+// IPCleared returns if the "ip" field was cleared in this mutation.
 func (m *UserLoginMutation) IPCleared() bool {
 	_, ok := m.clearedFields[userlogin.FieldIP]
 	return ok
 }
 
-// ResetIP reset all changes of the "ip" field.
+// ResetIP resets all changes to the "ip" field.
 func (m *UserLoginMutation) ResetIP() {
 	m.ip = nil
 	delete(m.clearedFields, userlogin.FieldIP)
 }
 
-// SetTrackID sets the track_id field.
+// SetTrackID sets the "track_id" field.
 func (m *UserLoginMutation) SetTrackID(s string) {
 	m.track_id = &s
 }
 
-// TrackID returns the track_id value in the mutation.
+// TrackID returns the value of the "track_id" field in the mutation.
 func (m *UserLoginMutation) TrackID() (r string, exists bool) {
 	v := m.track_id
 	if v == nil {
@@ -4789,13 +4708,12 @@ func (m *UserLoginMutation) TrackID() (r string, exists bool) {
 	return *v, true
 }
 
-// OldTrackID returns the old track_id value of the UserLogin.
-// If the UserLogin object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldTrackID returns the old "track_id" field's value of the UserLogin entity.
+// If the UserLogin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserLoginMutation) OldTrackID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldTrackID is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldTrackID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldTrackID requires an ID field in the mutation")
@@ -4807,30 +4725,30 @@ func (m *UserLoginMutation) OldTrackID(ctx context.Context) (v string, err error
 	return oldValue.TrackID, nil
 }
 
-// ClearTrackID clears the value of track_id.
+// ClearTrackID clears the value of the "track_id" field.
 func (m *UserLoginMutation) ClearTrackID() {
 	m.track_id = nil
 	m.clearedFields[userlogin.FieldTrackID] = struct{}{}
 }
 
-// TrackIDCleared returns if the field track_id was cleared in this mutation.
+// TrackIDCleared returns if the "track_id" field was cleared in this mutation.
 func (m *UserLoginMutation) TrackIDCleared() bool {
 	_, ok := m.clearedFields[userlogin.FieldTrackID]
 	return ok
 }
 
-// ResetTrackID reset all changes of the "track_id" field.
+// ResetTrackID resets all changes to the "track_id" field.
 func (m *UserLoginMutation) ResetTrackID() {
 	m.track_id = nil
 	delete(m.clearedFields, userlogin.FieldTrackID)
 }
 
-// SetSessionID sets the session_id field.
+// SetSessionID sets the "session_id" field.
 func (m *UserLoginMutation) SetSessionID(s string) {
 	m.session_id = &s
 }
 
-// SessionID returns the session_id value in the mutation.
+// SessionID returns the value of the "session_id" field in the mutation.
 func (m *UserLoginMutation) SessionID() (r string, exists bool) {
 	v := m.session_id
 	if v == nil {
@@ -4839,13 +4757,12 @@ func (m *UserLoginMutation) SessionID() (r string, exists bool) {
 	return *v, true
 }
 
-// OldSessionID returns the old session_id value of the UserLogin.
-// If the UserLogin object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldSessionID returns the old "session_id" field's value of the UserLogin entity.
+// If the UserLogin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserLoginMutation) OldSessionID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldSessionID is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldSessionID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldSessionID requires an ID field in the mutation")
@@ -4857,30 +4774,30 @@ func (m *UserLoginMutation) OldSessionID(ctx context.Context) (v string, err err
 	return oldValue.SessionID, nil
 }
 
-// ClearSessionID clears the value of session_id.
+// ClearSessionID clears the value of the "session_id" field.
 func (m *UserLoginMutation) ClearSessionID() {
 	m.session_id = nil
 	m.clearedFields[userlogin.FieldSessionID] = struct{}{}
 }
 
-// SessionIDCleared returns if the field session_id was cleared in this mutation.
+// SessionIDCleared returns if the "session_id" field was cleared in this mutation.
 func (m *UserLoginMutation) SessionIDCleared() bool {
 	_, ok := m.clearedFields[userlogin.FieldSessionID]
 	return ok
 }
 
-// ResetSessionID reset all changes of the "session_id" field.
+// ResetSessionID resets all changes to the "session_id" field.
 func (m *UserLoginMutation) ResetSessionID() {
 	m.session_id = nil
 	delete(m.clearedFields, userlogin.FieldSessionID)
 }
 
-// SetXForwardedFor sets the x_forwarded_for field.
+// SetXForwardedFor sets the "x_forwarded_for" field.
 func (m *UserLoginMutation) SetXForwardedFor(s string) {
 	m.x_forwarded_for = &s
 }
 
-// XForwardedFor returns the x_forwarded_for value in the mutation.
+// XForwardedFor returns the value of the "x_forwarded_for" field in the mutation.
 func (m *UserLoginMutation) XForwardedFor() (r string, exists bool) {
 	v := m.x_forwarded_for
 	if v == nil {
@@ -4889,13 +4806,12 @@ func (m *UserLoginMutation) XForwardedFor() (r string, exists bool) {
 	return *v, true
 }
 
-// OldXForwardedFor returns the old x_forwarded_for value of the UserLogin.
-// If the UserLogin object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldXForwardedFor returns the old "x_forwarded_for" field's value of the UserLogin entity.
+// If the UserLogin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserLoginMutation) OldXForwardedFor(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldXForwardedFor is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldXForwardedFor is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldXForwardedFor requires an ID field in the mutation")
@@ -4907,30 +4823,30 @@ func (m *UserLoginMutation) OldXForwardedFor(ctx context.Context) (v string, err
 	return oldValue.XForwardedFor, nil
 }
 
-// ClearXForwardedFor clears the value of x_forwarded_for.
+// ClearXForwardedFor clears the value of the "x_forwarded_for" field.
 func (m *UserLoginMutation) ClearXForwardedFor() {
 	m.x_forwarded_for = nil
 	m.clearedFields[userlogin.FieldXForwardedFor] = struct{}{}
 }
 
-// XForwardedForCleared returns if the field x_forwarded_for was cleared in this mutation.
+// XForwardedForCleared returns if the "x_forwarded_for" field was cleared in this mutation.
 func (m *UserLoginMutation) XForwardedForCleared() bool {
 	_, ok := m.clearedFields[userlogin.FieldXForwardedFor]
 	return ok
 }
 
-// ResetXForwardedFor reset all changes of the "x_forwarded_for" field.
+// ResetXForwardedFor resets all changes to the "x_forwarded_for" field.
 func (m *UserLoginMutation) ResetXForwardedFor() {
 	m.x_forwarded_for = nil
 	delete(m.clearedFields, userlogin.FieldXForwardedFor)
 }
 
-// SetCountry sets the country field.
+// SetCountry sets the "country" field.
 func (m *UserLoginMutation) SetCountry(s string) {
 	m.country = &s
 }
 
-// Country returns the country value in the mutation.
+// Country returns the value of the "country" field in the mutation.
 func (m *UserLoginMutation) Country() (r string, exists bool) {
 	v := m.country
 	if v == nil {
@@ -4939,13 +4855,12 @@ func (m *UserLoginMutation) Country() (r string, exists bool) {
 	return *v, true
 }
 
-// OldCountry returns the old country value of the UserLogin.
-// If the UserLogin object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldCountry returns the old "country" field's value of the UserLogin entity.
+// If the UserLogin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserLoginMutation) OldCountry(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCountry is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldCountry is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldCountry requires an ID field in the mutation")
@@ -4957,30 +4872,30 @@ func (m *UserLoginMutation) OldCountry(ctx context.Context) (v string, err error
 	return oldValue.Country, nil
 }
 
-// ClearCountry clears the value of country.
+// ClearCountry clears the value of the "country" field.
 func (m *UserLoginMutation) ClearCountry() {
 	m.country = nil
 	m.clearedFields[userlogin.FieldCountry] = struct{}{}
 }
 
-// CountryCleared returns if the field country was cleared in this mutation.
+// CountryCleared returns if the "country" field was cleared in this mutation.
 func (m *UserLoginMutation) CountryCleared() bool {
 	_, ok := m.clearedFields[userlogin.FieldCountry]
 	return ok
 }
 
-// ResetCountry reset all changes of the "country" field.
+// ResetCountry resets all changes to the "country" field.
 func (m *UserLoginMutation) ResetCountry() {
 	m.country = nil
 	delete(m.clearedFields, userlogin.FieldCountry)
 }
 
-// SetProvince sets the province field.
+// SetProvince sets the "province" field.
 func (m *UserLoginMutation) SetProvince(s string) {
 	m.province = &s
 }
 
-// Province returns the province value in the mutation.
+// Province returns the value of the "province" field in the mutation.
 func (m *UserLoginMutation) Province() (r string, exists bool) {
 	v := m.province
 	if v == nil {
@@ -4989,13 +4904,12 @@ func (m *UserLoginMutation) Province() (r string, exists bool) {
 	return *v, true
 }
 
-// OldProvince returns the old province value of the UserLogin.
-// If the UserLogin object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldProvince returns the old "province" field's value of the UserLogin entity.
+// If the UserLogin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserLoginMutation) OldProvince(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldProvince is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldProvince is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldProvince requires an ID field in the mutation")
@@ -5007,30 +4921,30 @@ func (m *UserLoginMutation) OldProvince(ctx context.Context) (v string, err erro
 	return oldValue.Province, nil
 }
 
-// ClearProvince clears the value of province.
+// ClearProvince clears the value of the "province" field.
 func (m *UserLoginMutation) ClearProvince() {
 	m.province = nil
 	m.clearedFields[userlogin.FieldProvince] = struct{}{}
 }
 
-// ProvinceCleared returns if the field province was cleared in this mutation.
+// ProvinceCleared returns if the "province" field was cleared in this mutation.
 func (m *UserLoginMutation) ProvinceCleared() bool {
 	_, ok := m.clearedFields[userlogin.FieldProvince]
 	return ok
 }
 
-// ResetProvince reset all changes of the "province" field.
+// ResetProvince resets all changes to the "province" field.
 func (m *UserLoginMutation) ResetProvince() {
 	m.province = nil
 	delete(m.clearedFields, userlogin.FieldProvince)
 }
 
-// SetCity sets the city field.
+// SetCity sets the "city" field.
 func (m *UserLoginMutation) SetCity(s string) {
 	m.city = &s
 }
 
-// City returns the city value in the mutation.
+// City returns the value of the "city" field in the mutation.
 func (m *UserLoginMutation) City() (r string, exists bool) {
 	v := m.city
 	if v == nil {
@@ -5039,13 +4953,12 @@ func (m *UserLoginMutation) City() (r string, exists bool) {
 	return *v, true
 }
 
-// OldCity returns the old city value of the UserLogin.
-// If the UserLogin object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldCity returns the old "city" field's value of the UserLogin entity.
+// If the UserLogin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserLoginMutation) OldCity(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCity is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldCity is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldCity requires an ID field in the mutation")
@@ -5057,30 +4970,30 @@ func (m *UserLoginMutation) OldCity(ctx context.Context) (v string, err error) {
 	return oldValue.City, nil
 }
 
-// ClearCity clears the value of city.
+// ClearCity clears the value of the "city" field.
 func (m *UserLoginMutation) ClearCity() {
 	m.city = nil
 	m.clearedFields[userlogin.FieldCity] = struct{}{}
 }
 
-// CityCleared returns if the field city was cleared in this mutation.
+// CityCleared returns if the "city" field was cleared in this mutation.
 func (m *UserLoginMutation) CityCleared() bool {
 	_, ok := m.clearedFields[userlogin.FieldCity]
 	return ok
 }
 
-// ResetCity reset all changes of the "city" field.
+// ResetCity resets all changes to the "city" field.
 func (m *UserLoginMutation) ResetCity() {
 	m.city = nil
 	delete(m.clearedFields, userlogin.FieldCity)
 }
 
-// SetIsp sets the isp field.
+// SetIsp sets the "isp" field.
 func (m *UserLoginMutation) SetIsp(s string) {
 	m.isp = &s
 }
 
-// Isp returns the isp value in the mutation.
+// Isp returns the value of the "isp" field in the mutation.
 func (m *UserLoginMutation) Isp() (r string, exists bool) {
 	v := m.isp
 	if v == nil {
@@ -5089,13 +5002,12 @@ func (m *UserLoginMutation) Isp() (r string, exists bool) {
 	return *v, true
 }
 
-// OldIsp returns the old isp value of the UserLogin.
-// If the UserLogin object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+// OldIsp returns the old "isp" field's value of the UserLogin entity.
+// If the UserLogin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserLoginMutation) OldIsp(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldIsp is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldIsp is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
 		return v, fmt.Errorf("OldIsp requires an ID field in the mutation")
@@ -5107,19 +5019,19 @@ func (m *UserLoginMutation) OldIsp(ctx context.Context) (v string, err error) {
 	return oldValue.Isp, nil
 }
 
-// ClearIsp clears the value of isp.
+// ClearIsp clears the value of the "isp" field.
 func (m *UserLoginMutation) ClearIsp() {
 	m.isp = nil
 	m.clearedFields[userlogin.FieldIsp] = struct{}{}
 }
 
-// IspCleared returns if the field isp was cleared in this mutation.
+// IspCleared returns if the "isp" field was cleared in this mutation.
 func (m *UserLoginMutation) IspCleared() bool {
 	_, ok := m.clearedFields[userlogin.FieldIsp]
 	return ok
 }
 
-// ResetIsp reset all changes of the "isp" field.
+// ResetIsp resets all changes to the "isp" field.
 func (m *UserLoginMutation) ResetIsp() {
 	m.isp = nil
 	delete(m.clearedFields, userlogin.FieldIsp)
@@ -5135,9 +5047,9 @@ func (m *UserLoginMutation) Type() string {
 	return m.typ
 }
 
-// Fields returns all fields that were changed during
-// this mutation. Note that, in order to get all numeric
-// fields that were in/decremented, call AddedFields().
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
 func (m *UserLoginMutation) Fields() []string {
 	fields := make([]string, 0, 12)
 	if m.created_at != nil {
@@ -5179,9 +5091,9 @@ func (m *UserLoginMutation) Fields() []string {
 	return fields
 }
 
-// Field returns the value of a field with the given name.
-// The second boolean value indicates that this field was
-// not set, or was not define in the schema.
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
 func (m *UserLoginMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case userlogin.FieldCreatedAt:
@@ -5212,9 +5124,9 @@ func (m *UserLoginMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
-// OldField returns the old value of the field from the database.
-// An error is returned if the mutation operation is not UpdateOne,
-// or the query to the database was failed.
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
 func (m *UserLoginMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
 	case userlogin.FieldCreatedAt:
@@ -5245,9 +5157,9 @@ func (m *UserLoginMutation) OldField(ctx context.Context, name string) (ent.Valu
 	return nil, fmt.Errorf("unknown UserLogin field %s", name)
 }
 
-// SetField sets the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
 func (m *UserLoginMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case userlogin.FieldCreatedAt:
@@ -5338,30 +5250,30 @@ func (m *UserLoginMutation) SetField(name string, value ent.Value) error {
 	return fmt.Errorf("unknown UserLogin field %s", name)
 }
 
-// AddedFields returns all numeric fields that were incremented
-// or decremented during this mutation.
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
 func (m *UserLoginMutation) AddedFields() []string {
 	return nil
 }
 
-// AddedField returns the numeric value that was in/decremented
-// from a field with the given name. The second value indicates
-// that this field was not set, or was not define in the schema.
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
 func (m *UserLoginMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
-// AddField adds the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
 func (m *UserLoginMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
 	return fmt.Errorf("unknown UserLogin numeric field %s", name)
 }
 
-// ClearedFields returns all nullable fields that were cleared
-// during this mutation.
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
 func (m *UserLoginMutation) ClearedFields() []string {
 	var fields []string
 	if m.FieldCleared(userlogin.FieldUserAgent) {
@@ -5394,14 +5306,14 @@ func (m *UserLoginMutation) ClearedFields() []string {
 	return fields
 }
 
-// FieldCleared returns a boolean indicates if this field was
+// FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
 func (m *UserLoginMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
-// ClearField clears the value for the given name. It returns an
+// ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *UserLoginMutation) ClearField(name string) error {
 	switch name {
@@ -5436,9 +5348,8 @@ func (m *UserLoginMutation) ClearField(name string) error {
 	return fmt.Errorf("unknown UserLogin nullable field %s", name)
 }
 
-// ResetField resets all changes in the mutation regarding the
-// given field name. It returns an error if the field is not
-// defined in the schema.
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
 func (m *UserLoginMutation) ResetField(name string) error {
 	switch name {
 	case userlogin.FieldCreatedAt:
@@ -5481,54 +5392,50 @@ func (m *UserLoginMutation) ResetField(name string) error {
 	return fmt.Errorf("unknown UserLogin field %s", name)
 }
 
-// AddedEdges returns all edge names that were set/added in this
-// mutation.
+// AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserLoginMutation) AddedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// AddedIDs returns all ids (to other nodes) that were added for
-// the given edge name.
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
 func (m *UserLoginMutation) AddedIDs(name string) []ent.Value {
 	return nil
 }
 
-// RemovedEdges returns all edge names that were removed in this
-// mutation.
+// RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserLoginMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// RemovedIDs returns all ids (to other nodes) that were removed for
-// the given edge name.
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
 func (m *UserLoginMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
-// ClearedEdges returns all edge names that were cleared in this
-// mutation.
+// ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserLoginMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
-// EdgeCleared returns a boolean indicates if this edge was
-// cleared in this mutation.
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
 func (m *UserLoginMutation) EdgeCleared(name string) bool {
 	return false
 }
 
-// ClearEdge clears the value for the given name. It returns an
-// error if the edge name is not defined in the schema.
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
 func (m *UserLoginMutation) ClearEdge(name string) error {
 	return fmt.Errorf("unknown UserLogin unique edge %s", name)
 }
 
-// ResetEdge resets all changes in the mutation regarding the
-// given edge name. It returns an error if the edge is not
-// defined in the schema.
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
 func (m *UserLoginMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown UserLogin edge %s", name)
 }

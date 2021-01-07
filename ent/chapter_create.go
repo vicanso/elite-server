@@ -20,13 +20,13 @@ type ChapterCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (cc *ChapterCreate) SetCreatedAt(t time.Time) *ChapterCreate {
 	cc.mutation.SetCreatedAt(t)
 	return cc
 }
 
-// SetNillableCreatedAt sets the created_at field if the given value is not nil.
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
 func (cc *ChapterCreate) SetNillableCreatedAt(t *time.Time) *ChapterCreate {
 	if t != nil {
 		cc.SetCreatedAt(*t)
@@ -34,13 +34,13 @@ func (cc *ChapterCreate) SetNillableCreatedAt(t *time.Time) *ChapterCreate {
 	return cc
 }
 
-// SetUpdatedAt sets the updated_at field.
+// SetUpdatedAt sets the "updated_at" field.
 func (cc *ChapterCreate) SetUpdatedAt(t time.Time) *ChapterCreate {
 	cc.mutation.SetUpdatedAt(t)
 	return cc
 }
 
-// SetNillableUpdatedAt sets the updated_at field if the given value is not nil.
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
 func (cc *ChapterCreate) SetNillableUpdatedAt(t *time.Time) *ChapterCreate {
 	if t != nil {
 		cc.SetUpdatedAt(*t)
@@ -48,31 +48,31 @@ func (cc *ChapterCreate) SetNillableUpdatedAt(t *time.Time) *ChapterCreate {
 	return cc
 }
 
-// SetNovel sets the novel field.
+// SetNovel sets the "novel" field.
 func (cc *ChapterCreate) SetNovel(i int) *ChapterCreate {
 	cc.mutation.SetNovel(i)
 	return cc
 }
 
-// SetNo sets the no field.
+// SetNo sets the "no" field.
 func (cc *ChapterCreate) SetNo(i int) *ChapterCreate {
 	cc.mutation.SetNo(i)
 	return cc
 }
 
-// SetTitle sets the title field.
+// SetTitle sets the "title" field.
 func (cc *ChapterCreate) SetTitle(s string) *ChapterCreate {
 	cc.mutation.SetTitle(s)
 	return cc
 }
 
-// SetContent sets the content field.
+// SetContent sets the "content" field.
 func (cc *ChapterCreate) SetContent(s string) *ChapterCreate {
 	cc.mutation.SetContent(s)
 	return cc
 }
 
-// SetNillableContent sets the content field if the given value is not nil.
+// SetNillableContent sets the "content" field if the given value is not nil.
 func (cc *ChapterCreate) SetNillableContent(s *string) *ChapterCreate {
 	if s != nil {
 		cc.SetContent(*s)
@@ -80,13 +80,13 @@ func (cc *ChapterCreate) SetNillableContent(s *string) *ChapterCreate {
 	return cc
 }
 
-// SetWordCount sets the word_count field.
+// SetWordCount sets the "word_count" field.
 func (cc *ChapterCreate) SetWordCount(i int) *ChapterCreate {
 	cc.mutation.SetWordCount(i)
 	return cc
 }
 
-// SetNillableWordCount sets the word_count field if the given value is not nil.
+// SetNillableWordCount sets the "word_count" field if the given value is not nil.
 func (cc *ChapterCreate) SetNillableWordCount(i *int) *ChapterCreate {
 	if i != nil {
 		cc.SetWordCount(*i)
@@ -259,7 +259,7 @@ func (cc *ChapterCreate) createSpec() (*Chapter, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// ChapterCreateBulk is the builder for creating a bulk of Chapter entities.
+// ChapterCreateBulk is the builder for creating many Chapter entities in bulk.
 type ChapterCreateBulk struct {
 	config
 	builders []*ChapterCreate
@@ -317,7 +317,7 @@ func (ccb *ChapterCreateBulk) Save(ctx context.Context) ([]*Chapter, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ccb *ChapterCreateBulk) SaveX(ctx context.Context) []*Chapter {
 	v, err := ccb.Save(ctx)
 	if err != nil {

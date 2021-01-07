@@ -20,7 +20,7 @@ type NovelDelete struct {
 	mutation *NovelMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the NovelDelete builder.
 func (nd *NovelDelete) Where(ps ...predicate.Novel) *NovelDelete {
 	nd.mutation.predicates = append(nd.mutation.predicates, ps...)
 	return nd

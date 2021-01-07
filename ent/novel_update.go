@@ -20,20 +20,20 @@ type NovelUpdate struct {
 	mutation *NovelMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the NovelUpdate builder.
 func (nu *NovelUpdate) Where(ps ...predicate.Novel) *NovelUpdate {
 	nu.mutation.predicates = append(nu.mutation.predicates, ps...)
 	return nu
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (nu *NovelUpdate) SetStatus(i int) *NovelUpdate {
 	nu.mutation.ResetStatus()
 	nu.mutation.SetStatus(i)
 	return nu
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (nu *NovelUpdate) SetNillableStatus(i *int) *NovelUpdate {
 	if i != nil {
 		nu.SetStatus(*i)
@@ -41,20 +41,20 @@ func (nu *NovelUpdate) SetNillableStatus(i *int) *NovelUpdate {
 	return nu
 }
 
-// AddStatus adds i to status.
+// AddStatus adds i to the "status" field.
 func (nu *NovelUpdate) AddStatus(i int) *NovelUpdate {
 	nu.mutation.AddStatus(i)
 	return nu
 }
 
-// SetWordCount sets the word_count field.
+// SetWordCount sets the "word_count" field.
 func (nu *NovelUpdate) SetWordCount(i int) *NovelUpdate {
 	nu.mutation.ResetWordCount()
 	nu.mutation.SetWordCount(i)
 	return nu
 }
 
-// SetNillableWordCount sets the word_count field if the given value is not nil.
+// SetNillableWordCount sets the "word_count" field if the given value is not nil.
 func (nu *NovelUpdate) SetNillableWordCount(i *int) *NovelUpdate {
 	if i != nil {
 		nu.SetWordCount(*i)
@@ -62,26 +62,26 @@ func (nu *NovelUpdate) SetNillableWordCount(i *int) *NovelUpdate {
 	return nu
 }
 
-// AddWordCount adds i to word_count.
+// AddWordCount adds i to the "word_count" field.
 func (nu *NovelUpdate) AddWordCount(i int) *NovelUpdate {
 	nu.mutation.AddWordCount(i)
 	return nu
 }
 
-// ClearWordCount clears the value of word_count.
+// ClearWordCount clears the value of the "word_count" field.
 func (nu *NovelUpdate) ClearWordCount() *NovelUpdate {
 	nu.mutation.ClearWordCount()
 	return nu
 }
 
-// SetViews sets the views field.
+// SetViews sets the "views" field.
 func (nu *NovelUpdate) SetViews(i int) *NovelUpdate {
 	nu.mutation.ResetViews()
 	nu.mutation.SetViews(i)
 	return nu
 }
 
-// SetNillableViews sets the views field if the given value is not nil.
+// SetNillableViews sets the "views" field if the given value is not nil.
 func (nu *NovelUpdate) SetNillableViews(i *int) *NovelUpdate {
 	if i != nil {
 		nu.SetViews(*i)
@@ -89,26 +89,26 @@ func (nu *NovelUpdate) SetNillableViews(i *int) *NovelUpdate {
 	return nu
 }
 
-// AddViews adds i to views.
+// AddViews adds i to the "views" field.
 func (nu *NovelUpdate) AddViews(i int) *NovelUpdate {
 	nu.mutation.AddViews(i)
 	return nu
 }
 
-// ClearViews clears the value of views.
+// ClearViews clears the value of the "views" field.
 func (nu *NovelUpdate) ClearViews() *NovelUpdate {
 	nu.mutation.ClearViews()
 	return nu
 }
 
-// SetDownloads sets the downloads field.
+// SetDownloads sets the "downloads" field.
 func (nu *NovelUpdate) SetDownloads(i int) *NovelUpdate {
 	nu.mutation.ResetDownloads()
 	nu.mutation.SetDownloads(i)
 	return nu
 }
 
-// SetNillableDownloads sets the downloads field if the given value is not nil.
+// SetNillableDownloads sets the "downloads" field if the given value is not nil.
 func (nu *NovelUpdate) SetNillableDownloads(i *int) *NovelUpdate {
 	if i != nil {
 		nu.SetDownloads(*i)
@@ -116,26 +116,26 @@ func (nu *NovelUpdate) SetNillableDownloads(i *int) *NovelUpdate {
 	return nu
 }
 
-// AddDownloads adds i to downloads.
+// AddDownloads adds i to the "downloads" field.
 func (nu *NovelUpdate) AddDownloads(i int) *NovelUpdate {
 	nu.mutation.AddDownloads(i)
 	return nu
 }
 
-// ClearDownloads clears the value of downloads.
+// ClearDownloads clears the value of the "downloads" field.
 func (nu *NovelUpdate) ClearDownloads() *NovelUpdate {
 	nu.mutation.ClearDownloads()
 	return nu
 }
 
-// SetFavorites sets the favorites field.
+// SetFavorites sets the "favorites" field.
 func (nu *NovelUpdate) SetFavorites(i int) *NovelUpdate {
 	nu.mutation.ResetFavorites()
 	nu.mutation.SetFavorites(i)
 	return nu
 }
 
-// SetNillableFavorites sets the favorites field if the given value is not nil.
+// SetNillableFavorites sets the "favorites" field if the given value is not nil.
 func (nu *NovelUpdate) SetNillableFavorites(i *int) *NovelUpdate {
 	if i != nil {
 		nu.SetFavorites(*i)
@@ -143,26 +143,26 @@ func (nu *NovelUpdate) SetNillableFavorites(i *int) *NovelUpdate {
 	return nu
 }
 
-// AddFavorites adds i to favorites.
+// AddFavorites adds i to the "favorites" field.
 func (nu *NovelUpdate) AddFavorites(i int) *NovelUpdate {
 	nu.mutation.AddFavorites(i)
 	return nu
 }
 
-// ClearFavorites clears the value of favorites.
+// ClearFavorites clears the value of the "favorites" field.
 func (nu *NovelUpdate) ClearFavorites() *NovelUpdate {
 	nu.mutation.ClearFavorites()
 	return nu
 }
 
-// SetUpdatedWeight sets the updated_weight field.
+// SetUpdatedWeight sets the "updated_weight" field.
 func (nu *NovelUpdate) SetUpdatedWeight(i int) *NovelUpdate {
 	nu.mutation.ResetUpdatedWeight()
 	nu.mutation.SetUpdatedWeight(i)
 	return nu
 }
 
-// SetNillableUpdatedWeight sets the updated_weight field if the given value is not nil.
+// SetNillableUpdatedWeight sets the "updated_weight" field if the given value is not nil.
 func (nu *NovelUpdate) SetNillableUpdatedWeight(i *int) *NovelUpdate {
 	if i != nil {
 		nu.SetUpdatedWeight(*i)
@@ -170,25 +170,25 @@ func (nu *NovelUpdate) SetNillableUpdatedWeight(i *int) *NovelUpdate {
 	return nu
 }
 
-// AddUpdatedWeight adds i to updated_weight.
+// AddUpdatedWeight adds i to the "updated_weight" field.
 func (nu *NovelUpdate) AddUpdatedWeight(i int) *NovelUpdate {
 	nu.mutation.AddUpdatedWeight(i)
 	return nu
 }
 
-// ClearUpdatedWeight clears the value of updated_weight.
+// ClearUpdatedWeight clears the value of the "updated_weight" field.
 func (nu *NovelUpdate) ClearUpdatedWeight() *NovelUpdate {
 	nu.mutation.ClearUpdatedWeight()
 	return nu
 }
 
-// SetCover sets the cover field.
+// SetCover sets the "cover" field.
 func (nu *NovelUpdate) SetCover(s string) *NovelUpdate {
 	nu.mutation.SetCover(s)
 	return nu
 }
 
-// SetNillableCover sets the cover field if the given value is not nil.
+// SetNillableCover sets the "cover" field if the given value is not nil.
 func (nu *NovelUpdate) SetNillableCover(s *string) *NovelUpdate {
 	if s != nil {
 		nu.SetCover(*s)
@@ -196,13 +196,13 @@ func (nu *NovelUpdate) SetNillableCover(s *string) *NovelUpdate {
 	return nu
 }
 
-// ClearCover clears the value of cover.
+// ClearCover clears the value of the "cover" field.
 func (nu *NovelUpdate) ClearCover() *NovelUpdate {
 	nu.mutation.ClearCover()
 	return nu
 }
 
-// SetSummary sets the summary field.
+// SetSummary sets the "summary" field.
 func (nu *NovelUpdate) SetSummary(s string) *NovelUpdate {
 	nu.mutation.SetSummary(s)
 	return nu
@@ -466,14 +466,14 @@ type NovelUpdateOne struct {
 	mutation *NovelMutation
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (nuo *NovelUpdateOne) SetStatus(i int) *NovelUpdateOne {
 	nuo.mutation.ResetStatus()
 	nuo.mutation.SetStatus(i)
 	return nuo
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (nuo *NovelUpdateOne) SetNillableStatus(i *int) *NovelUpdateOne {
 	if i != nil {
 		nuo.SetStatus(*i)
@@ -481,20 +481,20 @@ func (nuo *NovelUpdateOne) SetNillableStatus(i *int) *NovelUpdateOne {
 	return nuo
 }
 
-// AddStatus adds i to status.
+// AddStatus adds i to the "status" field.
 func (nuo *NovelUpdateOne) AddStatus(i int) *NovelUpdateOne {
 	nuo.mutation.AddStatus(i)
 	return nuo
 }
 
-// SetWordCount sets the word_count field.
+// SetWordCount sets the "word_count" field.
 func (nuo *NovelUpdateOne) SetWordCount(i int) *NovelUpdateOne {
 	nuo.mutation.ResetWordCount()
 	nuo.mutation.SetWordCount(i)
 	return nuo
 }
 
-// SetNillableWordCount sets the word_count field if the given value is not nil.
+// SetNillableWordCount sets the "word_count" field if the given value is not nil.
 func (nuo *NovelUpdateOne) SetNillableWordCount(i *int) *NovelUpdateOne {
 	if i != nil {
 		nuo.SetWordCount(*i)
@@ -502,26 +502,26 @@ func (nuo *NovelUpdateOne) SetNillableWordCount(i *int) *NovelUpdateOne {
 	return nuo
 }
 
-// AddWordCount adds i to word_count.
+// AddWordCount adds i to the "word_count" field.
 func (nuo *NovelUpdateOne) AddWordCount(i int) *NovelUpdateOne {
 	nuo.mutation.AddWordCount(i)
 	return nuo
 }
 
-// ClearWordCount clears the value of word_count.
+// ClearWordCount clears the value of the "word_count" field.
 func (nuo *NovelUpdateOne) ClearWordCount() *NovelUpdateOne {
 	nuo.mutation.ClearWordCount()
 	return nuo
 }
 
-// SetViews sets the views field.
+// SetViews sets the "views" field.
 func (nuo *NovelUpdateOne) SetViews(i int) *NovelUpdateOne {
 	nuo.mutation.ResetViews()
 	nuo.mutation.SetViews(i)
 	return nuo
 }
 
-// SetNillableViews sets the views field if the given value is not nil.
+// SetNillableViews sets the "views" field if the given value is not nil.
 func (nuo *NovelUpdateOne) SetNillableViews(i *int) *NovelUpdateOne {
 	if i != nil {
 		nuo.SetViews(*i)
@@ -529,26 +529,26 @@ func (nuo *NovelUpdateOne) SetNillableViews(i *int) *NovelUpdateOne {
 	return nuo
 }
 
-// AddViews adds i to views.
+// AddViews adds i to the "views" field.
 func (nuo *NovelUpdateOne) AddViews(i int) *NovelUpdateOne {
 	nuo.mutation.AddViews(i)
 	return nuo
 }
 
-// ClearViews clears the value of views.
+// ClearViews clears the value of the "views" field.
 func (nuo *NovelUpdateOne) ClearViews() *NovelUpdateOne {
 	nuo.mutation.ClearViews()
 	return nuo
 }
 
-// SetDownloads sets the downloads field.
+// SetDownloads sets the "downloads" field.
 func (nuo *NovelUpdateOne) SetDownloads(i int) *NovelUpdateOne {
 	nuo.mutation.ResetDownloads()
 	nuo.mutation.SetDownloads(i)
 	return nuo
 }
 
-// SetNillableDownloads sets the downloads field if the given value is not nil.
+// SetNillableDownloads sets the "downloads" field if the given value is not nil.
 func (nuo *NovelUpdateOne) SetNillableDownloads(i *int) *NovelUpdateOne {
 	if i != nil {
 		nuo.SetDownloads(*i)
@@ -556,26 +556,26 @@ func (nuo *NovelUpdateOne) SetNillableDownloads(i *int) *NovelUpdateOne {
 	return nuo
 }
 
-// AddDownloads adds i to downloads.
+// AddDownloads adds i to the "downloads" field.
 func (nuo *NovelUpdateOne) AddDownloads(i int) *NovelUpdateOne {
 	nuo.mutation.AddDownloads(i)
 	return nuo
 }
 
-// ClearDownloads clears the value of downloads.
+// ClearDownloads clears the value of the "downloads" field.
 func (nuo *NovelUpdateOne) ClearDownloads() *NovelUpdateOne {
 	nuo.mutation.ClearDownloads()
 	return nuo
 }
 
-// SetFavorites sets the favorites field.
+// SetFavorites sets the "favorites" field.
 func (nuo *NovelUpdateOne) SetFavorites(i int) *NovelUpdateOne {
 	nuo.mutation.ResetFavorites()
 	nuo.mutation.SetFavorites(i)
 	return nuo
 }
 
-// SetNillableFavorites sets the favorites field if the given value is not nil.
+// SetNillableFavorites sets the "favorites" field if the given value is not nil.
 func (nuo *NovelUpdateOne) SetNillableFavorites(i *int) *NovelUpdateOne {
 	if i != nil {
 		nuo.SetFavorites(*i)
@@ -583,26 +583,26 @@ func (nuo *NovelUpdateOne) SetNillableFavorites(i *int) *NovelUpdateOne {
 	return nuo
 }
 
-// AddFavorites adds i to favorites.
+// AddFavorites adds i to the "favorites" field.
 func (nuo *NovelUpdateOne) AddFavorites(i int) *NovelUpdateOne {
 	nuo.mutation.AddFavorites(i)
 	return nuo
 }
 
-// ClearFavorites clears the value of favorites.
+// ClearFavorites clears the value of the "favorites" field.
 func (nuo *NovelUpdateOne) ClearFavorites() *NovelUpdateOne {
 	nuo.mutation.ClearFavorites()
 	return nuo
 }
 
-// SetUpdatedWeight sets the updated_weight field.
+// SetUpdatedWeight sets the "updated_weight" field.
 func (nuo *NovelUpdateOne) SetUpdatedWeight(i int) *NovelUpdateOne {
 	nuo.mutation.ResetUpdatedWeight()
 	nuo.mutation.SetUpdatedWeight(i)
 	return nuo
 }
 
-// SetNillableUpdatedWeight sets the updated_weight field if the given value is not nil.
+// SetNillableUpdatedWeight sets the "updated_weight" field if the given value is not nil.
 func (nuo *NovelUpdateOne) SetNillableUpdatedWeight(i *int) *NovelUpdateOne {
 	if i != nil {
 		nuo.SetUpdatedWeight(*i)
@@ -610,25 +610,25 @@ func (nuo *NovelUpdateOne) SetNillableUpdatedWeight(i *int) *NovelUpdateOne {
 	return nuo
 }
 
-// AddUpdatedWeight adds i to updated_weight.
+// AddUpdatedWeight adds i to the "updated_weight" field.
 func (nuo *NovelUpdateOne) AddUpdatedWeight(i int) *NovelUpdateOne {
 	nuo.mutation.AddUpdatedWeight(i)
 	return nuo
 }
 
-// ClearUpdatedWeight clears the value of updated_weight.
+// ClearUpdatedWeight clears the value of the "updated_weight" field.
 func (nuo *NovelUpdateOne) ClearUpdatedWeight() *NovelUpdateOne {
 	nuo.mutation.ClearUpdatedWeight()
 	return nuo
 }
 
-// SetCover sets the cover field.
+// SetCover sets the "cover" field.
 func (nuo *NovelUpdateOne) SetCover(s string) *NovelUpdateOne {
 	nuo.mutation.SetCover(s)
 	return nuo
 }
 
-// SetNillableCover sets the cover field if the given value is not nil.
+// SetNillableCover sets the "cover" field if the given value is not nil.
 func (nuo *NovelUpdateOne) SetNillableCover(s *string) *NovelUpdateOne {
 	if s != nil {
 		nuo.SetCover(*s)
@@ -636,13 +636,13 @@ func (nuo *NovelUpdateOne) SetNillableCover(s *string) *NovelUpdateOne {
 	return nuo
 }
 
-// ClearCover clears the value of cover.
+// ClearCover clears the value of the "cover" field.
 func (nuo *NovelUpdateOne) ClearCover() *NovelUpdateOne {
 	nuo.mutation.ClearCover()
 	return nuo
 }
 
-// SetSummary sets the summary field.
+// SetSummary sets the "summary" field.
 func (nuo *NovelUpdateOne) SetSummary(s string) *NovelUpdateOne {
 	nuo.mutation.SetSummary(s)
 	return nuo
@@ -653,7 +653,7 @@ func (nuo *NovelUpdateOne) Mutation() *NovelMutation {
 	return nuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Novel entity.
 func (nuo *NovelUpdateOne) Save(ctx context.Context) (*Novel, error) {
 	var (
 		err  error
@@ -888,7 +888,7 @@ func (nuo *NovelUpdateOne) sqlSave(ctx context.Context) (_node *Novel, err error
 	}
 	_node = &Novel{config: nuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, nuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{novel.Label}

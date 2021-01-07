@@ -20,20 +20,20 @@ type NovelSourceUpdate struct {
 	mutation *NovelSourceMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the NovelSourceUpdate builder.
 func (nsu *NovelSourceUpdate) Where(ps ...predicate.NovelSource) *NovelSourceUpdate {
 	nsu.mutation.predicates = append(nsu.mutation.predicates, ps...)
 	return nsu
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (nsu *NovelSourceUpdate) SetStatus(i int) *NovelSourceUpdate {
 	nsu.mutation.ResetStatus()
 	nsu.mutation.SetStatus(i)
 	return nsu
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (nsu *NovelSourceUpdate) SetNillableStatus(i *int) *NovelSourceUpdate {
 	if i != nil {
 		nsu.SetStatus(*i)
@@ -41,7 +41,7 @@ func (nsu *NovelSourceUpdate) SetNillableStatus(i *int) *NovelSourceUpdate {
 	return nsu
 }
 
-// AddStatus adds i to status.
+// AddStatus adds i to the "status" field.
 func (nsu *NovelSourceUpdate) AddStatus(i int) *NovelSourceUpdate {
 	nsu.mutation.AddStatus(i)
 	return nsu
@@ -185,14 +185,14 @@ type NovelSourceUpdateOne struct {
 	mutation *NovelSourceMutation
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (nsuo *NovelSourceUpdateOne) SetStatus(i int) *NovelSourceUpdateOne {
 	nsuo.mutation.ResetStatus()
 	nsuo.mutation.SetStatus(i)
 	return nsuo
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (nsuo *NovelSourceUpdateOne) SetNillableStatus(i *int) *NovelSourceUpdateOne {
 	if i != nil {
 		nsuo.SetStatus(*i)
@@ -200,7 +200,7 @@ func (nsuo *NovelSourceUpdateOne) SetNillableStatus(i *int) *NovelSourceUpdateOn
 	return nsuo
 }
 
-// AddStatus adds i to status.
+// AddStatus adds i to the "status" field.
 func (nsuo *NovelSourceUpdateOne) AddStatus(i int) *NovelSourceUpdateOne {
 	nsuo.mutation.AddStatus(i)
 	return nsuo
@@ -211,7 +211,7 @@ func (nsuo *NovelSourceUpdateOne) Mutation() *NovelSourceMutation {
 	return nsuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated NovelSource entity.
 func (nsuo *NovelSourceUpdateOne) Save(ctx context.Context) (*NovelSource, error) {
 	var (
 		err  error
@@ -326,7 +326,7 @@ func (nsuo *NovelSourceUpdateOne) sqlSave(ctx context.Context) (_node *NovelSour
 	}
 	_node = &NovelSource{config: nsuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, nsuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{novelsource.Label}

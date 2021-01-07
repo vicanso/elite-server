@@ -20,51 +20,51 @@ type ChapterUpdate struct {
 	mutation *ChapterMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the ChapterUpdate builder.
 func (cu *ChapterUpdate) Where(ps ...predicate.Chapter) *ChapterUpdate {
 	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
 	return cu
 }
 
-// SetNovel sets the novel field.
+// SetNovel sets the "novel" field.
 func (cu *ChapterUpdate) SetNovel(i int) *ChapterUpdate {
 	cu.mutation.ResetNovel()
 	cu.mutation.SetNovel(i)
 	return cu
 }
 
-// AddNovel adds i to novel.
+// AddNovel adds i to the "novel" field.
 func (cu *ChapterUpdate) AddNovel(i int) *ChapterUpdate {
 	cu.mutation.AddNovel(i)
 	return cu
 }
 
-// SetNo sets the no field.
+// SetNo sets the "no" field.
 func (cu *ChapterUpdate) SetNo(i int) *ChapterUpdate {
 	cu.mutation.ResetNo()
 	cu.mutation.SetNo(i)
 	return cu
 }
 
-// AddNo adds i to no.
+// AddNo adds i to the "no" field.
 func (cu *ChapterUpdate) AddNo(i int) *ChapterUpdate {
 	cu.mutation.AddNo(i)
 	return cu
 }
 
-// SetTitle sets the title field.
+// SetTitle sets the "title" field.
 func (cu *ChapterUpdate) SetTitle(s string) *ChapterUpdate {
 	cu.mutation.SetTitle(s)
 	return cu
 }
 
-// SetContent sets the content field.
+// SetContent sets the "content" field.
 func (cu *ChapterUpdate) SetContent(s string) *ChapterUpdate {
 	cu.mutation.SetContent(s)
 	return cu
 }
 
-// SetNillableContent sets the content field if the given value is not nil.
+// SetNillableContent sets the "content" field if the given value is not nil.
 func (cu *ChapterUpdate) SetNillableContent(s *string) *ChapterUpdate {
 	if s != nil {
 		cu.SetContent(*s)
@@ -72,20 +72,20 @@ func (cu *ChapterUpdate) SetNillableContent(s *string) *ChapterUpdate {
 	return cu
 }
 
-// ClearContent clears the value of content.
+// ClearContent clears the value of the "content" field.
 func (cu *ChapterUpdate) ClearContent() *ChapterUpdate {
 	cu.mutation.ClearContent()
 	return cu
 }
 
-// SetWordCount sets the word_count field.
+// SetWordCount sets the "word_count" field.
 func (cu *ChapterUpdate) SetWordCount(i int) *ChapterUpdate {
 	cu.mutation.ResetWordCount()
 	cu.mutation.SetWordCount(i)
 	return cu
 }
 
-// SetNillableWordCount sets the word_count field if the given value is not nil.
+// SetNillableWordCount sets the "word_count" field if the given value is not nil.
 func (cu *ChapterUpdate) SetNillableWordCount(i *int) *ChapterUpdate {
 	if i != nil {
 		cu.SetWordCount(*i)
@@ -93,13 +93,13 @@ func (cu *ChapterUpdate) SetNillableWordCount(i *int) *ChapterUpdate {
 	return cu
 }
 
-// AddWordCount adds i to word_count.
+// AddWordCount adds i to the "word_count" field.
 func (cu *ChapterUpdate) AddWordCount(i int) *ChapterUpdate {
 	cu.mutation.AddWordCount(i)
 	return cu
 }
 
-// ClearWordCount clears the value of word_count.
+// ClearWordCount clears the value of the "word_count" field.
 func (cu *ChapterUpdate) ClearWordCount() *ChapterUpdate {
 	cu.mutation.ClearWordCount()
 	return cu
@@ -281,45 +281,45 @@ type ChapterUpdateOne struct {
 	mutation *ChapterMutation
 }
 
-// SetNovel sets the novel field.
+// SetNovel sets the "novel" field.
 func (cuo *ChapterUpdateOne) SetNovel(i int) *ChapterUpdateOne {
 	cuo.mutation.ResetNovel()
 	cuo.mutation.SetNovel(i)
 	return cuo
 }
 
-// AddNovel adds i to novel.
+// AddNovel adds i to the "novel" field.
 func (cuo *ChapterUpdateOne) AddNovel(i int) *ChapterUpdateOne {
 	cuo.mutation.AddNovel(i)
 	return cuo
 }
 
-// SetNo sets the no field.
+// SetNo sets the "no" field.
 func (cuo *ChapterUpdateOne) SetNo(i int) *ChapterUpdateOne {
 	cuo.mutation.ResetNo()
 	cuo.mutation.SetNo(i)
 	return cuo
 }
 
-// AddNo adds i to no.
+// AddNo adds i to the "no" field.
 func (cuo *ChapterUpdateOne) AddNo(i int) *ChapterUpdateOne {
 	cuo.mutation.AddNo(i)
 	return cuo
 }
 
-// SetTitle sets the title field.
+// SetTitle sets the "title" field.
 func (cuo *ChapterUpdateOne) SetTitle(s string) *ChapterUpdateOne {
 	cuo.mutation.SetTitle(s)
 	return cuo
 }
 
-// SetContent sets the content field.
+// SetContent sets the "content" field.
 func (cuo *ChapterUpdateOne) SetContent(s string) *ChapterUpdateOne {
 	cuo.mutation.SetContent(s)
 	return cuo
 }
 
-// SetNillableContent sets the content field if the given value is not nil.
+// SetNillableContent sets the "content" field if the given value is not nil.
 func (cuo *ChapterUpdateOne) SetNillableContent(s *string) *ChapterUpdateOne {
 	if s != nil {
 		cuo.SetContent(*s)
@@ -327,20 +327,20 @@ func (cuo *ChapterUpdateOne) SetNillableContent(s *string) *ChapterUpdateOne {
 	return cuo
 }
 
-// ClearContent clears the value of content.
+// ClearContent clears the value of the "content" field.
 func (cuo *ChapterUpdateOne) ClearContent() *ChapterUpdateOne {
 	cuo.mutation.ClearContent()
 	return cuo
 }
 
-// SetWordCount sets the word_count field.
+// SetWordCount sets the "word_count" field.
 func (cuo *ChapterUpdateOne) SetWordCount(i int) *ChapterUpdateOne {
 	cuo.mutation.ResetWordCount()
 	cuo.mutation.SetWordCount(i)
 	return cuo
 }
 
-// SetNillableWordCount sets the word_count field if the given value is not nil.
+// SetNillableWordCount sets the "word_count" field if the given value is not nil.
 func (cuo *ChapterUpdateOne) SetNillableWordCount(i *int) *ChapterUpdateOne {
 	if i != nil {
 		cuo.SetWordCount(*i)
@@ -348,13 +348,13 @@ func (cuo *ChapterUpdateOne) SetNillableWordCount(i *int) *ChapterUpdateOne {
 	return cuo
 }
 
-// AddWordCount adds i to word_count.
+// AddWordCount adds i to the "word_count" field.
 func (cuo *ChapterUpdateOne) AddWordCount(i int) *ChapterUpdateOne {
 	cuo.mutation.AddWordCount(i)
 	return cuo
 }
 
-// ClearWordCount clears the value of word_count.
+// ClearWordCount clears the value of the "word_count" field.
 func (cuo *ChapterUpdateOne) ClearWordCount() *ChapterUpdateOne {
 	cuo.mutation.ClearWordCount()
 	return cuo
@@ -365,7 +365,7 @@ func (cuo *ChapterUpdateOne) Mutation() *ChapterMutation {
 	return cuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Chapter entity.
 func (cuo *ChapterUpdateOne) Save(ctx context.Context) (*Chapter, error) {
 	var (
 		err  error
@@ -518,7 +518,7 @@ func (cuo *ChapterUpdateOne) sqlSave(ctx context.Context) (_node *Chapter, err e
 	}
 	_node = &Chapter{config: cuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{chapter.Label}

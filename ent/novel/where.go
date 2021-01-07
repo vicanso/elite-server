@@ -9,7 +9,7 @@ import (
 	"github.com/vicanso/elite/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id int) predicate.Novel {
 	return predicate.Novel(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
@@ -1395,7 +1395,7 @@ func SummaryContainsFold(v string) predicate.Novel {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Novel) predicate.Novel {
 	return predicate.Novel(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
@@ -1406,7 +1406,7 @@ func And(predicates ...predicate.Novel) predicate.Novel {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Novel) predicate.Novel {
 	return predicate.Novel(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)

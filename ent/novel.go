@@ -45,114 +45,129 @@ type Novel struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Novel) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullTime{},   // created_at
-		&sql.NullTime{},   // updated_at
-		&sql.NullString{}, // name
-		&sql.NullString{}, // author
-		&sql.NullInt64{},  // source
-		&sql.NullInt64{},  // status
-		&sql.NullInt64{},  // word_count
-		&sql.NullInt64{},  // views
-		&sql.NullInt64{},  // downloads
-		&sql.NullInt64{},  // favorites
-		&sql.NullInt64{},  // updated_weight
-		&sql.NullString{}, // cover
-		&sql.NullString{}, // summary
+func (*Novel) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case novel.FieldID, novel.FieldSource, novel.FieldStatus, novel.FieldWordCount, novel.FieldViews, novel.FieldDownloads, novel.FieldFavorites, novel.FieldUpdatedWeight:
+			values[i] = &sql.NullInt64{}
+		case novel.FieldName, novel.FieldAuthor, novel.FieldCover, novel.FieldSummary:
+			values[i] = &sql.NullString{}
+		case novel.FieldCreatedAt, novel.FieldUpdatedAt:
+			values[i] = &sql.NullTime{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Novel", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Novel fields.
-func (n *Novel) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(novel.Columns); m < n {
+func (n *Novel) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	n.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field created_at", values[0])
-	} else if value.Valid {
-		n.CreatedAt = value.Time
-	}
-	if value, ok := values[1].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field updated_at", values[1])
-	} else if value.Valid {
-		n.UpdatedAt = value.Time
-	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[2])
-	} else if value.Valid {
-		n.Name = value.String
-	}
-	if value, ok := values[3].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field author", values[3])
-	} else if value.Valid {
-		n.Author = value.String
-	}
-	if value, ok := values[4].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field source", values[4])
-	} else if value.Valid {
-		n.Source = int(value.Int64)
-	}
-	if value, ok := values[5].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field status", values[5])
-	} else if value.Valid {
-		n.Status = int(value.Int64)
-	}
-	if value, ok := values[6].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field word_count", values[6])
-	} else if value.Valid {
-		n.WordCount = int(value.Int64)
-	}
-	if value, ok := values[7].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field views", values[7])
-	} else if value.Valid {
-		n.Views = int(value.Int64)
-	}
-	if value, ok := values[8].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field downloads", values[8])
-	} else if value.Valid {
-		n.Downloads = int(value.Int64)
-	}
-	if value, ok := values[9].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field favorites", values[9])
-	} else if value.Valid {
-		n.Favorites = int(value.Int64)
-	}
-	if value, ok := values[10].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field updated_weight", values[10])
-	} else if value.Valid {
-		n.UpdatedWeight = int(value.Int64)
-	}
-	if value, ok := values[11].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field cover", values[11])
-	} else if value.Valid {
-		n.Cover = value.String
-	}
-	if value, ok := values[12].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field summary", values[12])
-	} else if value.Valid {
-		n.Summary = value.String
+	for i := range columns {
+		switch columns[i] {
+		case novel.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			n.ID = int(value.Int64)
+		case novel.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				n.CreatedAt = value.Time
+			}
+		case novel.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				n.UpdatedAt = value.Time
+			}
+		case novel.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				n.Name = value.String
+			}
+		case novel.FieldAuthor:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field author", values[i])
+			} else if value.Valid {
+				n.Author = value.String
+			}
+		case novel.FieldSource:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field source", values[i])
+			} else if value.Valid {
+				n.Source = int(value.Int64)
+			}
+		case novel.FieldStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				n.Status = int(value.Int64)
+			}
+		case novel.FieldWordCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field word_count", values[i])
+			} else if value.Valid {
+				n.WordCount = int(value.Int64)
+			}
+		case novel.FieldViews:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field views", values[i])
+			} else if value.Valid {
+				n.Views = int(value.Int64)
+			}
+		case novel.FieldDownloads:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field downloads", values[i])
+			} else if value.Valid {
+				n.Downloads = int(value.Int64)
+			}
+		case novel.FieldFavorites:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field favorites", values[i])
+			} else if value.Valid {
+				n.Favorites = int(value.Int64)
+			}
+		case novel.FieldUpdatedWeight:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_weight", values[i])
+			} else if value.Valid {
+				n.UpdatedWeight = int(value.Int64)
+			}
+		case novel.FieldCover:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field cover", values[i])
+			} else if value.Valid {
+				n.Cover = value.String
+			}
+		case novel.FieldSummary:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field summary", values[i])
+			} else if value.Valid {
+				n.Summary = value.String
+			}
+		}
 	}
 	return nil
 }
 
 // Update returns a builder for updating this Novel.
-// Note that, you need to call Novel.Unwrap() before calling this method, if this Novel
+// Note that you need to call Novel.Unwrap() before calling this method if this Novel
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (n *Novel) Update() *NovelUpdateOne {
 	return (&NovelClient{config: n.config}).UpdateOne(n)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Novel entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (n *Novel) Unwrap() *Novel {
 	tx, ok := n.config.driver.(*txDriver)
 	if !ok {

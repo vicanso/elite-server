@@ -53,11 +53,11 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultCreatedAt holds the default value on creation for the created_at field.
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
-	// DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
-	// UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
@@ -67,7 +67,7 @@ var (
 	SourceValidator func(int) error
 	// SourceIDValidator is a validator for the "source_id" field. It is called by the builders before save.
 	SourceIDValidator func(int) error
-	// DefaultStatus holds the default value on creation for the status field.
+	// DefaultStatus holds the default value on creation for the "status" field.
 	DefaultStatus int
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	StatusValidator func(int) error

@@ -20,6 +20,7 @@ import (
 func init() {
 	chapterMixin := schema.Chapter{}.Mixin()
 	chapterMixinFields0 := chapterMixin[0].Fields()
+	_ = chapterMixinFields0
 	chapterFields := schema.Chapter{}.Fields()
 	_ = chapterFields
 	// chapterDescCreatedAt is the schema descriptor for created_at field.
@@ -34,7 +35,9 @@ func init() {
 	chapter.UpdateDefaultUpdatedAt = chapterDescUpdatedAt.UpdateDefault.(func() time.Time)
 	configurationMixin := schema.Configuration{}.Mixin()
 	configurationMixinFields0 := configurationMixin[0].Fields()
+	_ = configurationMixinFields0
 	configurationMixinFields1 := configurationMixin[1].Fields()
+	_ = configurationMixinFields1
 	configurationFields := schema.Configuration{}.Fields()
 	_ = configurationFields
 	// configurationDescCreatedAt is the schema descriptor for created_at field.
@@ -67,6 +70,7 @@ func init() {
 	configuration.DataValidator = configurationDescData.Validators[0].(func(string) error)
 	novelMixin := schema.Novel{}.Mixin()
 	novelMixinFields0 := novelMixin[0].Fields()
+	_ = novelMixinFields0
 	novelFields := schema.Novel{}.Fields()
 	_ = novelFields
 	// novelDescCreatedAt is the schema descriptor for created_at field.
@@ -119,6 +123,7 @@ func init() {
 	novel.DefaultUpdatedWeight = novelDescUpdatedWeight.Default.(int)
 	novelsourceMixin := schema.NovelSource{}.Mixin()
 	novelsourceMixinFields0 := novelsourceMixin[0].Fields()
+	_ = novelsourceMixinFields0
 	novelsourceFields := schema.NovelSource{}.Fields()
 	_ = novelsourceFields
 	// novelsourceDescCreatedAt is the schema descriptor for created_at field.
@@ -155,7 +160,9 @@ func init() {
 	novelsource.StatusValidator = novelsourceDescStatus.Validators[0].(func(int) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
+	_ = userMixinFields0
 	userMixinFields1 := userMixin[1].Fields()
+	_ = userMixinFields1
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.
@@ -198,6 +205,7 @@ func init() {
 	user.PasswordValidator = userDescPassword.Validators[0].(func(string) error)
 	userloginMixin := schema.UserLogin{}.Mixin()
 	userloginMixinFields0 := userloginMixin[0].Fields()
+	_ = userloginMixinFields0
 	userloginFields := schema.UserLogin{}.Fields()
 	_ = userloginFields
 	// userloginDescCreatedAt is the schema descriptor for created_at field.

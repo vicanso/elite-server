@@ -71,11 +71,11 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultCreatedAt holds the default value on creation for the created_at field.
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
-	// DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
-	// UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
@@ -83,18 +83,18 @@ var (
 	AuthorValidator func(string) error
 	// SourceValidator is a validator for the "source" field. It is called by the builders before save.
 	SourceValidator func(int) error
-	// DefaultStatus holds the default value on creation for the status field.
+	// DefaultStatus holds the default value on creation for the "status" field.
 	DefaultStatus int
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	StatusValidator func(int) error
-	// DefaultWordCount holds the default value on creation for the word_count field.
+	// DefaultWordCount holds the default value on creation for the "word_count" field.
 	DefaultWordCount int
-	// DefaultViews holds the default value on creation for the views field.
+	// DefaultViews holds the default value on creation for the "views" field.
 	DefaultViews int
-	// DefaultDownloads holds the default value on creation for the downloads field.
+	// DefaultDownloads holds the default value on creation for the "downloads" field.
 	DefaultDownloads int
-	// DefaultFavorites holds the default value on creation for the favorites field.
+	// DefaultFavorites holds the default value on creation for the "favorites" field.
 	DefaultFavorites int
-	// DefaultUpdatedWeight holds the default value on creation for the updated_weight field.
+	// DefaultUpdatedWeight holds the default value on creation for the "updated_weight" field.
 	DefaultUpdatedWeight int
 )

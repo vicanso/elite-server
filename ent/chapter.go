@@ -33,78 +33,93 @@ type Chapter struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Chapter) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullTime{},   // created_at
-		&sql.NullTime{},   // updated_at
-		&sql.NullInt64{},  // novel
-		&sql.NullInt64{},  // no
-		&sql.NullString{}, // title
-		&sql.NullString{}, // content
-		&sql.NullInt64{},  // word_count
+func (*Chapter) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case chapter.FieldID, chapter.FieldNovel, chapter.FieldNo, chapter.FieldWordCount:
+			values[i] = &sql.NullInt64{}
+		case chapter.FieldTitle, chapter.FieldContent:
+			values[i] = &sql.NullString{}
+		case chapter.FieldCreatedAt, chapter.FieldUpdatedAt:
+			values[i] = &sql.NullTime{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Chapter", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Chapter fields.
-func (c *Chapter) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(chapter.Columns); m < n {
+func (c *Chapter) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	c.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field created_at", values[0])
-	} else if value.Valid {
-		c.CreatedAt = value.Time
-	}
-	if value, ok := values[1].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field updated_at", values[1])
-	} else if value.Valid {
-		c.UpdatedAt = value.Time
-	}
-	if value, ok := values[2].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field novel", values[2])
-	} else if value.Valid {
-		c.Novel = int(value.Int64)
-	}
-	if value, ok := values[3].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field no", values[3])
-	} else if value.Valid {
-		c.No = int(value.Int64)
-	}
-	if value, ok := values[4].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field title", values[4])
-	} else if value.Valid {
-		c.Title = value.String
-	}
-	if value, ok := values[5].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field content", values[5])
-	} else if value.Valid {
-		c.Content = value.String
-	}
-	if value, ok := values[6].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field word_count", values[6])
-	} else if value.Valid {
-		c.WordCount = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case chapter.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			c.ID = int(value.Int64)
+		case chapter.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				c.CreatedAt = value.Time
+			}
+		case chapter.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				c.UpdatedAt = value.Time
+			}
+		case chapter.FieldNovel:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field novel", values[i])
+			} else if value.Valid {
+				c.Novel = int(value.Int64)
+			}
+		case chapter.FieldNo:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field no", values[i])
+			} else if value.Valid {
+				c.No = int(value.Int64)
+			}
+		case chapter.FieldTitle:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field title", values[i])
+			} else if value.Valid {
+				c.Title = value.String
+			}
+		case chapter.FieldContent:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field content", values[i])
+			} else if value.Valid {
+				c.Content = value.String
+			}
+		case chapter.FieldWordCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field word_count", values[i])
+			} else if value.Valid {
+				c.WordCount = int(value.Int64)
+			}
+		}
 	}
 	return nil
 }
 
 // Update returns a builder for updating this Chapter.
-// Note that, you need to call Chapter.Unwrap() before calling this method, if this Chapter
+// Note that you need to call Chapter.Unwrap() before calling this method if this Chapter
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Chapter) Update() *ChapterUpdateOne {
 	return (&ChapterClient{config: c.config}).UpdateOne(c)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Chapter entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (c *Chapter) Unwrap() *Chapter {
 	tx, ok := c.config.driver.(*txDriver)
 	if !ok {

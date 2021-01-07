@@ -20,13 +20,13 @@ type NovelSourceCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (nsc *NovelSourceCreate) SetCreatedAt(t time.Time) *NovelSourceCreate {
 	nsc.mutation.SetCreatedAt(t)
 	return nsc
 }
 
-// SetNillableCreatedAt sets the created_at field if the given value is not nil.
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
 func (nsc *NovelSourceCreate) SetNillableCreatedAt(t *time.Time) *NovelSourceCreate {
 	if t != nil {
 		nsc.SetCreatedAt(*t)
@@ -34,13 +34,13 @@ func (nsc *NovelSourceCreate) SetNillableCreatedAt(t *time.Time) *NovelSourceCre
 	return nsc
 }
 
-// SetUpdatedAt sets the updated_at field.
+// SetUpdatedAt sets the "updated_at" field.
 func (nsc *NovelSourceCreate) SetUpdatedAt(t time.Time) *NovelSourceCreate {
 	nsc.mutation.SetUpdatedAt(t)
 	return nsc
 }
 
-// SetNillableUpdatedAt sets the updated_at field if the given value is not nil.
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
 func (nsc *NovelSourceCreate) SetNillableUpdatedAt(t *time.Time) *NovelSourceCreate {
 	if t != nil {
 		nsc.SetUpdatedAt(*t)
@@ -48,37 +48,37 @@ func (nsc *NovelSourceCreate) SetNillableUpdatedAt(t *time.Time) *NovelSourceCre
 	return nsc
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (nsc *NovelSourceCreate) SetName(s string) *NovelSourceCreate {
 	nsc.mutation.SetName(s)
 	return nsc
 }
 
-// SetAuthor sets the author field.
+// SetAuthor sets the "author" field.
 func (nsc *NovelSourceCreate) SetAuthor(s string) *NovelSourceCreate {
 	nsc.mutation.SetAuthor(s)
 	return nsc
 }
 
-// SetSource sets the source field.
+// SetSource sets the "source" field.
 func (nsc *NovelSourceCreate) SetSource(i int) *NovelSourceCreate {
 	nsc.mutation.SetSource(i)
 	return nsc
 }
 
-// SetSourceID sets the source_id field.
+// SetSourceID sets the "source_id" field.
 func (nsc *NovelSourceCreate) SetSourceID(i int) *NovelSourceCreate {
 	nsc.mutation.SetSourceID(i)
 	return nsc
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (nsc *NovelSourceCreate) SetStatus(i int) *NovelSourceCreate {
 	nsc.mutation.SetStatus(i)
 	return nsc
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (nsc *NovelSourceCreate) SetNillableStatus(i *int) *NovelSourceCreate {
 	if i != nil {
 		nsc.SetStatus(*i)
@@ -286,7 +286,7 @@ func (nsc *NovelSourceCreate) createSpec() (*NovelSource, *sqlgraph.CreateSpec) 
 	return _node, _spec
 }
 
-// NovelSourceCreateBulk is the builder for creating a bulk of NovelSource entities.
+// NovelSourceCreateBulk is the builder for creating many NovelSource entities in bulk.
 type NovelSourceCreateBulk struct {
 	config
 	builders []*NovelSourceCreate
@@ -344,7 +344,7 @@ func (nscb *NovelSourceCreateBulk) Save(ctx context.Context) ([]*NovelSource, er
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (nscb *NovelSourceCreateBulk) SaveX(ctx context.Context) []*NovelSource {
 	v, err := nscb.Save(ctx)
 	if err != nil {

@@ -20,13 +20,13 @@ type NovelCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (nc *NovelCreate) SetCreatedAt(t time.Time) *NovelCreate {
 	nc.mutation.SetCreatedAt(t)
 	return nc
 }
 
-// SetNillableCreatedAt sets the created_at field if the given value is not nil.
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
 func (nc *NovelCreate) SetNillableCreatedAt(t *time.Time) *NovelCreate {
 	if t != nil {
 		nc.SetCreatedAt(*t)
@@ -34,13 +34,13 @@ func (nc *NovelCreate) SetNillableCreatedAt(t *time.Time) *NovelCreate {
 	return nc
 }
 
-// SetUpdatedAt sets the updated_at field.
+// SetUpdatedAt sets the "updated_at" field.
 func (nc *NovelCreate) SetUpdatedAt(t time.Time) *NovelCreate {
 	nc.mutation.SetUpdatedAt(t)
 	return nc
 }
 
-// SetNillableUpdatedAt sets the updated_at field if the given value is not nil.
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
 func (nc *NovelCreate) SetNillableUpdatedAt(t *time.Time) *NovelCreate {
 	if t != nil {
 		nc.SetUpdatedAt(*t)
@@ -48,31 +48,31 @@ func (nc *NovelCreate) SetNillableUpdatedAt(t *time.Time) *NovelCreate {
 	return nc
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (nc *NovelCreate) SetName(s string) *NovelCreate {
 	nc.mutation.SetName(s)
 	return nc
 }
 
-// SetAuthor sets the author field.
+// SetAuthor sets the "author" field.
 func (nc *NovelCreate) SetAuthor(s string) *NovelCreate {
 	nc.mutation.SetAuthor(s)
 	return nc
 }
 
-// SetSource sets the source field.
+// SetSource sets the "source" field.
 func (nc *NovelCreate) SetSource(i int) *NovelCreate {
 	nc.mutation.SetSource(i)
 	return nc
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (nc *NovelCreate) SetStatus(i int) *NovelCreate {
 	nc.mutation.SetStatus(i)
 	return nc
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (nc *NovelCreate) SetNillableStatus(i *int) *NovelCreate {
 	if i != nil {
 		nc.SetStatus(*i)
@@ -80,13 +80,13 @@ func (nc *NovelCreate) SetNillableStatus(i *int) *NovelCreate {
 	return nc
 }
 
-// SetWordCount sets the word_count field.
+// SetWordCount sets the "word_count" field.
 func (nc *NovelCreate) SetWordCount(i int) *NovelCreate {
 	nc.mutation.SetWordCount(i)
 	return nc
 }
 
-// SetNillableWordCount sets the word_count field if the given value is not nil.
+// SetNillableWordCount sets the "word_count" field if the given value is not nil.
 func (nc *NovelCreate) SetNillableWordCount(i *int) *NovelCreate {
 	if i != nil {
 		nc.SetWordCount(*i)
@@ -94,13 +94,13 @@ func (nc *NovelCreate) SetNillableWordCount(i *int) *NovelCreate {
 	return nc
 }
 
-// SetViews sets the views field.
+// SetViews sets the "views" field.
 func (nc *NovelCreate) SetViews(i int) *NovelCreate {
 	nc.mutation.SetViews(i)
 	return nc
 }
 
-// SetNillableViews sets the views field if the given value is not nil.
+// SetNillableViews sets the "views" field if the given value is not nil.
 func (nc *NovelCreate) SetNillableViews(i *int) *NovelCreate {
 	if i != nil {
 		nc.SetViews(*i)
@@ -108,13 +108,13 @@ func (nc *NovelCreate) SetNillableViews(i *int) *NovelCreate {
 	return nc
 }
 
-// SetDownloads sets the downloads field.
+// SetDownloads sets the "downloads" field.
 func (nc *NovelCreate) SetDownloads(i int) *NovelCreate {
 	nc.mutation.SetDownloads(i)
 	return nc
 }
 
-// SetNillableDownloads sets the downloads field if the given value is not nil.
+// SetNillableDownloads sets the "downloads" field if the given value is not nil.
 func (nc *NovelCreate) SetNillableDownloads(i *int) *NovelCreate {
 	if i != nil {
 		nc.SetDownloads(*i)
@@ -122,13 +122,13 @@ func (nc *NovelCreate) SetNillableDownloads(i *int) *NovelCreate {
 	return nc
 }
 
-// SetFavorites sets the favorites field.
+// SetFavorites sets the "favorites" field.
 func (nc *NovelCreate) SetFavorites(i int) *NovelCreate {
 	nc.mutation.SetFavorites(i)
 	return nc
 }
 
-// SetNillableFavorites sets the favorites field if the given value is not nil.
+// SetNillableFavorites sets the "favorites" field if the given value is not nil.
 func (nc *NovelCreate) SetNillableFavorites(i *int) *NovelCreate {
 	if i != nil {
 		nc.SetFavorites(*i)
@@ -136,13 +136,13 @@ func (nc *NovelCreate) SetNillableFavorites(i *int) *NovelCreate {
 	return nc
 }
 
-// SetUpdatedWeight sets the updated_weight field.
+// SetUpdatedWeight sets the "updated_weight" field.
 func (nc *NovelCreate) SetUpdatedWeight(i int) *NovelCreate {
 	nc.mutation.SetUpdatedWeight(i)
 	return nc
 }
 
-// SetNillableUpdatedWeight sets the updated_weight field if the given value is not nil.
+// SetNillableUpdatedWeight sets the "updated_weight" field if the given value is not nil.
 func (nc *NovelCreate) SetNillableUpdatedWeight(i *int) *NovelCreate {
 	if i != nil {
 		nc.SetUpdatedWeight(*i)
@@ -150,13 +150,13 @@ func (nc *NovelCreate) SetNillableUpdatedWeight(i *int) *NovelCreate {
 	return nc
 }
 
-// SetCover sets the cover field.
+// SetCover sets the "cover" field.
 func (nc *NovelCreate) SetCover(s string) *NovelCreate {
 	nc.mutation.SetCover(s)
 	return nc
 }
 
-// SetNillableCover sets the cover field if the given value is not nil.
+// SetNillableCover sets the "cover" field if the given value is not nil.
 func (nc *NovelCreate) SetNillableCover(s *string) *NovelCreate {
 	if s != nil {
 		nc.SetCover(*s)
@@ -164,7 +164,7 @@ func (nc *NovelCreate) SetNillableCover(s *string) *NovelCreate {
 	return nc
 }
 
-// SetSummary sets the summary field.
+// SetSummary sets the "summary" field.
 func (nc *NovelCreate) SetSummary(s string) *NovelCreate {
 	nc.mutation.SetSummary(s)
 	return nc
@@ -433,7 +433,7 @@ func (nc *NovelCreate) createSpec() (*Novel, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// NovelCreateBulk is the builder for creating a bulk of Novel entities.
+// NovelCreateBulk is the builder for creating many Novel entities in bulk.
 type NovelCreateBulk struct {
 	config
 	builders []*NovelCreate
@@ -491,7 +491,7 @@ func (ncb *NovelCreateBulk) Save(ctx context.Context) ([]*Novel, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ncb *NovelCreateBulk) SaveX(ctx context.Context) []*Novel {
 	v, err := ncb.Save(ctx)
 	if err != nil {

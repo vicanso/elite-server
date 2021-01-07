@@ -21,13 +21,14 @@ type NovelQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Novel
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the NovelQuery builder.
 func (nq *NovelQuery) Where(ps ...predicate.Novel) *NovelQuery {
 	nq.predicates = append(nq.predicates, ps...)
 	return nq
@@ -51,7 +52,8 @@ func (nq *NovelQuery) Order(o ...OrderFunc) *NovelQuery {
 	return nq
 }
 
-// First returns the first Novel entity in the query. Returns *NotFoundError when no novel was found.
+// First returns the first Novel entity from the query.
+// Returns a *NotFoundError when no Novel was found.
 func (nq *NovelQuery) First(ctx context.Context) (*Novel, error) {
 	nodes, err := nq.Limit(1).All(ctx)
 	if err != nil {
@@ -72,7 +74,8 @@ func (nq *NovelQuery) FirstX(ctx context.Context) *Novel {
 	return node
 }
 
-// FirstID returns the first Novel id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first Novel ID from the query.
+// Returns a *NotFoundError when no Novel ID was found.
 func (nq *NovelQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = nq.Limit(1).IDs(ctx); err != nil {
@@ -94,7 +97,9 @@ func (nq *NovelQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns the only Novel entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single Novel entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one Novel entity is not found.
+// Returns a *NotFoundError when no Novel entities are found.
 func (nq *NovelQuery) Only(ctx context.Context) (*Novel, error) {
 	nodes, err := nq.Limit(2).All(ctx)
 	if err != nil {
@@ -119,7 +124,9 @@ func (nq *NovelQuery) OnlyX(ctx context.Context) *Novel {
 	return node
 }
 
-// OnlyID returns the only Novel id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only Novel ID in the query.
+// Returns a *NotSingularError when exactly one Novel ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (nq *NovelQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = nq.Limit(2).IDs(ctx); err != nil {
@@ -162,7 +169,7 @@ func (nq *NovelQuery) AllX(ctx context.Context) []*Novel {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Novel ids.
+// IDs executes the query and returns a list of Novel IDs.
 func (nq *NovelQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
 	if err := nq.Select(novel.FieldID).Scan(ctx, &ids); err != nil {
@@ -214,7 +221,7 @@ func (nq *NovelQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the NovelQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (nq *NovelQuery) Clone() *NovelQuery {
 	if nq == nil {
@@ -232,7 +239,7 @@ func (nq *NovelQuery) Clone() *NovelQuery {
 	}
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -259,7 +266,8 @@ func (nq *NovelQuery) GroupBy(field string, fields ...string) *NovelGroupBy {
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -272,18 +280,16 @@ func (nq *NovelQuery) GroupBy(field string, fields ...string) *NovelGroupBy {
 //		Scan(ctx, &v)
 //
 func (nq *NovelQuery) Select(field string, fields ...string) *NovelSelect {
-	selector := &NovelSelect{config: nq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := nq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return nq.sqlQuery(), nil
-	}
-	return selector
+	nq.fields = append([]string{field}, fields...)
+	return &NovelSelect{NovelQuery: nq}
 }
 
 func (nq *NovelQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range nq.fields {
+		if !novel.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if nq.path != nil {
 		prev, err := nq.path(ctx)
 		if err != nil {
@@ -299,18 +305,17 @@ func (nq *NovelQuery) sqlAll(ctx context.Context) ([]*Novel, error) {
 		nodes = []*Novel{}
 		_spec = nq.querySpec()
 	)
-	_spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Novel{config: nq.config}
 		nodes = append(nodes, node)
-		values := node.scanValues()
-		return values
+		return node.scanValues(columns)
 	}
-	_spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(columns []string, values []interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
-		return node.assignValues(values...)
+		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, nq.driver, _spec); err != nil {
 		return nil, err
@@ -346,6 +351,15 @@ func (nq *NovelQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   nq.sql,
 		Unique: true,
+	}
+	if fields := nq.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, novel.FieldID)
+		for i := range fields {
+			if fields[i] != novel.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
+			}
+		}
 	}
 	if ps := nq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -395,7 +409,7 @@ func (nq *NovelQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// NovelGroupBy is the builder for group-by Novel entities.
+// NovelGroupBy is the group-by builder for Novel entities.
 type NovelGroupBy struct {
 	config
 	fields []string
@@ -411,7 +425,7 @@ func (ngb *NovelGroupBy) Aggregate(fns ...AggregateFunc) *NovelGroupBy {
 	return ngb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (ngb *NovelGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := ngb.path(ctx)
 	if err != nil {
@@ -428,7 +442,8 @@ func (ngb *NovelGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NovelGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(ngb.fields) > 1 {
 		return nil, errors.New("ent: NovelGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -449,7 +464,8 @@ func (ngb *NovelGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NovelGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = ngb.Strings(ctx); err != nil {
@@ -475,7 +491,8 @@ func (ngb *NovelGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NovelGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(ngb.fields) > 1 {
 		return nil, errors.New("ent: NovelGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -496,7 +513,8 @@ func (ngb *NovelGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NovelGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = ngb.Ints(ctx); err != nil {
@@ -522,7 +540,8 @@ func (ngb *NovelGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NovelGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(ngb.fields) > 1 {
 		return nil, errors.New("ent: NovelGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -543,7 +562,8 @@ func (ngb *NovelGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NovelGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = ngb.Float64s(ctx); err != nil {
@@ -569,7 +589,8 @@ func (ngb *NovelGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NovelGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(ngb.fields) > 1 {
 		return nil, errors.New("ent: NovelGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -590,7 +611,8 @@ func (ngb *NovelGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NovelGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = ngb.Bools(ctx); err != nil {
@@ -645,22 +667,19 @@ func (ngb *NovelGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(ngb.fields...)
 }
 
-// NovelSelect is the builder for select fields of Novel entities.
+// NovelSelect is the builder for selecting fields of Novel entities.
 type NovelSelect struct {
-	config
-	fields []string
+	*NovelQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ns *NovelSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := ns.path(ctx)
-	if err != nil {
+	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ns.sql = query
+	ns.sql = ns.NovelQuery.sqlQuery()
 	return ns.sqlScan(ctx, v)
 }
 
@@ -671,7 +690,7 @@ func (ns *NovelSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (ns *NovelSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(ns.fields) > 1 {
 		return nil, errors.New("ent: NovelSelect.Strings is not achievable when selecting more than 1 field")
@@ -692,7 +711,7 @@ func (ns *NovelSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (ns *NovelSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = ns.Strings(ctx); err != nil {
@@ -718,7 +737,7 @@ func (ns *NovelSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (ns *NovelSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(ns.fields) > 1 {
 		return nil, errors.New("ent: NovelSelect.Ints is not achievable when selecting more than 1 field")
@@ -739,7 +758,7 @@ func (ns *NovelSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (ns *NovelSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = ns.Ints(ctx); err != nil {
@@ -765,7 +784,7 @@ func (ns *NovelSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (ns *NovelSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(ns.fields) > 1 {
 		return nil, errors.New("ent: NovelSelect.Float64s is not achievable when selecting more than 1 field")
@@ -786,7 +805,7 @@ func (ns *NovelSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (ns *NovelSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = ns.Float64s(ctx); err != nil {
@@ -812,7 +831,7 @@ func (ns *NovelSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (ns *NovelSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(ns.fields) > 1 {
 		return nil, errors.New("ent: NovelSelect.Bools is not achievable when selecting more than 1 field")
@@ -833,7 +852,7 @@ func (ns *NovelSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (ns *NovelSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = ns.Bools(ctx); err != nil {
@@ -860,11 +879,6 @@ func (ns *NovelSelect) BoolX(ctx context.Context) bool {
 }
 
 func (ns *NovelSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range ns.fields {
-		if !novel.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := ns.sqlQuery().Query()
 	if err := ns.driver.Query(ctx, query, args, rows); err != nil {

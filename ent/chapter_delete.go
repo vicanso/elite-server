@@ -20,7 +20,7 @@ type ChapterDelete struct {
 	mutation *ChapterMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the ChapterDelete builder.
 func (cd *ChapterDelete) Where(ps ...predicate.Chapter) *ChapterDelete {
 	cd.mutation.predicates = append(cd.mutation.predicates, ps...)
 	return cd
