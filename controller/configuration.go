@@ -26,6 +26,7 @@ import (
 	confSchema "github.com/vicanso/elite/ent/configuration"
 	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/router"
+	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elite/validate"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/hes"
@@ -57,6 +58,7 @@ type (
 		StartedAt time.Time           `json:"startedAt,omitempty"`
 		EndedAt   time.Time           `json:"endedAt,omitempty"`
 	}
+
 	// configurationListParmas 配置查询参数
 	configurationListParmas struct {
 		listParams
@@ -85,6 +87,12 @@ func init() {
 		"/v1",
 		newTrackerMiddleware(cs.ActionConfigurationAdd),
 		ctrl.add,
+	)
+
+	// 获取当前有效配置
+	g.GET(
+		"/v1/current-valid",
+		ctrl.getCurrentValid,
 	)
 
 	// 更新配置
@@ -260,5 +268,11 @@ func (*configurationCtrl) findByID(c *elton.Context) (err error) {
 		return
 	}
 	c.Body = configuration
+	return
+}
+
+// getCurrentValid 获取当前有效配置
+func (*configurationCtrl) getCurrentValid(c *elton.Context) (err error) {
+	c.Body = service.GetCurrentValidConfiguration()
 	return
 }

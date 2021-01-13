@@ -59,6 +59,8 @@ type (
 		Name string `validate:"required,ascii"`
 		// PID文件
 		PidFile string `validate:"required"`
+		// 应用前缀
+		Prefixes []string `validate:"omitempty,dive,xPath"`
 	}
 	// SessionConfig session相关配置信息
 	SessionConfig struct {
