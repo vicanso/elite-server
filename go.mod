@@ -38,6 +38,7 @@ require (
 	github.com/vicanso/viperx v0.1.3
 	go.uber.org/atomic v1.7.0
 	go.uber.org/automaxprocs v1.3.0
+	go.uber.org/ratelimit v0.1.0
 	go.uber.org/zap v1.16.0
 	golang.org/x/image v0.0.0-20201208152932-35266b937fa6
 	google.golang.org/grpc v1.35.0

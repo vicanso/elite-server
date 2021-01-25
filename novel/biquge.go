@@ -28,6 +28,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/vicanso/elite/ent/novelsource"
 	"github.com/vicanso/elite/helper"
+	"github.com/vicanso/elite/log"
 	"github.com/vicanso/go-axios"
 	lruttl "github.com/vicanso/lru-ttl"
 	"go.uber.org/zap"
@@ -271,7 +272,7 @@ func (bqg *biQuGe) Sync() (err error) {
 		}
 		novel, err := bqg.GetDetail(i)
 		if err != nil {
-			logger.Error("sync novel fail",
+			log.Default().Error("sync novel fail",
 				zap.Int("id", i),
 			)
 			continue

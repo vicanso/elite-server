@@ -14,6 +14,12 @@
 
 package validate
 
+import (
+	"regexp"
+
+	"github.com/go-playground/validator/v10"
+)
+
 func init() {
 	// 客户端使用的limit，最多只允许一次拉取100条
 	Add("xLimit", newNumberRange(1, 100))
@@ -30,4 +36,10 @@ func init() {
 	AddAlias("xPath", "startswith=/")
 	// boolean的字符串形式，0: false, 1:true
 	AddAlias("xBoolean", "oneof=0 1")
+	// duration配置
+	durationReg := regexp.MustCompile(`^\d+(ms|s|m)$`)
+	Add("xDuration", func(fl validator.FieldLevel) bool {
+		v, _ := toString(fl)
+		return durationReg.MatchString(v)
+	})
 }

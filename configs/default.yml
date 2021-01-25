@@ -34,7 +34,7 @@ influxdb:
   uri: http://127.0.0.1:8086
   bucket: elite 
   org: bigTree
-  token: AeSJbMPoFMmQ-tAaZdOefFZ8mIhe_TgxH8t0dMeBhKYmUyLZ8XOFCZsQqW8ptVflom6pgTlqYYiQUEUVMzgeYw==
+  token: iNhMlbht5W58fple-NTUgDRbWkTS1EtnGhgNJW9wqSKRmi8ePKrZesMQPJw6ypFWKr76Ku0nizvgFKkzeZwQng==
   batchSize: 1000
   flushInterval: 10s
   disabled: false 

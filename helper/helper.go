@@ -14,12 +14,6 @@
 
 package helper
 
-import "github.com/vicanso/elite/log"
-
-var (
-	logger = log.Default()
-)
-
 type ContextKey struct{}
 
 var (

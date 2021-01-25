@@ -33,8 +33,6 @@ type (
 	statsTaskFn func() map[string]interface{}
 )
 
-var logger = log.Default()
-
 const logCategory = "schedule"
 
 func init() {
@@ -70,14 +68,14 @@ func doTask(desc string, fn taskFn) {
 	startedAt := time.Now()
 	err := fn()
 	if err != nil {
-		logger.Error(desc+" fail",
+		log.Default().Error(desc+" fail",
 			zap.String("category", logCategory),
 			zap.Duration("use", time.Since(startedAt)),
 			zap.Error(err),
 		)
 		service.AlarmError(desc + " fail, " + err.Error())
 	} else {
-		logger.Info(desc+" success",
+		log.Default().Info(desc+" success",
 			zap.String("category", logCategory),
 			zap.Duration("use", time.Since(startedAt)),
 		)
@@ -87,7 +85,7 @@ func doTask(desc string, fn taskFn) {
 func doStatsTask(desc string, fn statsTaskFn) {
 	startedAt := time.Now()
 	stats := fn()
-	logger.Info(desc,
+	log.Default().Info(desc,
 		zap.String("category", logCategory),
 		zap.Duration("use", time.Since(startedAt)),
 		zap.Any("stats", stats),
@@ -173,17 +171,20 @@ func performanceStats() {
 	doStatsTask("performance stats", func() map[string]interface{} {
 		data := service.GetPerformance()
 		fields := map[string]interface{}{
-			"goMaxProcs":   data.GoMaxProcs,
-			"concurrency":  data.Concurrency,
-			"threadCount":  data.ThreadCount,
-			"memSys":       data.MemSys,
-			"memHeapSys":   data.MemHeapSys,
-			"memHeapInuse": data.MemHeapInuse,
-			"memFrees":     data.MemFrees - prevMemFrees,
-			"routineCount": data.RoutineCount,
-			"cpuUsage":     data.CPUUsage,
-			"numGC":        data.NumGC - prevNumGC,
-			"pause":        (data.PauseTotalNs - prevPauseTotal).Milliseconds(),
+			cs.FieldGoMaxProcs:       data.GoMaxProcs,
+			cs.FieldProcessing:       int(data.Concurrency),
+			cs.FieldThreadCount:      int(data.ThreadCount),
+			cs.FieldMemSys:           data.MemSys,
+			cs.FieldMemHeapSys:       data.MemHeapSys,
+			cs.FieldMemHeapInuse:     data.MemHeapInuse,
+			cs.FieldMemFrees:         int(data.MemFrees - prevMemFrees),
+			cs.FieldRoutineCount:     data.RoutineCount,
+			cs.FieldCpuUsage:         int(data.CPUUsage),
+			cs.FieldNumGC:            int(data.NumGC - prevNumGC),
+			cs.FieldPauseNS:          int((data.PauseTotalNs - prevPauseTotal).Milliseconds()),
+			cs.FieldConnProcessing:   int(data.ConnProcessing),
+			cs.FieldConnAlive:        int(data.ConnAlive),
+			cs.FieldConnCreatedCount: int(data.ConnCreatedCount),
 		}
 		prevMemFrees = data.MemFrees
 		prevNumGC = data.NumGC
@@ -222,9 +223,9 @@ func routerConcurrencyStats() {
 			}
 			fields[key] = value
 			influxSrv.Write(cs.MeasurementRouterConcurrency, map[string]string{
-				"route": key,
+				cs.TagRoute: key,
 			}, map[string]interface{}{
-				"count": value,
+				cs.FieldCount: int(value),
 			})
 		}
 		return fields

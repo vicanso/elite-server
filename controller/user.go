@@ -33,6 +33,7 @@ import (
 	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/ent/user"
 	"github.com/vicanso/elite/ent/userlogin"
+	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/middleware"
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/service"
@@ -115,6 +116,8 @@ type (
 			Route string `json:"route,omitempty" validate:"required,xUserActionRoute"`
 			// Path 触发时的完整路径
 			Path string `json:"path,omitempty" validate:"required,xPath"`
+			// Result 操作结果，0:成功 1:失败
+			Result int `json:"result,omitempty"`
 			// Time 记录的时间戳，单位秒
 			Time int64 `json:"time,omitempty" validate:"required"`
 			// Extra 其它额外信息
@@ -228,7 +231,6 @@ func init() {
 	// 获取客户登录记录
 	g.GET(
 		"/v1/login-records",
-		shouldBeAdmin,
 		ctrl.listLoginRecord,
 	)
 
@@ -521,19 +523,19 @@ func (*userCtrl) me(c *elton.Context) (err error) {
 
 		ip := c.RealIP()
 		fields := map[string]interface{}{
-			"userAgent": c.GetRequestHeader("User-Agent"),
-			"trackID":   uid,
-			"ip":        ip,
+			cs.FieldUserAgent: c.GetRequestHeader("User-Agent"),
+			cs.FieldTID:       uid,
+			cs.FieldIP:        ip,
 		}
 
 		// 记录创建user track
 		go func() {
 			location, _ := service.GetLocationByIP(ip, nil)
 			if location.IP != "" {
-				fields["country"] = location.Country
-				fields["province"] = location.Province
-				fields["city"] = location.City
-				fields["isp"] = location.ISP
+				fields[cs.FieldCountry] = location.Country
+				fields[cs.FieldProvince] = location.Province
+				fields[cs.FieldCity] = location.City
+				fields[cs.FieldISP] = location.ISP
 			}
 			getInfluxSrv().Write(cs.MeasurementUserAddTrack, nil, fields)
 		}()
@@ -615,11 +617,11 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 	xForwardedFor := c.GetRequestHeader("X-Forwarded-For")
 	go func() {
 		fields := map[string]interface{}{
-			"account":   account,
-			"userAgent": userAgent,
-			"ip":        ip,
-			"tid":       tid,
-			"sid":       sid,
+			cs.FieldAccount:   account,
+			cs.FieldUserAgent: userAgent,
+			cs.FieldIP:        ip,
+			cs.FieldTID:       tid,
+			cs.FieldSID:       sid,
 		}
 		location, _ := service.GetLocationByIP(ip, nil)
 		country := ""
@@ -631,10 +633,10 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 			province = location.Province
 			city = location.City
 			isp = location.ISP
-			fields["country"] = country
-			fields["province"] = province
-			fields["city"] = city
-			fields["isp"] = isp
+			fields[cs.FieldCountry] = country
+			fields[cs.FieldProvince] = province
+			fields[cs.FieldCity] = city
+			fields[cs.FieldISP] = isp
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
@@ -652,7 +654,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 			SetIsp(isp).
 			Save(ctx)
 		if err != nil {
-			logger.Error("save user login fail",
+			log.Default().Error("save user login fail",
 				zap.Error(err),
 			)
 		}
@@ -772,6 +774,13 @@ func (ctrl userCtrl) listLoginRecord(c *elton.Context) (err error) {
 
 // addUserAction add user action
 func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
+	tid := util.GetTrackID(c)
+	// 如果没有tid，则直接返回
+	if tid == "" {
+		c.NoContent()
+		return
+	}
+
 	params := userActionAddParams{}
 	err = validate.Do(&params, c.RequestBody)
 	if err != nil {
@@ -779,7 +788,10 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 	}
 	now := time.Now().Unix()
 	us := getUserSession(c)
-	account := us.MustGetInfo().Account
+	account := ""
+	if us.IsLogin() {
+		account = us.MustGetInfo().Account
+	}
 
 	count := 0
 	for _, item := range params.Actions {
@@ -793,13 +805,17 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 		nsec := rand.Int() % int(time.Second)
 		t := time.Unix(item.Time, int64(nsec))
 		fields := map[string]interface{}{
-			"account": account,
-			"route":   item.Route,
-			"path":    item.Path,
+			cs.FieldRoute: item.Route,
+			cs.FieldPath:  item.Path,
+			cs.FieldTID:   tid,
+		}
+		if account != "" {
+			fields[cs.FieldAccount] = account
 		}
 		fields = util.MergeMapStringInterface(fields, item.Extra)
 		getInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{
-			"category": item.Category,
+			cs.TagCategory: item.Category,
+			cs.TagResult:   strconv.Itoa(item.Result),
 		}, fields, t)
 	}
 	c.Body = map[string]int{

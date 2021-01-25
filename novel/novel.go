@@ -34,8 +34,6 @@ import (
 
 var (
 	getEntClient = helper.EntGetClient
-
-	logger = log.Default()
 )
 
 const (
@@ -240,7 +238,7 @@ func (srv *Srv) Publish(params QueryParams) (novel *ent.Novel, err error) {
 			SetStatus(entSchema.NovelSourceStatusPublished).
 			Save(context.Background())
 		if err != nil {
-			logger.Error("update novel source status fail",
+			log.Default().Error("update novel source status fail",
 				zap.String("name", params.Name),
 				zap.String("author", params.Author),
 				zap.Error(err),

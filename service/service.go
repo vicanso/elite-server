@@ -16,12 +16,9 @@ package service
 
 import (
 	"github.com/vicanso/elite/cache"
-	"github.com/vicanso/elite/log"
 )
 
 var (
-	logger = log.Default()
-
 	redisSrv = cache.GetRedisCache()
 	fileSrv  = &FileSrv{}
 )

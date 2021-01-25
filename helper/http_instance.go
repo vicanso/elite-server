@@ -68,8 +68,8 @@ func GetQidianInstance() *axios.Instance {
 // GetHTTPInstanceStats get http instance stats
 func GetHTTPInstanceStats() map[string]interface{} {
 	return map[string]interface{}{
-		"location": locationIns.GetConcurrency(),
-		"biquge":   biqugeIns.GetConcurrency(),
-		"qidian":   qidianIns.GetConcurrency(),
+		"location": int(locationIns.GetConcurrency()),
+		"biquge":   int(biqugeIns.GetConcurrency()),
+		"qidian":   int(qidianIns.GetConcurrency()),
 	}
 }

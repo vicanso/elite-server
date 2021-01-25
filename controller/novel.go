@@ -31,6 +31,7 @@ import (
 	entNovel "github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/ent/novelsource"
 	"github.com/vicanso/elite/ent/schema"
+	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/novel"
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/service"
@@ -556,7 +557,7 @@ func (*novelCtrl) publish(params novel.QueryParams) (result *ent.Novel, err erro
 		if strings.HasPrefix(result.Cover, "http") {
 			err := updateCoverByURL(result.ID, result.Cover)
 			if err != nil {
-				logger.Error("update cover fail",
+				log.Default().Error("update cover fail",
 					zap.String("name", result.Name),
 					zap.Error(err),
 				)
@@ -609,14 +610,14 @@ func (ctrl *novelCtrl) publishAll(c *elton.Context) (err error) {
 				Author: result.Author,
 			})
 			if err != nil {
-				logger.Error("publish novel fail",
+				log.Default().Error("publish novel fail",
 					zap.String("name", result.Name),
 					zap.String("author", result.Author),
 					zap.Error(err),
 				)
 			}
 		}
-		logger.Info("publish all done")
+		log.Default().Info("publish all done")
 	}()
 	c.NoContent()
 	return
@@ -647,7 +648,7 @@ func (*novelCtrl) updateChaptersByID(c *elton.Context) (err error) {
 	go func() {
 		err := updateNovelChapters(id, true)
 		if err != nil {
-			logger.Error("fetch chapter content fail",
+			log.Default().Error("fetch chapter content fail",
 				zap.Int("id", id),
 				zap.Error(err),
 			)
@@ -668,7 +669,7 @@ func (*novelCtrl) updateAllChapters(c *elton.Context) (err error) {
 		for i := 1; i <= id; i++ {
 			err := updateNovelChapters(i, fetchingContent)
 			if err != nil {
-				logger.Error("update chapters fail",
+				log.Default().Error("update chapters fail",
 					zap.Int("id", i),
 					zap.Error(err),
 				)

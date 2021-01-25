@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/vicanso/elite/cache"
+	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/elton/middleware"
 	"github.com/vicanso/hes"
@@ -51,7 +52,7 @@ func createConcurrentLimitLock(prefix string, ttl time.Duration, withDone bool) 
 			done = func() {
 				err := redisDone()
 				if err != nil {
-					logger.Error("redis done fail",
+					log.Default().Error("redis done fail",
 						zap.String("key", k),
 						zap.Error(err),
 					)
