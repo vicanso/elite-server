@@ -117,7 +117,7 @@ func exitForDev() {
 	signal.Notify(c, syscall.SIGUSR2)
 	go func() {
 		for range c {
-			os.Exit(0)
+			os.Exit(1)
 		}
 	}()
 }
