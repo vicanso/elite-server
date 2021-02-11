@@ -98,7 +98,7 @@ func gracefulClose(e *elton.Elton) {
 
 // watchForClose 监听信号关闭程序
 func watchForClose(e *elton.Elton) {
-	c := make(chan os.Signal)
+	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
 		for s := range c {
@@ -112,11 +112,13 @@ func watchForClose(e *elton.Elton) {
 }
 
 // exitForDev 开发环境退出
-func exitForDev() {
+func exitForDev(e *elton.Elton) {
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGUSR2)
+	signal.Notify(c, syscall.SIGINT)
 	go func() {
 		for range c {
+			closeDepends()
+			e.Close()
 			os.Exit(1)
 		}
 	}()
@@ -216,7 +218,7 @@ func main() {
 	if !util.IsDevelopment() {
 		watchForClose(e)
 	} else {
-		exitForDev()
+		exitForDev(e)
 	}
 
 	basicConfig := config.GetBasicConfig()
