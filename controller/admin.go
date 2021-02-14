@@ -18,6 +18,7 @@ package controller
 
 import (
 	"github.com/vicanso/elite/cache"
+	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elton"
 )
@@ -42,6 +43,7 @@ func init() {
 	// 清空session数据
 	g.DELETE(
 		"/v1/sessions/{id}",
+		newTrackerMiddleware(cs.ActionAdminCleanSession),
 		ctrl.cleanSessionByID,
 	)
 }

@@ -31,6 +31,9 @@ const (
 	// ActionConfigurationUpdate update configuration
 	ActionConfigurationUpdate = "updateConfiguration"
 
+	// ActionAdminCleanSession clean session
+	ActionAdminCleanSession = "cleanSession"
+
 	// ActionNovelUpdate update novel
 	ActionNovelUpdate = "updateNovel"
 	// ActionNovelChaptersUpdate update novel chapters
