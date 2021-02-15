@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 	"github.com/vicanso/elite/ent/novelsource"
 	"github.com/vicanso/elite/ent/predicate"
 )
@@ -261,7 +261,7 @@ func (nsq *NovelSourceQuery) GroupBy(field string, fields ...string) *NovelSourc
 		if err := nsq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return nsq.sqlQuery(), nil
+		return nsq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -384,7 +384,7 @@ func (nsq *NovelSourceQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (nsq *NovelSourceQuery) sqlQuery() *sql.Selector {
+func (nsq *NovelSourceQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(nsq.driver.Dialect())
 	t1 := builder.Table(novelsource.Table)
 	selector := builder.Select(t1.Columns(novelsource.Columns...)...).From(t1)
@@ -679,7 +679,7 @@ func (nss *NovelSourceSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := nss.prepareQuery(ctx); err != nil {
 		return err
 	}
-	nss.sql = nss.NovelSourceQuery.sqlQuery()
+	nss.sql = nss.NovelSourceQuery.sqlQuery(ctx)
 	return nss.sqlScan(ctx, v)
 }
 

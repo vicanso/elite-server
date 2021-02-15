@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebook/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql"
 	"github.com/vicanso/elite/ent/chapter"
 )
 
@@ -16,19 +16,19 @@ type Chapter struct {
 	config `json:"-" sql:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
+	// 创建时间，添加记录时由程序自动生成
 	CreatedAt time.Time `json:"createdAt,omitempty" sql:"created_at"`
-	// UpdatedAt holds the value of the "updated_at" field.
+	// 更新时间，更新记录时由程序自动生成
 	UpdatedAt time.Time `json:"updatedAt,omitempty" sql:"updated_at"`
-	// Novel holds the value of the "novel" field.
+	// 小说id
 	Novel int `json:"novel,omitempty"`
-	// No holds the value of the "no" field.
+	// 章节序号
 	No int `json:"no,omitempty"`
-	// Title holds the value of the "title" field.
+	// 章节名称
 	Title string `json:"title,omitempty"`
-	// Content holds the value of the "content" field.
+	// 章节内容
 	Content string `json:"content,omitempty"`
-	// WordCount holds the value of the "word_count" field.
+	// 章节字数
 	WordCount int `json:"wordCount,omitempty" sql:"word_count"`
 }
 

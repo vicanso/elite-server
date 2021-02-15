@@ -236,3 +236,11 @@ func sessionInterceptorMiddleware(c *elton.Context) error {
 	he.Category = "sessionInterceptorMiddleware"
 	return he
 }
+
+// isIntranet 判断是否内网访问
+func isIntranet(c *elton.Context) error {
+	if elton.IsIntranet(c.ClientIP()) {
+		return c.Next()
+	}
+	return hes.NewWithStatusCode("Forbidden", 403)
+}

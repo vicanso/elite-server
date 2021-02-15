@@ -23,8 +23,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqljson"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"github.com/tidwall/gjson"
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/cs"
@@ -216,6 +216,15 @@ func init() {
 		newErrorLimit(5, 10*time.Minute, func(c *elton.Context) string {
 			return gjson.GetBytes(c.RequestBody, "account").String()
 		}),
+		ctrl.login,
+	)
+
+	// 内部登录
+	g.POST(
+		"/inner/v1/me/login",
+		newTrackerMiddleware(cs.ActionLogin),
+		captchaValidate,
+		isIntranet,
 		ctrl.login,
 	)
 

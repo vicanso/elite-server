@@ -55,7 +55,7 @@ docker run -d --restart=always \
 
 ```bash
 # 安装entc
-go get github.com/facebook/ent/cmd/entc
+go get entgo.io/ent/cmd/entc
 ```
 
 ```bash

@@ -17,7 +17,7 @@ import (
 	"github.com/vicanso/elite/ent/user"
 	"github.com/vicanso/elite/ent/userlogin"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 const (

@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 	"github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/ent/predicate"
 )
@@ -261,7 +261,7 @@ func (nq *NovelQuery) GroupBy(field string, fields ...string) *NovelGroupBy {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return nq.sqlQuery(), nil
+		return nq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -384,7 +384,7 @@ func (nq *NovelQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (nq *NovelQuery) sqlQuery() *sql.Selector {
+func (nq *NovelQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(nq.driver.Dialect())
 	t1 := builder.Table(novel.Table)
 	selector := builder.Select(t1.Columns(novel.Columns...)...).From(t1)
@@ -679,7 +679,7 @@ func (ns *NovelSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ns.sql = ns.NovelQuery.sqlQuery()
+	ns.sql = ns.NovelQuery.sqlQuery(ctx)
 	return ns.sqlScan(ctx, v)
 }
 

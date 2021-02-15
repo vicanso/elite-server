@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebook/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql"
 	"github.com/vicanso/elite/ent/novel"
 )
 
@@ -16,31 +16,31 @@ type Novel struct {
 	config `json:"-" sql:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
+	// 创建时间，添加记录时由程序自动生成
 	CreatedAt time.Time `json:"createdAt,omitempty" sql:"created_at"`
-	// UpdatedAt holds the value of the "updated_at" field.
+	// 更新时间，更新记录时由程序自动生成
 	UpdatedAt time.Time `json:"updatedAt,omitempty" sql:"updated_at"`
-	// Name holds the value of the "name" field.
+	// 小说名称
 	Name string `json:"name,omitempty"`
-	// Author holds the value of the "author" field.
+	// 小说作者
 	Author string `json:"author,omitempty"`
-	// Source holds the value of the "source" field.
+	// 小说来源
 	Source int `json:"source,omitempty"`
-	// Status holds the value of the "status" field.
+	// 小说状态
 	Status int `json:"status,omitempty"`
-	// WordCount holds the value of the "word_count" field.
+	// 小说总字数
 	WordCount int `json:"wordCount,omitempty" sql:"word_count"`
-	// Views holds the value of the "views" field.
+	// 小说阅读次数
 	Views int `json:"views,omitempty"`
-	// Downloads holds the value of the "downloads" field.
+	// 小说下载次数
 	Downloads int `json:"downloads,omitempty"`
-	// Favorites holds the value of the "favorites" field.
+	// 小说收藏次数
 	Favorites int `json:"favorites,omitempty"`
-	// UpdatedWeight holds the value of the "updated_weight" field.
+	// 小说更新权重
 	UpdatedWeight int `json:"updatedWeight,omitempty" sql:"updated_weight"`
-	// Cover holds the value of the "cover" field.
+	// 小说封面
 	Cover string `json:"cover,omitempty"`
-	// Summary holds the value of the "summary" field.
+	// 小说简介
 	Summary string `json:"summary,omitempty"`
 }
 

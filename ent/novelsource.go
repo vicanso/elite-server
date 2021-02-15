@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebook/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql"
 	"github.com/vicanso/elite/ent/novelsource"
 )
 
@@ -16,19 +16,19 @@ type NovelSource struct {
 	config `json:"-" sql:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
+	// 创建时间，添加记录时由程序自动生成
 	CreatedAt time.Time `json:"createdAt,omitempty" sql:"created_at"`
-	// UpdatedAt holds the value of the "updated_at" field.
+	// 更新时间，更新记录时由程序自动生成
 	UpdatedAt time.Time `json:"updatedAt,omitempty" sql:"updated_at"`
-	// Name holds the value of the "name" field.
+	// 小说名称
 	Name string `json:"name,omitempty"`
-	// Author holds the value of the "author" field.
+	// 小说作者
 	Author string `json:"author,omitempty"`
-	// Source holds the value of the "source" field.
+	// 小说来源
 	Source int `json:"source,omitempty"`
-	// SourceID holds the value of the "source_id" field.
+	// 小说来源ID
 	SourceID int `json:"sourceID,omitempty"`
-	// Status holds the value of the "status" field.
+	// 小说来源发布状态
 	Status int `json:"status,omitempty"`
 }
 
