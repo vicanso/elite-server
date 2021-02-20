@@ -1,6 +1,6 @@
 module github.com/vicanso/elite
 
-go 1.15
+go 1.16
 
 require (
 	entgo.io/ent v0.6.0
@@ -14,14 +14,16 @@ require (
 	github.com/gobuffalo/packr/v2 v2.8.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/snappy v0.0.2
+	github.com/huandu/go-tls v1.0.1
 	github.com/iancoleman/strcase v0.1.3
 	github.com/influxdata/influxdb-client-go/v2 v2.2.2
 	github.com/jackc/pgx/v4 v4.10.1
 	github.com/jinzhu/now v1.1.1
-	github.com/minio/minio-go/v7 v7.0.8
+	github.com/minio/minio-go/v7 v7.0.9
 	github.com/mozillazg/go-pinyin v0.18.0
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/sirupsen/logrus v1.7.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.6.8
 	github.com/vicanso/count-warner v1.1.0
@@ -40,7 +42,8 @@ require (
 	go.uber.org/automaxprocs v1.4.0
 	go.uber.org/ratelimit v0.1.0
 	go.uber.org/zap v1.16.0
-	golang.org/x/image v0.0.0-20201208152932-35266b937fa6
+	golang.org/x/image v0.0.0-20210216034530-4410531fe030
 	google.golang.org/grpc v1.35.0
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
