@@ -32,6 +32,14 @@ type TracerInfo struct {
 
 var tracerInfoCache = mustNewTracerCache()
 
+func getID() uintptr {
+	p := g.G()
+	if p == nil {
+		return 0
+	}
+	return uintptr(p)
+}
+
 func mustNewTracerCache() *lru.Cache {
 	// 设置缓存，根据系统的访问量调整，需要比request limit大
 	l, err := lru.New(1024 * 10)
@@ -43,11 +51,11 @@ func mustNewTracerCache() *lru.Cache {
 
 // GetTracerInfo 获取tracer信息
 func GetTracerInfo() TracerInfo {
-	p := g.G()
-	if p == nil {
+	id := getID()
+	if id == 0 {
 		return TracerInfo{}
 	}
-	value, ok := tracerInfoCache.Peek(p)
+	value, ok := tracerInfoCache.Peek(id)
 	if !ok {
 		return TracerInfo{}
 	}
@@ -60,9 +68,9 @@ func GetTracerInfo() TracerInfo {
 
 // SetTracerInfo 设置tracer信息
 func SetTracerInfo(info TracerInfo) {
-	p := g.G()
-	if p == nil {
+	id := getID()
+	if id == 0 {
 		return
 	}
-	tracerInfoCache.Add(p, &info)
+	tracerInfoCache.Add(id, &info)
 }
