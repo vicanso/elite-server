@@ -31,7 +31,7 @@ var defaultLogger = mustNewLogger("")
 type httpServerLogger struct{}
 
 func (hsl *httpServerLogger) Write(p []byte) (int, error) {
-	defaultLogger.Info(string(p),
+	Default().Info(string(p),
 		zap.String("category", "httpServerLogger"),
 	)
 	return len(p), nil
@@ -40,7 +40,7 @@ func (hsl *httpServerLogger) Write(p []byte) (int, error) {
 type redisLogger struct{}
 
 func (rl *redisLogger) Printf(ctx context.Context, format string, v ...interface{}) {
-	defaultLogger.Info(fmt.Sprintf(format, v...),
+	Default().Info(fmt.Sprintf(format, v...),
 		zap.String("category", "redisLogger"),
 	)
 }
@@ -124,14 +124,6 @@ func mustNewLogger(outputPath string) *logger {
 	return &logger{
 		zapLogger: l,
 	}
-}
-
-// SetOutputPath 设置日志的输出目录，在程序初始化时使用
-func SetOutputPath(outputPath string) {
-	if defaultLogger != nil {
-		_ = defaultLogger.Sync()
-	}
-	defaultLogger = mustNewLogger(outputPath)
 }
 
 // Default 获取默认的logger

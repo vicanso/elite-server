@@ -52,6 +52,10 @@ type (
 	}
 )
 
+func init() {
+	redis.SetLogger(log.NewRedisLogger())
+}
+
 func mustNewRedisClient() (*redis.Client, *redisHook) {
 	redisConfig := config.GetRedisConfig()
 	log.Default().Info("connect to redis",
@@ -62,7 +66,6 @@ func mustNewRedisClient() (*redis.Client, *redisHook) {
 		slow:          redisConfig.Slow,
 		maxProcessing: redisConfig.MaxProcessing,
 	}
-	redis.SetLogger(log.NewRedisLogger())
 	c := redis.NewClient(&redis.Options{
 		Addr:     redisConfig.Addr,
 		Password: redisConfig.Password,

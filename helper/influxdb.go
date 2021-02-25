@@ -107,6 +107,9 @@ func (srv *InfluxSrv) Health() (err error) {
 }
 
 func (srv *InfluxSrv) query(ctx context.Context, query string) (items []map[string]interface{}, err error) {
+	if srv.client == nil {
+		return
+	}
 	result, err := srv.client.QueryAPI(srv.config.Org).Query(ctx, query)
 	if err != nil {
 		return
@@ -125,9 +128,6 @@ func (srv *InfluxSrv) query(ctx context.Context, query string) (items []map[stri
 
 // Query query records
 func (srv *InfluxSrv) Query(ctx context.Context, query string) (items []map[string]interface{}, err error) {
-	if srv.client == nil {
-		return
-	}
 	query = fmt.Sprintf(`from(bucket: "%s")`, srv.config.Bucket) + query
 	return srv.query(ctx, query)
 }
