@@ -108,6 +108,7 @@ func newHTTPOnDone(serviceName string) axios.OnDone {
 			data = resp.UnmarshalData
 			size = len(resp.Data)
 		}
+		log.Default().Debug(conf.CURL())
 		log.Default().Info("http request stats",
 			zap.String("service", serviceName),
 			zap.String("method", conf.Method),

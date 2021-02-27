@@ -24,6 +24,7 @@ import (
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/novel"
 	"github.com/vicanso/elite/service"
+	"github.com/vicanso/elite/util"
 
 	"go.uber.org/zap"
 )
@@ -60,6 +61,9 @@ func init() {
 	if os.Getenv("SYNC_SOURCE") != "" {
 		// _, _ = c.AddFunc("@every 12h", syncNovelSource)
 		go syncNovelSource()
+	}
+	if util.IsDevelopment() {
+		return
 	}
 	c.Start()
 }

@@ -18,6 +18,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+	"strconv"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -27,6 +29,18 @@ import (
 )
 
 var defaultLogger = mustNewLogger("")
+
+// 如果有配置指定日志级别，则以配置指定的输出
+var logLevel = os.Getenv("LOG_LEVEL")
+
+var enabledDebugLog = false
+
+func init() {
+	lv, _ := strconv.Atoi(logLevel)
+	if lv < 0 {
+		enabledDebugLog = true
+	}
+}
 
 type httpServerLogger struct{}
 
@@ -43,6 +57,12 @@ func (rl *redisLogger) Printf(ctx context.Context, format string, v ...interface
 	Default().Info(fmt.Sprintf(format, v...),
 		zap.String("category", "redisLogger"),
 	)
+}
+
+type entLogger struct{}
+
+func (el *entLogger) Log(args ...interface{}) {
+	Default().Info(fmt.Sprint(args...))
 }
 
 type logger struct {
@@ -86,6 +106,11 @@ func (l *logger) Sync() error {
 	return l.zapLogger.Sync()
 }
 
+// DebugEnabled 是否启用了debug日志
+func DebugEnabled() bool {
+	return enabledDebugLog
+}
+
 // mustNewLogger 初始化logger
 func mustNewLogger(outputPath string) *logger {
 
@@ -105,6 +130,11 @@ func mustNewLogger(outputPath string) *logger {
 
 		// 只针对panic 以上的日志增加stack trace
 		opts = append(opts, zap.AddStacktrace(zap.DPanicLevel))
+	}
+
+	if logLevel != "" {
+		lv, _ := strconv.Atoi(logLevel)
+		c.Level = zap.NewAtomicLevelAt(zapcore.Level(lv))
 	}
 
 	if outputPath != "" {
@@ -139,4 +169,9 @@ func NewHTTPServerLogger() *log.Logger {
 // NewRedisLogger create a redis logger
 func NewRedisLogger() *redisLogger {
 	return &redisLogger{}
+}
+
+// NewEntLogger create a ent logger
+func NewEntLogger() *entLogger {
+	return &entLogger{}
 }
