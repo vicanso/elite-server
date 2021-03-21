@@ -33,7 +33,7 @@ func TestParseColor(t *testing.T) {
 
 	_, err = parseColor("255,255")
 	assert.Equal("非法颜色值，格式必须为：1,1,1，当前为：255,255", err.(*hes.Error).Message)
-	_, err = parseColor("255,255, 256")
+	_, err = parseColor("255,255,256")
 	assert.Equal("非法颜色值，必须>=0 <=255，当前为：256", err.(*hes.Error).Message)
 }
 

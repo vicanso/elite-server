@@ -20,5 +20,4 @@ import (
 
 var (
 	redisSrv = cache.GetRedisCache()
-	fileSrv  = &FileSrv{}
 )

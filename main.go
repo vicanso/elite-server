@@ -12,6 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/*
+Package main Forest
+
+	接口出错统一使用如下格式：{"category": "出错类别", "message": "出错信息", "code": "出错代码", "exception": true}，
+	其中category与code字段为可选，当处理出错时，HTTP的响应状态码为`4xx`与`5xx`。
+	如果exception为true则表示此出错未预期出错，一般需要修复。
+	其中`4xx`表示客户端参数等异常出错，而`5xx`则表示服务处理异常。
+
+
+	常见出错类别：
+	`validate`：表示参数校验失败，接口传参不符合约束条件
+
+
+Host: 127.0.0.1:7001
+Version: 1.0.0
+Schemes: http
+
+Consumes:
+- application/json
+
+Produces:
+- application/json
+
+swagger:meta
+*/
 package main
 
 import (
@@ -32,6 +57,7 @@ import (
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/middleware"
+	"github.com/vicanso/elite/profiler"
 	"github.com/vicanso/elite/router"
 	_ "github.com/vicanso/elite/schedule"
 	"github.com/vicanso/elite/service"
@@ -41,7 +67,6 @@ import (
 	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/hes"
 	"go.uber.org/automaxprocs/maxprocs"
-	"go.uber.org/zap"
 )
 
 var (
@@ -67,16 +92,16 @@ func init() {
 
 	_, _ = maxprocs.Set(maxprocs.Logger(func(format string, args ...interface{}) {
 		value := fmt.Sprintf(format, args...)
-		log.Default().Info(value)
+		log.Default().Info().
+			Msg(value)
 	}))
 	service.SetApplicationVersion(Version)
 	service.SetApplicationBuildedAt(BuildedAt)
 	closeOnce := sync.Once{}
 	closeDepends = func() {
 		closeOnce.Do(func() {
-			_ = log.Default().Sync()
 			// 关闭influxdb，flush统计数据
-			helper.GetInfluxSrv().Close()
+			helper.GetInfluxDB().Close()
 			_ = helper.EntGetClient().Close()
 			_ = helper.RedisGetClient().Close()
 		})
@@ -87,10 +112,10 @@ func init() {
 var closedByUser = false
 
 func gracefulClose(e *elton.Elton) {
-	log.Default().Info("start to graceful close")
+	log.Default().Info().Msg("start to graceful close")
 	// 设置状态为退出中，/ping请求返回出错，反向代理不再转发流量
 	service.SetApplicationStatus(service.ApplicationStatusStopping)
-	// docker 在10秒内退出，因此设置8秒后退出
+	// docker 在10秒内退出，因此设置5秒后退出
 	time.Sleep(5 * time.Second)
 	// 所有新的请求均返回出错
 	e.GracefulClose(3 * time.Second)
@@ -104,17 +129,17 @@ func watchForClose(e *elton.Elton) {
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
 		for s := range c {
-			log.Default().Info("server will be closed",
-				zap.String("signal", s.String()),
-			)
+			log.Default().Info().
+				Str("signal", s.String()).
+				Msg("server will be closed")
 			closedByUser = true
 			gracefulClose(e)
 		}
 	}()
 }
 
-// exitForDev 开发环境退出
-func exitForDev(e *elton.Elton) {
+// devWaitForExit 开发环境退出
+func devWaitForExit(e *elton.Elton) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT)
 	go func() {
@@ -136,7 +161,7 @@ func dependServiceCheck() (err error) {
 	if err != nil {
 		return
 	}
-	// 初始化所有schema
+	// 程序启动后再执行init schema
 	err = helper.EntInitSchema()
 	if err != nil {
 		return
@@ -153,9 +178,8 @@ func newOnErrorHandler(e *elton.Elton) {
 	// 未处理的error才会触发
 	// 如果1分钟出现超过5次未处理异常
 	// exception的warner只有一个key，因此无需定时清除
-	warnerException := warner.NewWarner(60*time.Second, 60)
-	warnerException.ResetOnWarn = true
-	warnerException.On(func(_ string, _ warner.Count) {
+	exceptionWarner := warner.NewWarner(5*time.Minute, 5)
+	exceptionWarner.On(func(_ string, _ int) {
 		service.AlarmError("too many uncaught exception")
 	})
 	// 只有未被处理的error才会触发此回调
@@ -166,6 +190,9 @@ func newOnErrorHandler(e *elton.Elton) {
 			he.Extra = make(map[string]interface{})
 		}
 		stack := util.GetStack(5)
+		if len(stack) != 0 {
+			stack = stack[1:]
+		}
 		ip := c.RealIP()
 		uri := c.Request.RequestURI
 
@@ -173,7 +200,7 @@ func newOnErrorHandler(e *elton.Elton) {
 		he.Extra["uri"] = uri
 
 		// 记录exception
-		helper.GetInfluxSrv().Write(cs.MeasurementException, map[string]string{
+		service.GetInfluxSrv().Write(cs.MeasurementException, map[string]string{
 			cs.TagCategory: "routeError",
 			cs.TagRoute:    c.Route,
 		}, map[string]interface{}{
@@ -182,57 +209,65 @@ func newOnErrorHandler(e *elton.Elton) {
 		})
 
 		// 可以针对实际场景输出更多的日志信息
-		log.Default().Error("exception",
-			zap.String("ip", ip),
-			zap.String("route", c.Route),
-			zap.String("uri", uri),
-			zap.Strings("stack", stack),
-			zap.Error(he.Err),
-		)
-		warnerException.Inc("exception", 1)
+		log.Default().Error().
+			Str("category", "excpetion").
+			Str("ip", ip).
+			Str("route", c.Route).
+			Str("uri", uri).
+			Strs("stack", stack).
+			Msg("")
+
+		exceptionWarner.Inc("exception", 1)
 		// panic类的异常都graceful close
 		if he.Category == M.ErrRecoverCategory {
+
 			service.AlarmError("panic recover:" + string(he.ToJSON()))
-			gracefulClose(e)
+			// 由于此处的error由请求触发的，因为要另外启动一个goroutine重启，避免影响当前处理
+			go gracefulClose(e)
 		}
 	})
 }
 
 func main() {
+	profiler.StartPyroscope()
 	e := elton.New()
+	// 记录server中连接的状态变化
 	e.Server.ConnState = service.GetHTTPServerConnState()
 	e.Server.ErrorLog = log.NewHTTPServerLogger()
 
-	logger := log.Default()
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Error("panic error",
-				zap.Any("error", r),
-			)
+			err, ok := r.(error)
+			if !ok {
+				err = fmt.Errorf("%v", r)
+			}
+			log.Default().Error().
+				Str("category", "panic").
+				Err(err).
+				Msg("")
 			service.AlarmError(fmt.Sprintf("panic recover:%v", r))
 			// panic类的异常都graceful close
 			gracefulClose(e)
 		}
 	}()
 
+	basicConfig := config.GetBasicConfig()
 	defer closeDepends()
 	// 非开发环境，监听信号退出
 	if !util.IsDevelopment() {
 		watchForClose(e)
+		go func() {
+			pidData := []byte(strconv.Itoa(os.Getpid()))
+			err := ioutil.WriteFile(basicConfig.PidFile, pidData, 0600)
+			if err != nil {
+				log.Default().Error().
+					Err(err).
+					Msg("write pid fail")
+			}
+		}()
 	} else {
-		exitForDev(e)
+		devWaitForExit(e)
 	}
-
-	basicConfig := config.GetBasicConfig()
-	go func() {
-		pidData := []byte(strconv.Itoa(os.Getpid()))
-		err := ioutil.WriteFile(basicConfig.PidFile, pidData, 0600)
-		if err != nil {
-			logger.Error("create pid file fail",
-				zap.Error(err),
-			)
-		}
-	}()
 
 	newOnErrorHandler(e)
 	// 启用耗时跟踪
@@ -279,7 +314,7 @@ func main() {
 	// tracer中间件在最大请求限制中间件之后，保证进入tracer的goroutine不要过多
 	e.UseWithName(middleware.NewTracer(), "tracer")
 
-	// 配置只针对snappy与lz4压缩（主要用于减少内网线路带宽，对外的压缩由前置反向代理 完成）
+	// 配置只针对snappy与zstd压缩（主要用于减少内网线路带宽，对外的压缩由前置反向代理完成）
 	compressMinLength := 2 * 1024
 	compressConfig := M.NewCompressConfig(
 		&compress.SnappyCompressor{
@@ -323,9 +358,10 @@ func main() {
 	err := dependServiceCheck()
 	if err != nil {
 		service.AlarmError("check depend service fail, " + err.Error())
-		logger.Error("exception",
-			zap.Error(err),
-		)
+		log.Default().Error().
+			Str("category", "depFail").
+			Err(err).
+			Msg("")
 		return
 	}
 
@@ -336,13 +372,13 @@ func main() {
 	// e.Server = &http.Server{
 	// 	Handler: h2c.NewHandler(e, &http2.Server{}),
 	// }
-	logger.Info("server will listen on " + basicConfig.Listen)
+	log.Default().Info().Msg("server will listen on " + basicConfig.Listen)
 	err = e.ListenAndServe(basicConfig.Listen)
 	// 如果出错而且非主动关闭，则发送告警
 	if err != nil && !closedByUser {
 		service.AlarmError("listen and serve fail, " + err.Error())
-		logger.Error("exception",
-			zap.Error(err),
-		)
+		log.Default().Error().
+			Err(err).
+			Msg("")
 	}
 }

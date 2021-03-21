@@ -21,8 +21,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vicanso/elton"
 	"github.com/vicanso/elite/service"
+	"github.com/vicanso/elton"
 )
 
 func TestNewRouterMocker(t *testing.T) {

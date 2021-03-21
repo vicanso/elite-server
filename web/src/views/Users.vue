@@ -1,121 +1,211 @@
-<template>
-  <div class="user" v-loading="!inited">
-    <!-- 用户列表 -->
-    <el-card v-if="!editMode">
-      <div slot="header">
-        <i class="el-icon-user-solid" />
-        <span>用户列表</span>
-      </div>
-      <!-- 搜索条件 -->
-      <BaseFilter :fields="filterFields" v-if="inited" @filter="filter" />
-      <div v-loading="processing">
-        <el-table
-          :data="users"
-          row-key="id"
-          stripe
-          @sort-change="handleSortChange"
-        >
-          <el-table-column prop="id" key="id" label="ID" width="80" sortable />
-          <el-table-column
-            prop="account"
-            key="account"
-            label="账户"
-            width="120"
-          />
-          <el-table-column
-            prop="statusDesc"
-            key="statusDesc"
-            label="状态"
-            width="80"
-          />
-          <el-table-column label="用户角色">
-            <template slot-scope="scope">
-              <ul>
-                <li v-for="role in scope.row.roles" :key="role">
-                  {{ role }}
-                </li>
-              </ul>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="updatedAtDesc"
-            key="updatedAtDesc"
-            label="更新于"
-            width="180"
-            sortable
-          />
-          <el-table-column label="操作" width="120">
-            <template slot-scope="scope">
-              <el-button
-                class="op"
-                type="text"
-                size="small"
-                @click="modify(scope.row)"
-                >编辑</el-button
-              >
-            </template>
-          </el-table-column>
-        </el-table>
-        <el-pagination
-          class="pagination"
-          layout="prev, pager, next, sizes"
-          :current-page="currentPage"
-          :page-size="query.limit"
-          :page-sizes="pageSizes"
-          :total="userCount"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
-    <User v-else />
-  </div>
-</template>
-<script>
-import { mapActions, mapState } from "vuex";
-import BaseTable from "@/components/base/Table.vue";
-import User from "@/components/User.vue";
-import BaseFilter from "@/components/base/Filter.vue";
-import { PAGE_SIZES } from "@/constants/common";
+<template lang="pug">
+mixin IDColumn
+  el-table-column(
+    prop="id"
+    key="id"
+    label="ID"
+    width="80"
+    sortable
+  )
 
-const userRoles = [];
-const userStatuses = [];
+mixin AccountColumn
+  el-table-column(
+    prop="account"
+    key="account"
+    label="账户"
+    width="120"
+  )
+
+mixin StatusColumn
+  el-table-column(
+    label="状态"
+    width="100"
+  ): template(
+    #default="scope"
+  ) {{ getStatusDesc(scope.row.status) }}
+
+mixin RolesColumn
+  el-table-column(
+    label="角色"
+  ): template(
+    #default="scope"
+  )
+    ul(
+      v-if="scope.row.roles && scope.row.roles.length"
+    )
+      li(
+        v-for="role in scope.row.roles"
+        :key="role"
+      ) {{ role }}
+    template(
+      v-else
+    ) --
+
+mixin UpdatedAtColumn
+  el-table-column(
+    prop="updatedAt"
+    key="updatedAt"
+    label="更新于"
+    width="160"
+    sortable
+  ): template(
+    #default="scope"
+  ): time-formater(
+    :time="scope.row.updatedAt"
+  )
+
+mixin OpColumn
+  el-table-column(
+    label="操作"
+    width="120"
+  ): template(
+    #default="scope"
+  ): el-button.op(
+    type="text"
+    size="small"
+    @click="modify(scope.row)"
+  ) 编辑
+
+mixin Pagination
+  el-pagination.pagination(
+    layout="prev, pager, next, sizes"
+    :current-page="currentPage"
+    :page-size="query.limit"
+    :page-sizes="pageSizes"
+    :total="users.count"
+    @size-change="handleSizeChange"
+    @current-change="handleCurrentChange"
+  )
+
+.users(
+  v-loading="!inited"
+)
+  el-card(
+    v-if="!editMode"
+  )
+    template(
+      #header
+    )
+      i.el-icon-user-solid
+      span 用户列表
+    //- 筛选条件
+    base-filter(
+      :fields="filterFields"
+      v-if="inited"
+      :filter="filter"
+    )
+    div(
+      v-loading="users.processing"
+    ): el-table(
+      :data="users.items"
+      row-key="id"
+      stripe
+      @sort-change="handleSortChange"
+    )
+      //- 用户ID
+      +IDColumn
+      //- 用户账号
+      +AccountColumn
+
+      //- 用户状态
+      +StatusColumn
+
+      //- 用户角色
+      +RolesColumn
+
+      //- 更新时间
+      +UpdatedAtColumn
+      
+      //- 操作
+      +OpColumn
+
+    //- 分页
+    +Pagination
+  //- 用户编辑
+  user(
+    v-else
+  )
+</template>
+
+<script lang="ts">
+import { defineComponent, onUnmounted } from "vue";
+
+import useUserState, {
+  userList,
+  userListRole,
+  userListClear,
+} from "../states/user";
+import useCommonState, { commonListStatus } from "../states/common";
+
+import BaseFilter from "../components/base/Filter.vue";
+import BaseTooltip from "../components/Tooltip.vue";
+import TimeFormater from "../components/TimeFormater.vue";
+import User from "../components/User.vue";
+import { PAGE_SIZES } from "../constants/common";
+import FilterTable from "../mixins/FilterTable";
+
+const roleSelectList = [];
+const statusSelectList = [];
 const filterFields = [
   {
     label: "用户角色：",
     key: "role",
     type: "select",
-    options: userRoles,
-    span: 6
+    options: roleSelectList,
+    span: 6,
   },
   {
     label: "用户状态：",
     key: "status",
     type: "select",
-    options: userStatuses,
-    span: 6
+    options: statusSelectList,
+    span: 6,
   },
   {
     label: "关键字：",
     key: "keyword",
     placeholder: "请输入关键字",
     clearable: true,
-    span: 6
+    span: 6,
   },
   {
     label: "",
     type: "filter",
     span: 6,
-    labelWidth: "0px"
-  }
+    labelWidth: "0px",
+  },
 ];
 
-export default {
+export default defineComponent({
   name: "Users",
-  extends: BaseTable,
   components: {
+    BaseFilter,
+    BaseTooltip,
+    TimeFormater,
     User,
-    BaseFilter
+  },
+  mixins: [FilterTable],
+  setup() {
+    const commonState = useCommonState();
+    const userState = useUserState();
+    // 清理数据减少内存占用
+    onUnmounted(() => {
+      userListClear();
+    });
+    return {
+      users: userState.users,
+      userRoles: userState.roles,
+      statuses: commonState.statuses,
+      getStatusDesc: (status: number): string => {
+        let desc = "";
+        commonState.statuses.items.forEach((item) => {
+          if (item.value === status) {
+            desc = item.name;
+          }
+        });
+        return desc;
+      },
+    };
   },
   data() {
     return {
@@ -125,72 +215,66 @@ export default {
       query: {
         offset: 0,
         limit: PAGE_SIZES[0],
-        order: "-updatedAt"
-      }
+        order: "-updatedAt",
+      },
     };
-  },
-  computed: {
-    ...mapState({
-      userCount: state => state.user.list.count,
-      users: state => state.user.list.data || [],
-      userRoles: state => state.user.roles || [],
-      userStatuses: state => state.user.statuses || [],
-      processing: state => state.user.listProcessing,
-      updateProcessing: state => state.user.updateProcessing
-    })
-  },
-  methods: {
-    ...mapActions(["listUser", "listUserRole", "listUserStatus"]),
-    async fetch() {
-      const { query, processing } = this;
-      if (processing) {
-        return;
-      }
-      try {
-        await this.listUser(query);
-      } catch (err) {
-        this.$message.error(err.message);
-      }
-    }
   },
   async beforeMount() {
     try {
-      const { roles } = await this.listUserRole();
-      const { statuses } = await this.listUserStatus();
-      userRoles.length = 0;
-      userRoles.push({
-        name: "所有",
-        value: ""
-      });
-      userRoles.push(...roles);
+      await userListRole();
+      await commonListStatus();
 
-      userStatuses.length = 0;
-      userStatuses.push({
+      // 重置
+      roleSelectList.length = 0;
+      roleSelectList.push({
         name: "所有",
-        value: ""
+        value: "",
       });
-      userStatuses.push(...statuses);
+      roleSelectList.push(...this.userRoles.items);
+
+      // 重置
+      statusSelectList.length = 0;
+      statusSelectList.push({
+        name: "所有",
+        value: "",
+      });
+      statusSelectList.push(...this.statuses.items);
+
       this.filterFields = filterFields;
     } catch (err) {
-      this.$message.error(err.message);
+      this.$error(err);
     } finally {
       this.inited = true;
     }
-  }
-};
+  },
+  methods: {
+    async fetch() {
+      const { users, query } = this;
+      if (users.processing) {
+        return;
+      }
+      try {
+        await userList(query);
+      } catch (err) {
+        this.$error(err);
+      }
+    },
+  },
+});
 </script>
-<style lang="sass" scoped>
-@import "@/common.sass"
-.user
-  margin: $mainMargin
+
+<style lang="stylus" scoped>
+@import "../common";
+.users
+  margin $mainMargin
   i
-    margin-right: 5px
+    margin-right 5px
   ul
     li
-      list-style: inside
+      list-style inside
 .selector, .submit
-  width: 100%
+  width 100%
 .pagination
-  text-align: right
-  margin-top: 15px
+  text-align right
+  margin-top 15px
 </style>

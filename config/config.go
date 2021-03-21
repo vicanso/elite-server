@@ -83,8 +83,6 @@ type (
 		Addr string `validate:"required,hostname_port"`
 		// 密码
 		Password string
-		// db(0,1,2等)
-		DB int
 		// 慢请求时长
 		Slow time.Duration `validate:"required"`
 		// 最大的正在处理请求量
@@ -129,7 +127,6 @@ type (
 	}
 	// LocationConfig 定位配置
 	LocationConfig struct {
-		Name    string        `validate:"required"`
 		Timeout time.Duration `validate:"required"`
 		BaseURL string        `validate:"required,url"`
 	}
@@ -141,20 +138,29 @@ type (
 		SecretAccessKey string `validate:"required,min=6"`
 		SSL             bool
 	}
-
+	// PyroscopeConfig pyroscope的配置信息
+	PyroscopeConfig struct {
+		Addr  string `validate:"omitempty,url"`
+		Token string
+	}
 	// NovelConfig
 	NovelConfig struct {
 		Name    string        `validate:"required"`
 		BaseURL string        `validate:"required,url"`
 		Timeout time.Duration `validate:"required"`
 	}
-	// TinyConfig tiny config
-	TinyConfig struct {
-		Host    string        `validate:"required,ip"`
-		Port    int           `validate:"required,number"`
-		Timeout time.Duration `validate:"required"`
-	}
+	NovelConfigs []NovelConfig
 )
+
+func (configs NovelConfigs) Find(name string) NovelConfig {
+	conf := NovelConfig{}
+	for _, item := range configs {
+		if item.Name == name {
+			conf = item
+		}
+	}
+	return conf
+}
 
 // mustLoadConfig 加载配置，出错是则抛出panic
 func mustLoadConfig() *viperx.ViperX {
@@ -203,6 +209,7 @@ func GetBasicConfig() BasicConfig {
 		Name:         defaultViperX.GetString(prefix + "name"),
 		RequestLimit: defaultViperX.GetUint(prefix + "requestLimit"),
 		Listen:       defaultViperX.GetStringFromENV(prefix + "listen"),
+		Prefixes:     defaultViperX.GetStringSlice(prefix + "prefixes"),
 	}
 	pidFile := fmt.Sprintf("%s.pid", basicConfig.Name)
 	pwd, _ := os.Getwd()
@@ -236,19 +243,10 @@ func GetRedisConfig() RedisConfig {
 	if err != nil {
 		panic(err)
 	}
-	// 获取设置的db
-	db := 0
-	query := uriInfo.Query()
-	dbValue := query.Get("db")
-	if dbValue != "" {
-		db, err = strconv.Atoi(dbValue)
-		if err != nil {
-			panic(err)
-		}
-	}
 	// 获取密码
 	password, _ := uriInfo.User.Password()
 
+	query := uriInfo.Query()
 	// 获取slow设置的时间间隔
 	slowValue := query.Get("slow")
 	slow := 100 * time.Millisecond
@@ -272,7 +270,6 @@ func GetRedisConfig() RedisConfig {
 	redisConfig := RedisConfig{
 		Addr:          uriInfo.Host,
 		Password:      password,
-		DB:            db,
 		Slow:          slow,
 		MaxProcessing: uint32(maxProcessing),
 	}
@@ -339,7 +336,6 @@ func GetAlarmConfig() AlarmConfig {
 func GetLocationConfig() LocationConfig {
 	prefix := "location."
 	locationConfig := LocationConfig{
-		Name:    defaultViperX.GetString(prefix + "name"),
 		BaseURL: defaultViperX.GetString(prefix + "baseURL"),
 		Timeout: defaultViperX.GetDuration(prefix + "timeout"),
 	}
@@ -360,32 +356,32 @@ func GetMinioConfig() MinioConfig {
 	return minioConfig
 }
 
+// GetPyroscopeConfig 获取pyroscope的配置信息
+func GetPyroscopeConfig() PyroscopeConfig {
+	prefix := "pyroscope."
+	pyroscopeConfig := PyroscopeConfig{
+		Addr:  defaultViperX.GetString(prefix + "addr"),
+		Token: defaultViperX.GetString(prefix + "token"),
+	}
+	return pyroscopeConfig
+}
+
 // GetNovelConfigs 获取novel的抓取配置
-func GetNovelConfigs() []NovelConfig {
+func GetNovelConfigs() NovelConfigs {
 	prefix := "novel."
 	keys := []string{
 		"biquge",
 		"qidian",
 	}
-	data := make([]NovelConfig, len(keys))
+	data := make(NovelConfigs, len(keys))
 	for index, name := range keys {
-		data[index] = NovelConfig{
+		conf := NovelConfig{
 			Name:    name,
 			BaseURL: defaultViperX.GetString(prefix + name + ".baseURL"),
 			Timeout: defaultViperX.GetDuration(prefix + name + ".timeout"),
 		}
+		mustValidate(&conf)
+		data[index] = conf
 	}
 	return data
-}
-
-// GetTinyConfig get tiny config
-func GetTinyConfig() TinyConfig {
-	prefix := "tiny."
-	tinyConfig := TinyConfig{
-		Host:    defaultViperX.GetString(prefix + "host"),
-		Port:    defaultViperX.GetInt(prefix + "port"),
-		Timeout: defaultViperX.GetDuration(prefix + "timeout"),
-	}
-	mustValidate(&tinyConfig)
-	return tinyConfig
 }

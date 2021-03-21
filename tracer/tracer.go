@@ -42,6 +42,7 @@ func getID() uintptr {
 
 func mustNewTracerCache() *lru.Cache {
 	// 设置缓存，根据系统的访问量调整，需要比request limit大
+	// tracer不依赖项目的模块，因此未直接从config中获取
 	l, err := lru.New(1024 * 10)
 	if err != nil {
 		panic(err)

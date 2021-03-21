@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vicanso/elite/ent/schema"
+	"github.com/vicanso/elite/schema"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elton"
 	session "github.com/vicanso/elton-session"

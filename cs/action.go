@@ -33,20 +33,4 @@ const (
 
 	// ActionAdminCleanSession clean session
 	ActionAdminCleanSession = "cleanSession"
-
-	// ActionNovelUpdate update novel
-	ActionNovelUpdate = "updateNovel"
-	// ActionNovelChaptersUpdate update novel chapters
-	ActionNovelChaptersUpdate = "updateNovelChapters"
-	// ActionNovelChapterUpdate update novel chapter
-	ActionNovelChapterUpdate = "updateNovelChapter"
-)
-
-const (
-	// ActionNovelUserView novel user view
-	ActionNovelUserView = "view"
-	// ActionNovelUserDownload novel user download
-	ActionNovelUserDownload = "download"
-	// ActionNovelUserFavorite novel user favorite
-	ActionNovelUserFavorite = "favorite"
 )

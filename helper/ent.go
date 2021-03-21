@@ -29,6 +29,7 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/iancoleman/strcase"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/rs/zerolog"
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/ent"
@@ -37,7 +38,6 @@ import (
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/util"
 	"go.uber.org/atomic"
-	"go.uber.org/zap"
 )
 
 var (
@@ -59,11 +59,23 @@ type entProcessingStats struct {
 
 // EntEntListParams 公共的列表查询参数
 type EntListParams struct {
-	Limit  string `json:"limit,omitempty" validate:"required,xLimit"`
+	// 查询limit限制
+	// validate:"required,xLimit"
+	Limit string `json:"limit,omitempty" validate:"required,xLimit"`
+
+	// 查询的offset偏移
+	// validate:"omitempty,xOffset"
 	Offset string `json:"offset,omitempty" validate:"omitempty,xOffset"`
+
+	// 查询筛选的字段，如果多个字段以,分隔
+	// validate:"omitempty,xFields"
 	Fields string `json:"fields,omitempty" validate:"omitempty,xFields"`
-	Order  string `json:"order,omitempty" validate:"omitempty,xOrder"`
-	// IgnoreCount 忽略计算总数
+
+	// 查询的排序字段，如果以-前缀表示降序，如果多个字段以,分隔
+	// validate:"omitempty,xOrder"
+	Order string `json:"order,omitempty" validate:"omitempty,xOrder"`
+
+	// 忽略计算总数，如果此字段不为空则表示不查询总数
 	IgnoreCount string `json:"ignoreCount,omitempty"`
 }
 
@@ -81,9 +93,9 @@ func mustNewEntClient() (*entsql.Driver, *ent.Client) {
 			maskURI = strings.ReplaceAll(maskURI, pass, "***")
 		}
 	}
-	log.Default().Info("connect postgres",
-		zap.String("uri", maskURI),
-	)
+	log.Default().Info().
+		Str("uri", maskURI).
+		Msg("connect postgres")
 	db, err := sql.Open("pgx", postgresConfig.URI)
 	if err != nil {
 		panic(err)
@@ -94,10 +106,6 @@ func mustNewEntClient() (*entsql.Driver, *ent.Client) {
 	entLogger := log.NewEntLogger()
 	c := ent.NewClient(ent.Driver(driver), ent.Log(entLogger.Log))
 
-	ctx := context.Background()
-	if err := c.Schema.Create(ctx); err != nil {
-		panic(err)
-	}
 	initSchemaHooks(c)
 	return driver, c
 }
@@ -251,16 +259,17 @@ func initSchemaHooks(c *ent.Client) {
 			}
 
 			d := time.Since(startedAt)
-			log.Default().Info("ent stats",
-				zap.String("schema", schemaType),
-				zap.String("op", op),
-				zap.Int("result", result),
-				zap.Int32("processing", processing),
-				zap.Int32("totalProcessing", totalProcessing),
-				zap.String("use", d.String()),
-				zap.Any("data", data),
-				zap.String("message", message),
-			)
+			log.Default().Info().
+				Str("category", "entStats").
+				Str("schema", schemaType).
+				Str("op", op).
+				Int("result", result).
+				Int32("processing", processing).
+				Int32("totalProcessing", totalProcessing).
+				Str("use", d.String()).
+				Dict("data", zerolog.Dict().Fields(data)).
+				Str("message", message).
+				Msg("")
 			fields := map[string]interface{}{
 				cs.FieldProcessing:      int(processing),
 				cs.FieldTotalProcessing: int(totalProcessing),
@@ -275,7 +284,7 @@ func initSchemaHooks(c *ent.Client) {
 				cs.TagOP:     op,
 				cs.TagResult: strconv.Itoa(result),
 			}
-			GetInfluxSrv().Write(cs.MeasurementEntOP, tags, fields)
+			GetInfluxDB().Write(cs.MeasurementEntOP, tags, fields)
 			return mutateResult, err
 		})
 	})
@@ -315,7 +324,6 @@ func EntPing() error {
 
 // EntInitSchema 初始化schema
 func EntInitSchema() (err error) {
-	// 只执行一次schema初始化以及hook
 	initSchemaOnce.Do(func() {
 		err = defaultEntClient.Schema.Create(context.Background())
 	})

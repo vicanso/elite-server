@@ -25,11 +25,10 @@ import (
 	"github.com/vicanso/elite/ent/chapter"
 	"github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/ent/novelsource"
-	entSchema "github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/log"
+	"github.com/vicanso/elite/schema"
 	"github.com/vicanso/hes"
-	"go.uber.org/zap"
 )
 
 var (
@@ -80,6 +79,10 @@ type (
 		Source int
 	}
 )
+
+func New() *Srv {
+	return &Srv{}
+}
 
 // AddToSource 添加至小说源
 func (novel *Novel) AddToSource() (source *ent.NovelSource, err error) {
@@ -235,14 +238,12 @@ func (srv *Srv) Publish(params QueryParams) (novel *ent.Novel, err error) {
 		_, err := getEntClient().NovelSource.Update().
 			Where(novelsource.NameEQ(params.Name)).
 			Where(novelsource.AuthorEQ(params.Author)).
-			SetStatus(entSchema.NovelSourceStatusPublished).
+			SetStatus(schema.NovelSourceStatusPublished).
 			Save(context.Background())
 		if err != nil {
-			log.Default().Error("update novel source status fail",
-				zap.String("name", params.Name),
-				zap.String("author", params.Author),
-				zap.Error(err),
-			)
+			log.Default().Error().
+				Str("name", params.Name).
+				Msg("update novel source status fail")
 		}
 	}()
 	return
@@ -323,11 +324,29 @@ func (srv *Srv) UpdateAllChaptersByWeight(minUpdatedWeight int) (err error) {
 }
 
 // UpdateWordCount 更新总字数
-func (srv *Srv) UpdateWordCount(id int) (err error) {
-	chapters := make([]*ent.Chapter, 0)
+func (srv *Srv) UpdateWordCount(id int, updatedAfter time.Time) (err error) {
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, defaultQueryTimeout)
+	ctx, cancel := context.WithTimeout(ctx, defaultQueryTimeout*2)
 	defer cancel()
+	latestChapter, err := getEntClient().Chapter.Query().
+		Where(chapter.Novel(id)).
+		Select(chapter.FieldUpdatedAt).
+		Order(ent.Desc(chapter.FieldUpdatedAt)).
+		First(ctx)
+	if err != nil {
+		// 将not found的error忽略
+		if ent.IsNotFound(err) {
+			err = nil
+		}
+		return
+	}
+	// 如果非最近更新
+	if latestChapter.UpdatedAt.Before(updatedAfter) {
+		return
+	}
+
+	chapters := make([]*ent.Chapter, 0)
+
 	err = getEntClient().Chapter.Query().
 		Where(chapter.Novel(id)).
 		Where(chapter.WordCountNotNil()).
@@ -340,6 +359,17 @@ func (srv *Srv) UpdateWordCount(id int) (err error) {
 	for _, item := range chapters {
 		wordCount += item.WordCount
 	}
+
+	result, err := getEntClient().Novel.
+		Query().Where(novel.ID(id)).First(ctx)
+	if err != nil {
+		return
+	}
+	// 总字数未变化
+	if result.WordCount == wordCount {
+		return
+	}
+
 	_, err = getEntClient().Novel.UpdateOneID(id).
 		SetWordCount(wordCount).
 		Save(context.Background())
@@ -379,7 +409,21 @@ func (srv *Srv) doAll(fn func(int) error) (err error) {
 
 // UpdateAllWordCount 更新所有小说总字数
 func (srv *Srv) UpdateAllWordCount() (err error) {
-	return srv.doAll(srv.UpdateWordCount)
+	// 确认是否有其它实例在更新
+	// 保证最少10分钟内不要有相同的更新任务
+	redisSrv := cache.GetRedisCache()
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	ok, err := redisSrv.Lock(ctx, "novel-update-all-word-count", 10*time.Minute)
+	if err != nil || !ok {
+		return
+	}
+
+	// 最近两天有更新
+	updatedAfter := time.Now().AddDate(0, 0, -2)
+	return srv.doAll(func(id int) error {
+		return srv.UpdateWordCount(id, updatedAfter)
+	})
 }
 
 // UpdateUpdatedWeight 更新小说权重

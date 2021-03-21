@@ -1,18 +1,6 @@
-# redis 配置
-redis:
-  uri: REDIS_URI 
+# 仅需要添加与default不相同的配置
+# 测试环境配置
 
 # postgres postgres配置
 postgres:
-  uri: PG_URI
-
-# influxdb 配置
-influxdb:
-  uri: http://192.168.1.2:8086
-  token: 3sUoQjgCOQVNVWK5wU8fMvustzWuO-rhEHBTNBw6dnXjjWTTz5nJF3_b4YK7Wzi8MjpBzz75tG_Uj1TaK3EPjQ==
-
-# minio配置
-minio:
-  endpoint: 192.168.1.2:9000
-  accessKeyID: WQwoJN5Klf
-  secretAccessKey: TCnTExhHte
+  uri: postgresql://postgres:postgres@127.0.0.1:5432/elite

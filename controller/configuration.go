@@ -24,22 +24,27 @@ import (
 	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/configuration"
 	confSchema "github.com/vicanso/elite/ent/configuration"
-	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/router"
+	"github.com/vicanso/elite/schema"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elite/validate"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/hes"
 )
 
-type (
-	configurationCtrl struct{}
+type configurationCtrl struct{}
 
+// 响应相关定义
+type (
 	// configurationListResp 配置列表响应
 	configurationListResp struct {
 		Configurations []*ent.Configuration `json:"configurations,omitempty"`
 		Count          int                  `json:"count,omitempty"`
 	}
+)
+
+// 参数相关定义
+type (
 
 	// configurationAddParams 添加配置参数
 	configurationAddParams struct {
@@ -112,6 +117,7 @@ func init() {
 
 // validateBeforeSave 保存前校验
 func (params *configurationAddParams) validateBeforeSave(ctx context.Context) (err error) {
+	// schema中有唯一限制，也可不校验
 	exists, err := getEntClient().Configuration.Query().
 		Where(configuration.Name(params.Name)).
 		Exist(ctx)

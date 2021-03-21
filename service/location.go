@@ -15,12 +15,13 @@
 package service
 
 import (
-	"github.com/vicanso/elite/helper"
-	"github.com/vicanso/elton"
+	"context"
+
+	"github.com/vicanso/elite/request"
 	"github.com/vicanso/go-axios"
 )
 
-var locationIns = helper.GetLocationInstance()
+var locationIns = request.GetLocation()
 
 // 相关的URL
 const (
@@ -41,14 +42,15 @@ type Location struct {
 }
 
 // GetLocationByIP get location by ip
-func GetLocationByIP(ip string, c *elton.Context) (lo Location, err error) {
+func GetLocationByIP(ctx context.Context, ip string) (lo Location, err error) {
 	conf := &axios.Config{
 		URL: locationURL,
 		Params: map[string]string{
 			"ip": ip,
 		},
+		Context: ctx,
 	}
-	helper.AttachWithContext(conf, c)
+
 	lo = Location{}
 	err = locationIns.EnhanceRequest(&lo, conf)
 	if err != nil {

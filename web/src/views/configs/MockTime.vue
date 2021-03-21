@@ -1,71 +1,83 @@
-<template>
-  <ConfigEditor
-    name="添加/更新MockTime配置"
-    summary="针对应用时间Mock，用于测试环境中调整应用时间"
-    :category="category"
-    :defaultValue="defaultValue"
-    v-if="!processing"
-    :id="currentID"
-    :backDisabled="true"
-  >
-    <template v-slot:data="configProps">
-      <MockTimeData
-        :data="configProps.form.data"
-        @change="configProps.form.data = $event"
-      />
-    </template>
-  </ConfigEditor>
+<template lang="pug">
+config-editor(
+  name="添加/更新MockTime配置"
+  summary="针对应用时间Mock，用于测试环境中调整应用时间"
+  :category="category"
+  :defaultValue="defaultValue"
+  :backDisabled="true"
+  v-if="!processing"
+  :id="currentID"
+  :back="noop"
+): template(
+  #data="configProps"
+): mock-time-data(
+  :data="configProps.form.data"
+  @change="configProps.form.data = $event"
+)
 </template>
-<script>
-import ConfigEditor from "@/components/configs/Editor.vue";
-import MockTimeData from "@/components/configs/MockTimeData.vue";
-import { MOCK_TIME } from "@/constants/config";
-import { mapActions } from "vuex";
+<script lang="ts">
+import { defineComponent } from "vue";
 
-export default {
+import ConfigEditor from "../../components/configs/Editor.vue";
+import MockTimeData from "../../components/configs/MockTimeData.vue";
+import { MOCK_TIME } from "../../constants/common";
+import useConfigState, { configList } from "../../states/config";
+
+export default defineComponent({
   name: "MockTime",
   components: {
     MockTimeData,
-    ConfigEditor
+    ConfigEditor,
+  },
+  setup() {
+    const configState = useConfigState();
+    return {
+      configs: configState.configs,
+    };
   },
   data() {
     return {
       defaultValue: {
         name: MOCK_TIME,
-        category: MOCK_TIME
+        category: MOCK_TIME,
       },
-      processing: false,
+      processing: true,
       currentID: 0,
-      category: MOCK_TIME
+      category: MOCK_TIME,
     };
   },
-  methods: {
-    ...mapActions(["listConfig"])
-  },
-  async beforeMount() {
+  async mounted() {
+    const { $route, $router, configs } = this;
     this.processing = true;
     try {
-      const { configurations } = await this.listConfig({
-        name: MOCK_TIME
+      await configList({
+        name: MOCK_TIME,
       });
-      if (configurations.length !== 0) {
+      const configurations = configs.items;
+      if (configurations && configurations.length !== 0) {
         let currentID = null;
-        if (this.$route.query.id) {
-          currentID = Number(this.$route.query.id);
+        if ($route.query.id) {
+          currentID = Number($route.query.id);
         }
         if (currentID !== configurations[0].id) {
-          this.$router.replace({
+          $router.replace({
             query: {
-              id: configurations[0].id
-            }
+              id: configurations[0].id,
+            },
           });
         }
       }
     } catch (err) {
-      this.$message.error(err.message);
+      this.$error(err);
     } finally {
       this.processing = false;
     }
-  }
-};
+  },
+  methods: {
+    // 无操作
+    noop() {
+      return;
+    },
+  },
+});
 </script>

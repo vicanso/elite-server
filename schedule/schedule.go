@@ -19,14 +19,14 @@ import (
 	"time"
 
 	"github.com/robfig/cron/v3"
+	"github.com/rs/zerolog"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/novel"
+	"github.com/vicanso/elite/request"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elite/util"
-
-	"go.uber.org/zap"
 )
 
 type (
@@ -48,22 +48,17 @@ func init() {
 	_, _ = c.AddFunc("@every 1m", performanceStats)
 	_, _ = c.AddFunc("@every 1m", httpInstanceStats)
 	_, _ = c.AddFunc("@every 1m", routerConcurrencyStats)
+	_, _ = c.AddFunc("@every 12h", updateAllNovelWordCount)
 
-	_, _ = c.AddFunc("@every 24h", updateAllNovelWordCount)
-	_, _ = c.AddFunc("@every 24h", updateAllNovelUpdatedWeight)
-	// 每小时更新权重>=50的小说
-	_, _ = c.AddFunc("@every 1h", newUpdateNovelChapterByWeight(50))
-	// 每12小时更新权重>=10的小说
-	_, _ = c.AddFunc("@every 12h", newUpdateNovelChapterByWeight(10))
-	// 每24小时更新权重>=1的小说
-	_, _ = c.AddFunc("@every 24h", newUpdateNovelChapterByWeight(1))
+	updateAllNovelWordCount()
 
+	// 如果是开发环境，则不执行定时任务
+	if util.IsDevelopment() {
+		return
+	}
 	if os.Getenv("SYNC_SOURCE") != "" {
 		// _, _ = c.AddFunc("@every 12h", syncNovelSource)
 		go syncNovelSource()
-	}
-	if util.IsDevelopment() {
-		return
 	}
 	c.Start()
 }
@@ -71,29 +66,30 @@ func init() {
 func doTask(desc string, fn taskFn) {
 	startedAt := time.Now()
 	err := fn()
+	use := time.Since(startedAt)
 	if err != nil {
-		log.Default().Error(desc+" fail",
-			zap.String("category", logCategory),
-			zap.Duration("use", time.Since(startedAt)),
-			zap.Error(err),
-		)
+		log.Default().Error().
+			Str("category", logCategory).
+			Dur("use", use).
+			Err(err).
+			Msg(desc + " fail")
 		service.AlarmError(desc + " fail, " + err.Error())
 	} else {
-		log.Default().Info(desc+" success",
-			zap.String("category", logCategory),
-			zap.Duration("use", time.Since(startedAt)),
-		)
+		log.Default().Info().
+			Str("category", logCategory).
+			Dur("use", use).
+			Msg(desc + " success")
 	}
 }
 
 func doStatsTask(desc string, fn statsTaskFn) {
 	startedAt := time.Now()
 	stats := fn()
-	log.Default().Info(desc,
-		zap.String("category", logCategory),
-		zap.Duration("use", time.Since(startedAt)),
-		zap.Any("stats", stats),
-	)
+	log.Default().Info().
+		Str("category", logCategory).
+		Dur("use", time.Since(startedAt)).
+		Dict("stats", zerolog.Dict().Fields(stats)).
+		Msg("")
 }
 
 func redisPing() {
@@ -109,7 +105,7 @@ func redisStats() {
 	doStatsTask("redis stats", func() map[string]interface{} {
 		// 统计中除了redis数据库的统计，还有当前实例的统计指标，因此所有实例都会写入统计
 		stats := helper.RedisStats()
-		helper.GetInfluxSrv().Write(cs.MeasurementRedisStats, nil, stats)
+		helper.GetInfluxDB().Write(cs.MeasurementRedisStats, nil, stats)
 		return stats
 	})
 }
@@ -122,38 +118,9 @@ func entPing() {
 func entStats() {
 	doStatsTask("ent stats", func() map[string]interface{} {
 		stats := helper.EntGetStats()
-		helper.GetInfluxSrv().Write(cs.MeasurementEntStats, nil, stats)
+		helper.GetInfluxDB().Write(cs.MeasurementEntStats, nil, stats)
 		return stats
 	})
-}
-
-// syncNovelSource 同步小说源
-func syncNovelSource() {
-	srv := novel.Srv{}
-	doTask("sync novel source", srv.SyncSource)
-}
-
-// updateAllNovelWordCount 更新小说总字数
-func updateAllNovelWordCount() {
-	srv := novel.Srv{}
-	doTask("update all novel word count", srv.UpdateAllWordCount)
-}
-
-// newUpdateNovelChapterByWeight 创建更新小说章节任务
-func newUpdateNovelChapterByWeight(updatedWeight int) func() {
-	return func() {
-		// 暂时不更新，等所有小说同步完成后再启用
-		// srv := novel.Srv{}
-		// doTask("update novel chapters by weight", func() error {
-		// 	return srv.UpdateAllChaptersByWeight(updatedWeight)
-		// })
-	}
-}
-
-// updateAllNovelUpdatedWeight 更新小说更新权重
-func updateAllNovelUpdatedWeight() {
-	srv := novel.Srv{}
-	doTask("update novel updated weight", srv.UpdateAllUpdatedWeight)
 }
 
 // cpuUsageStats cpu使用率
@@ -194,7 +161,7 @@ func performanceStats() {
 		prevNumGC = data.NumGC
 		prevPauseTotal = data.PauseTotalNs
 
-		helper.GetInfluxSrv().Write(cs.MeasurementPerformance, nil, fields)
+		helper.GetInfluxDB().Write(cs.MeasurementPerformance, nil, fields)
 		return fields
 	})
 }
@@ -202,15 +169,15 @@ func performanceStats() {
 // httpInstanceStats http instance stats
 func httpInstanceStats() {
 	doStatsTask("http instance stats", func() map[string]interface{} {
-		fields := helper.GetHTTPInstanceStats()
-		helper.GetInfluxSrv().Write(cs.MeasurementHTTPInstanceStats, nil, fields)
+		fields := request.GetHTTPStats()
+		helper.GetInfluxDB().Write(cs.MeasurementHTTPInstanceStats, nil, fields)
 		return fields
 	})
 }
 
 // influxdbPing influxdb ping
 func influxdbPing() {
-	doTask("influxdb ping", helper.GetInfluxSrv().Health)
+	doTask("influxdb ping", helper.GetInfluxDB().Health)
 }
 
 // routerConcurrencyStats router concurrency stats
@@ -219,7 +186,7 @@ func routerConcurrencyStats() {
 		result := service.GetRouterConcurrencyLimiter().GetStats()
 		fields := make(map[string]interface{})
 
-		influxSrv := helper.GetInfluxSrv()
+		influxSrv := helper.GetInfluxDB()
 		for key, value := range result {
 			// 如果并发为0，则不记录
 			if value == 0 {
@@ -234,4 +201,16 @@ func routerConcurrencyStats() {
 		}
 		return fields
 	})
+}
+
+// syncNovelSource 同步小说源
+func syncNovelSource() {
+	srv := novel.Srv{}
+	doTask("sync novel source", srv.SyncSource)
+}
+
+// updateAllNovelWordCount 更新小说总字数
+func updateAllNovelWordCount() {
+	srv := novel.Srv{}
+	doTask("update all novel word count", srv.UpdateAllWordCount)
 }

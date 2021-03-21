@@ -20,19 +20,19 @@ import (
 	"regexp"
 	"strconv"
 
+	"github.com/rs/zerolog"
 	"github.com/vicanso/elite/cs"
-	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/middleware"
 	"github.com/vicanso/elite/novel"
+	"github.com/vicanso/elite/schema"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elite/tracer"
 	"github.com/vicanso/elite/util"
 	"github.com/vicanso/elton"
 	M "github.com/vicanso/elton/middleware"
 	"github.com/vicanso/hes"
-	"go.uber.org/zap"
 )
 
 type listParams = helper.EntListParams
@@ -69,16 +69,14 @@ var (
 
 	// 图形验证码校验
 	captchaValidate = newMagicalCaptchaValidate()
+	// GetInfluxDB 仅提供基础服务
+	GetInfluxDB = helper.GetInfluxDB
 	// 获取influx service
-	getInfluxSrv = helper.GetInfluxSrv
+	GetInfluxSrv = service.GetInfluxSrv
 	// 文件服务
 	fileSrv = &service.FileSrv{}
-	// 小说服务
-	novelSrv = &novel.Srv{}
-	// 图片服务
-	imageSrv = &service.ImageSrv{}
-	// prof服务
-	profSrv = &service.ProfSrv{}
+	// 小说用回
+	novelSrv = novel.New()
 )
 
 func newMagicalCaptchaValidate() elton.Handler {
@@ -159,14 +157,7 @@ func newTrackerMiddleware(action string) elton.Handler {
 			}
 			ip := c.RealIP()
 			sid := util.GetSessionID(c)
-			zapFields := make([]zap.Field, 0, 10)
-			zapFields = append(
-				zapFields,
-				zap.String("action", action),
-				zap.String("ip", ip),
-				zap.String("sid", sid),
-				zap.Int("result", info.Result),
-			)
+
 			fields := map[string]interface{}{
 				cs.FieldAccount: account,
 				cs.FieldIP:      ip,
@@ -174,23 +165,38 @@ func newTrackerMiddleware(action string) elton.Handler {
 				cs.FieldTID:     tid,
 			}
 			if len(info.Query) != 0 {
-				zapFields = append(zapFields, zap.Any("query", info.Query))
 				fields[cs.FieldQuery] = marshalString(info.Query)
 			}
 			if len(info.Params) != 0 {
-				zapFields = append(zapFields, zap.Any("params", info.Params))
 				fields[cs.FieldParams] = marshalString(info.Params)
 			}
 			if len(info.Form) != 0 {
-				zapFields = append(zapFields, zap.Any("form", info.Form))
 				fields[cs.FieldForm] = marshalString(info.Form)
 			}
 			if info.Err != nil {
-				zapFields = append(zapFields, zap.Error(info.Err))
 				fields[cs.FieldError] = info.Err.Error()
 			}
-			log.Default().Info("tracker", zapFields...)
-			getInfluxSrv().Write(cs.MeasurementUserTracker, map[string]string{
+			event := log.Default().Info().
+				Str("category", "tracker").
+				Str("action", action).
+				Str("ip", ip).
+				Str("sid", sid).
+				Int("result", info.Result)
+			if len(info.Query) != 0 {
+				event = event.Dict("query", log.MapStringString(info.Query))
+			}
+			if len(info.Params) != 0 {
+				event = event.Dict("params", log.MapStringString(info.Params))
+			}
+			if len(info.Form) != 0 {
+				event = event.Dict("form", zerolog.
+					Dict().
+					Fields(info.Form))
+			}
+			event.Err(info.Err).
+				Msg("")
+
+			GetInfluxSrv().Write(cs.MeasurementUserTracker, map[string]string{
 				cs.TagAction: action,
 				cs.TagResult: strconv.Itoa(info.Result),
 			}, fields)

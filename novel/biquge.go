@@ -26,12 +26,12 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/vicanso/elite/cache"
 	"github.com/vicanso/elite/ent/novelsource"
-	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/log"
+	"github.com/vicanso/elite/request"
 	"github.com/vicanso/go-axios"
 	lruttl "github.com/vicanso/lru-ttl"
-	"go.uber.org/zap"
 )
 
 const (
@@ -44,7 +44,7 @@ const (
 type biQuGe struct {
 	ins   *axios.Instance
 	max   int
-	cache *lruttl.Cache
+	cache *lruttl.L2Cache
 }
 type biQuGeNovel struct {
 	biQuGe *biQuGe
@@ -54,9 +54,9 @@ type biQuGeNovel struct {
 // NewBiQuGe 初始化biquge小说网站实例
 func NewBiQuGe() *biQuGe {
 	return &biQuGe{
-		ins:   helper.GetBiqugeInstance(),
+		ins:   request.GetBiQuGe(),
 		max:   50000,
-		cache: lruttl.New(50, 5*time.Minute),
+		cache: cache.NewMultilevelCache(50, 5*time.Minute, "biquge:"),
 	}
 }
 
@@ -80,14 +80,20 @@ func (bgq *biQuGe) NewFetcher(id int) Fetcher {
 	}
 }
 
+type biQuGeDetail struct {
+	Data []byte `json:"data,omitempty"`
+}
+
 func (bqg *biQuGe) getDetail(id int) (data []byte, err error) {
 	key := fmt.Sprintf("detail-%d", id)
-	if result, ok := bqg.cache.Get(key); ok {
-		data, ok = result.([]byte)
-		if ok {
-			return
-		}
+	detail := biQuGeDetail{}
+	// 忽略出错
+	_ = bqg.cache.Get(key, &detail)
+	if len(detail.Data) != 0 {
+		data = detail.Data
+		return
 	}
+
 	// 如果出错则继续拉取，拉取两次
 	for i := 0; i < 2; i++ {
 		conf := &axios.Config{
@@ -108,7 +114,9 @@ func (bqg *biQuGe) getDetail(id int) (data []byte, err error) {
 		return
 	}
 
-	bqg.cache.Add(key, data)
+	_ = bqg.cache.Set(key, &biQuGeDetail{
+		Data: data,
+	})
 	return
 }
 
@@ -245,24 +253,11 @@ func (bqg *biQuGe) GetChapterContent(id, no int) (content string, err error) {
 
 // Sync 同步小说来源
 func (bqg *biQuGe) Sync() (err error) {
-	// ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	// defer cancel()
-	// // 获取当前源的最后更新记录
-	// source, err := getEntClient().NovelSource.Query().
-	// 	Where(novelsource.SourceEQ(NovelSourceBiQuGe)).
-	// 	Order(ent.Desc("source_id")).
-	// 	First(ctx)
-
-	// if err != nil && !ent.IsNotFound(err) {
-	// 	return
-	// }
-	var id int
-	// if source != nil {
-	// id = source.SourceID
-	// }
+	id := 0
 	for i := id + 1; i < bqg.max; i++ {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
+		// 如果已存在，则忽略
 		exists, _ := getEntClient().NovelSource.Query().
 			Where(novelsource.SourceIDEQ(i)).
 			Where(novelsource.SourceEQ(NovelSourceBiQuGe)).
@@ -272,9 +267,9 @@ func (bqg *biQuGe) Sync() (err error) {
 		}
 		novel, err := bqg.GetDetail(i)
 		if err != nil {
-			log.Default().Error("sync novel fail",
-				zap.Int("id", i),
-			)
+			log.Default().Error().
+				Int("id", i).
+				Msg("sync novel fail")
 			continue
 		}
 		if novel.SourceID == 0 {

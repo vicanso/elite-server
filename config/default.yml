@@ -1,11 +1,12 @@
 # 系统基本配置
 basic:
   name: elite
-  # 系统并发限制
+  # 系统并发限制，如果调整此限制，需要确认tracer中的大小也需要调整
   requestLimit: 1000
   listen: :7001
-  prefixes:
-  - /api
+  # 如果需要支持前缀，则可添加配置
+  # prefixes:
+  # - /api
 
 # 用户session的配置
 session:
@@ -13,6 +14,7 @@ session:
   key: elite
   ttl: 240h
   # 用于加密session cookie 
+  # 需要配置此属性或通过管理后台配置
   keys:
   - cuttlefish
   - secret
@@ -22,11 +24,13 @@ session:
 redis:
   # 可以配置为下面的形式，则从env中获取REDIS_URI对应的字符串来当redis连接串
   # uri: REDIS_URI
-  # uri: redis://:pass@127.0.0.1:6379/?db=0&slow=200ms&maxProcessing=1000
-  uri: redis://127.0.0.1:6379/?db=0&slow=200ms&maxProcessing=1000&prefix=elite
+  # uri: redis://:pass@127.0.0.1:6379/?slow=200ms&maxProcessing=1000
+  uri: redis://127.0.0.1:6379/?slow=200ms&maxProcessing=1000&prefix=elite
 
 # postgres postgres配置
 postgres:
+  # 可以配置为下面的形式，则从env中获取POSTGRES_URI对应的字符串来当postgres连接串
+  # uri: POSTGRES_URI
   uri: postgresql://vicanso:A123456@127.0.0.1:5432/elite
 
 # influxdb 配置
@@ -35,8 +39,10 @@ influxdb:
   bucket: elite 
   org: bigTree
   token: iNhMlbht5W58fple-NTUgDRbWkTS1EtnGhgNJW9wqSKRmi8ePKrZesMQPJw6ypFWKr76Ku0nizvgFKkzeZwQng==
-  batchSize: 1000
+  batchSize: 100
   flushInterval: 10s
+  # 如果与influxdb非同一内网，建议设置为true
+  gzip: false
   disabled: false 
 
 # mail相关配置
@@ -53,7 +59,6 @@ alarm:
 
 # 定位相关配置
 location:
-  name: location
   timeout: 3s
   baseURL: https://ip.npmtrend.com
 
@@ -64,11 +69,10 @@ minio:
   secretAccessKey: test123456
   ssl: false
 
-# tiny服务的配置
-tiny:
-  host: 192.168.1.2
-  port: 6002
-  timeout: 10s
+# pyroscope配置
+pyroscope:
+  addr: http://127.0.0.1:4040
+  # token: ""
 
 # 抓取小说配置
 novel:

@@ -1,80 +1,126 @@
-<template>
-  <div id="app" :class="{ shrinking: shrinking }">
-    <MainHeader class="header" />
-    <MainNav class="nav" :onToggle="toggleNav" :shrinking="shrinking" />
-    <div class="mainContent">
-      <router-view />
-    </div>
-  </div>
-</template>
-<script>
-import { mapActions, mapState } from "vuex";
-import MainHeader from "@/components/MainHeader.vue";
-import MainNav from "@/components/MainNav.vue";
+<template lang="pug">
+#app(
+  :class="{ shrinking: setting.mainNavShrinking }"
+  v-loading="loadingSetting"
+)
+  //- 主头部
+  main-header.header(
+    :shrinking="setting.mainNavShrinking"
+    v-if="!loadingSetting"
+  )
+  //- 主导航
+  main-nav.nav(
+    :shrinking="setting.mainNavShrinking"
+    @toggle="toggleNav"
+    v-if="!loadingSetting"
+  )
+  //- 内容区域
+  .mainContent
+    router-view(
+      v-if="inited"
+    )
+    p.tac(
+      v-else
+    ) ...
 
-export default {
+</template>
+
+<script lang="ts">
+import { defineComponent } from "vue";
+import MainHeader from "./components/MainHeader.vue";
+import MainNav from "./components/MainNav.vue";
+
+import useUserState, { userFetchInfo, userUpdate } from "./states/user";
+import { ROUTE_LOGIN } from "./router";
+import useSettingState, { settingLoad, settingSave } from "./states/setting";
+
+export default defineComponent({
   name: "App",
   components: {
     MainHeader,
-    MainNav
+    MainNav,
+  },
+  setup() {
+    const userState = useUserState();
+    const settingState = useSettingState();
+    return {
+      setting: settingState,
+      userInfo: userState.info,
+    };
   },
   data() {
     return {
-      shrinking: false
+      loadingSetting: false,
+      // 是否初始化完成
+      inited: false,
     };
   },
-  computed: mapState({
-    userAccount: state => state.user.info.account
-  }),
-  methods: {
-    ...mapActions(["fetchUserInfo", "updateMe", "listStatus"]),
-    refreshSessionTTL() {
-      if (!this.userAccount) {
-        return;
-      }
-      this.updateMe({});
-    },
-    toggleNav() {
-      this.shrinking = !this.shrinking;
+  async beforeMount() {
+    this.loadingSetting = true;
+    try {
+      await settingLoad();
+    } catch (err) {
+      this.$error(err);
+    } finally {
+      this.loadingSetting = false;
     }
   },
-  async mounted() {
-    setInterval(() => {
-      this.refreshSessionTTL();
-    }, 5 * 60 * 1000);
-    try {
-      await this.listStatus();
-      await this.fetchUserInfo();
-    } catch (err) {
-      this.$message.error(err.message);
-    }
-  }
-};
+  mounted() {
+    this.fetch();
+  },
+  methods: {
+    toggleNav() {
+      settingSave({
+        mainNavShrinking: !this.setting.mainNavShrinking,
+      });
+    },
+    async fetch() {
+      const { userInfo, $router } = this;
+      try {
+        await userFetchInfo();
+        // 如果未登录则跳转至登录
+        if (!userInfo.account) {
+          $router.push({
+            name: ROUTE_LOGIN,
+          });
+        } else {
+          // 如果已登录，刷新cookie有效期（不关注刷新是否成功，因此不用await）
+          userUpdate({});
+        }
+      } catch (err) {
+        this.$error(err);
+      } finally {
+        this.inited = true;
+      }
+    },
+  },
+});
 </script>
-<style lang="sass" scoped>
-@import "@/common.sass"
+
+<style lang="stylus" scoped>
+@import "./common";
 .shrinking
   .header
-    left: $mainNavShrinkingWidth
+    left $mainNavShrinkingWidth
   .nav
-    width: $mainNavShrinkingWidth
+    width $mainNavShrinkingWidth
   .mainContent
-    padding-left: $mainNavShrinkingWidth
+    padding-left $mainNavShrinkingWidth
 .header
-  position: fixed
-  left: $mainNavWidth
-  top: 0
-  right: 0
-  z-index: 9
+  position fixed
+  left $mainNavWidth
+  top 0
+  right 0
+  z-index 9
 .nav
-  position: fixed
-  width: $mainNavWidth
-  top: 0
-  bottom: 0
-  left: 0
-  overflow: hidden
-  overflow-y: auto
+  position fixed
+  width $mainNavWidth
+  top 0
+  bottom 0
+  left 0
+  overflow hidden
+  overflow-y auto
 .mainContent
-  padding-left: $mainNavWidth
-  padding-top: $mainHeaderHeight
+  padding-left $mainNavWidth
+  padding-top $mainHeaderHeight
 </style>

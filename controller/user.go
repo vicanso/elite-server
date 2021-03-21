@@ -30,34 +30,43 @@ import (
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/predicate"
-	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/ent/user"
 	"github.com/vicanso/elite/ent/userlogin"
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/middleware"
 	"github.com/vicanso/elite/router"
+	"github.com/vicanso/elite/schema"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elite/tracer"
 	"github.com/vicanso/elite/util"
 	"github.com/vicanso/elite/validate"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/hes"
-	"go.uber.org/zap"
 )
 
-type (
-	userCtrl struct{}
+type userCtrl struct{}
 
+// 响应相关定义
+type (
+	// 用户登录Token响应
+	userLoginTokenResp struct {
+		// 用户登录的Token
+		Token string `json:"token,omitempty"`
+	}
 	// userInfoResp 用户信息响应
 	userInfoResp struct {
+		// 服务器当前时间，2021-03-06T15:10:12+08:00
 		Date string `json:"date,omitempty"`
 		service.UserSessionInfo
 	}
 
 	// userListResp 用户列表响应
 	userListResp struct {
+		// 用户列表
 		Users []*ent.User `json:"users,omitempty"`
-		Count int         `json:"count,omitempty"`
+
+		// 用户记录总数，如果返回-1表示此次查询未返回总数
+		Count int `json:"count,omitempty"`
 	}
 	// userRoleListResp 用户角色列表响应
 	userRoleListResp struct {
@@ -68,15 +77,28 @@ type (
 		UserLogins []*ent.UserLogin `json:"userLogins,omitempty"`
 		Count      int              `json:"count,omitempty"`
 	}
+)
 
-	// userListParams 用户查询参数
+// 参数相关定义
+type (
 	userListParams struct {
 		listParams
 
+		// 关键字搜索
+		// validate:"omitempty,xKeyword"
 		Keyword string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
-		Role    string `json:"role,omitempty" validate:"omitempty,xUserRole"`
-		Group   string `json:"group,omitempty" validate:"omitempty,xUserGroup"`
-		Status  string `json:"status,omitempty" validate:"omitempty,xStatus"`
+
+		// 用户角色筛选
+		// validate:"omitempty,xUserRole"
+		Role string `json:"role,omitempty" validate:"omitempty,xUserRole"`
+
+		// 用户分组筛选
+		// validate:"omitempty,xUserGroup"
+		Group string `json:"group,omitempty" validate:"omitempty,xUserGroup"`
+
+		// 用户状态分组
+		// validate:"omitempty,xStatus"
+		Status string `json:"status,omitempty" validate:"omitempty,xStatus"`
 	}
 
 	// userLoginListParams 用户登录查询
@@ -92,7 +114,7 @@ type (
 	userRegisterLoginParams struct {
 		// 账户
 		Account string `json:"account,omitempty" validate:"required,xUserAccount"`
-		// 密码，密码为sha256后的加密串
+		// 用户密码，如果登录则是sha256(token + 用户密码)
 		Password string `json:"password,omitempty" validate:"required,xUserPassword"`
 	}
 
@@ -219,7 +241,6 @@ func init() {
 		}),
 		ctrl.login,
 	)
-
 	// 内部登录
 	g.POST(
 		"/inner/v1/me/login",
@@ -248,13 +269,13 @@ func init() {
 	// 获取客户登录记录
 	g.GET(
 		"/v1/login-records",
+		shouldBeAdmin,
 		ctrl.listLoginRecord,
 	)
 
 	// 添加用户行为
 	g.POST(
 		"/v1/actions",
-		shouldBeLogin,
 		ctrl.addUserAction,
 	)
 
@@ -446,7 +467,13 @@ func pickUserInfo(c *elton.Context) (resp userInfoResp, err error) {
 	return
 }
 
-// list 获取用户列表
+// swagger:route GET /users/v1 users userList
+// 用户查询
+//
+// 根据查询条件返回用户列表，限制只允许管理人查询
+// Responses:
+// 	200: apiUserListResponse
+
 func (*userCtrl) list(c *elton.Context) (err error) {
 	params := userListParams{}
 	err = validate.Do(&params, c.Query())
@@ -505,7 +532,13 @@ func (ctrl *userCtrl) updateByID(c *elton.Context) (err error) {
 	return
 }
 
-// getLoginToken 获取登录的token
+// swagger:route GET /users/v1/me/login users userLoginToken
+// 获取登录的token
+//
+// 在登录之前需要先调用获取token，此token用于登录时与客户密码sha256生成hash，
+// 保证客户每次登录时的密码均不相同，避免接口重放登录。
+// Responses:
+// 	200: apiUserLoginTokenResponse
 func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	// 清除当前session id，确保每次登录的用户都是新的session
@@ -520,16 +553,23 @@ func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	c.Body = &userInfo
+	c.Body = &userLoginTokenResp{
+		Token: userInfo.Token,
+	}
 	return
 }
 
-// me 获取用户信息
+// swagger:route GET /users/v1/me users userMe
+// 获取客户信息
+//
+// 若用户登录状态，则返回客户的相关信息。
+// 若用户未登录，仅返回服务器当前时间。
+// Responses:
+// 	200: apiUserInfoResponse
 func (*userCtrl) me(c *elton.Context) (err error) {
 	cookie, _ := c.Cookie(sessionConfig.TrackKey)
-	// ulid的长度为26
-	if cookie == nil || len(cookie.Value) != 26 {
-		uid := util.GenUlid()
+	if cookie == nil {
+		uid := util.GenXID()
 		c.AddCookie(&http.Cookie{
 			Name:     sessionConfig.TrackKey,
 			Value:    uid,
@@ -549,14 +589,14 @@ func (*userCtrl) me(c *elton.Context) (err error) {
 		tracerInfo := tracer.GetTracerInfo()
 		go func() {
 			tracer.SetTracerInfo(tracerInfo)
-			location, _ := service.GetLocationByIP(ip, nil)
+			location, _ := service.GetLocationByIP(context.Background(), ip)
 			if location.IP != "" {
 				fields[cs.FieldCountry] = location.Country
 				fields[cs.FieldProvince] = location.Province
 				fields[cs.FieldCity] = location.City
 				fields[cs.FieldISP] = location.ISP
 			}
-			getInfluxSrv().Write(cs.MeasurementUserAddTrack, nil, fields)
+			GetInfluxSrv().Write(cs.MeasurementUserAddTrack, nil, fields)
 		}()
 	}
 	resp, err := pickUserInfo(c)
@@ -579,7 +619,14 @@ func (*userCtrl) detail(c *elton.Context) (err error) {
 	return
 }
 
-// register 用户注册
+// swagger:route POST /users/v1/me users userRegister
+// 用户注册
+//
+// 用户注册时提交的密码需要在客户端以sha256后提交，
+// 在成功注册后返回用户信息。
+// 需注意此时并非登录状态，需要客户自主登录。
+// Responses:
+// 	201: apiUserRegisterResponse
 func (*userCtrl) register(c *elton.Context) (err error) {
 	params := userRegisterLoginParams{}
 	err = validate.Do(&params, c.RequestBody)
@@ -601,11 +648,17 @@ func (*userCtrl) register(c *elton.Context) (err error) {
 				Save(context.Background())
 		}()
 	}
-	c.Body = user
+	c.Created(user)
 	return
 }
 
-// login 用户登录
+// swagger:route POST /users/v1/me/login users userLogin
+// 用户登录
+//
+// 用户登录时需要先获取token，之后使用token与密码sha256后提交，
+// 登录成功后返回用户信息。
+// Responses:
+// 	200: apiUserInfoResponse
 func (*userCtrl) login(c *elton.Context) (err error) {
 	params := userRegisterLoginParams{}
 	err = validate.Do(&params, c.RequestBody)
@@ -656,7 +709,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 			cs.FieldTID:       tid,
 			cs.FieldSID:       sid,
 		}
-		location, _ := service.GetLocationByIP(ip, nil)
+		location, _ := service.GetLocationByIP(context.Background(), ip)
 		country := ""
 		province := ""
 		city := ""
@@ -687,12 +740,12 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 			SetIsp(isp).
 			Save(ctx)
 		if err != nil {
-			log.Default().Error("save user login fail",
-				zap.Error(err),
-			)
+			log.Default().Error().
+				Err(err).
+				Msg("save user login fail")
 		}
 		// 记录用户登录行为
-		getInfluxSrv().Write(cs.MeasurementUserLogin, nil, fields)
+		GetInfluxSrv().Write(cs.MeasurementUserLogin, nil, fields)
 	}()
 
 	// 返回用户信息
@@ -704,7 +757,12 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 	return
 }
 
-// logout 退出登录
+// swagger:route DELETE /users/v1/me users userLogout
+// 用户退出登录
+//
+// 退出用户当前登录状态，成功时并无内容返回。
+// Responses:
+// 	204: apiNoContentResponse
 func (*userCtrl) logout(c *elton.Context) (err error) {
 	us := getUserSession(c)
 	// 清除session
@@ -838,15 +896,15 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 		nsec := rand.Int() % int(time.Second)
 		t := time.Unix(item.Time, int64(nsec))
 		fields := map[string]interface{}{
-			cs.FieldRoute: item.Route,
-			cs.FieldPath:  item.Path,
-			cs.FieldTID:   tid,
+			cs.FieldRouteName: item.Route,
+			cs.FieldPath:      item.Path,
+			cs.FieldTID:       tid,
 		}
 		if account != "" {
 			fields[cs.FieldAccount] = account
 		}
 		fields = util.MergeMapStringInterface(fields, item.Extra)
-		getInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{
+		GetInfluxSrv().Write(cs.MeasurementUserAction, map[string]string{
 			cs.TagCategory: item.Category,
 			cs.TagResult:   strconv.Itoa(item.Result),
 		}, fields, t)

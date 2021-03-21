@@ -1,23 +1,24 @@
-.PHONY: default test test-cover dev generate hooks
+.PHONY: default test test-cover dev generate hooks lint-web doc
 
 # for dev
 dev:
 	air -c .air.toml	
-
 dev-debug:
-	LOG_LEVEL=-1 make dev
-
+	LOG_LEVEL=0 make dev
 doc:
-	swagger generate spec -o ./api.yml && swagger validate ./api.yml 
+	CGO_ENABLED=0 swagger generate spec -o ./asset/api.yml && swagger validate ./asset/api.yml 
 
 test:
 	go test -race -cover ./...
 
+install:
+	go get entgo.io/ent/cmd/entc
+
 generate: 
-	go generate ./ent
+	entc generate ./schema --target ./ent
 
 describe:
-	entc describe ./ent/schema
+	entc describe ./schema
 
 test-cover:
 	go test -race -coverprofile=test.out ./... && go tool cover --html=test.out
@@ -31,11 +32,12 @@ tidy:
 build:
 	go build -ldflags "-X main.Version=0.0.1 -X 'main.BuildedAt=`date`'" -o elite 
 
-clean:
-	packr2 clean
 
 lint:
-	golangci-lint run --timeout 2m --skip-dirs /web
+	golangci-lint run
+
+lint-web:
+	cd web && yarn lint 
 
 hooks:
 	cp hooks/* .git/hooks/

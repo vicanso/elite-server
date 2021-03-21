@@ -1,198 +1,214 @@
-<template>
-  <el-card class="profile" v-loading="processing">
-    <div slot="header">
-      <a
-        href="#"
-        @click.prevent="toggleEnableUpdatePassword"
-        class="updatePassword"
-        >修改密码</a
-      >
-      <i class="el-icon-user-solid" />
-      <span>我的信息</span>
-    </div>
-    <el-form label-width="80px" v-if="profile">
-      <el-row :gutter="15">
-        <el-col :span="6">
-          <el-form-item label="账号：">
-            {{ profile.account }}
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item label="角色：">
-            {{ profile.roles.join(",") || "--" }}
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item label="部门：">
-            {{ profile.groupsDesc.join(",") || "--" }}
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item label="状态：">
-            {{ profile.statusDesc }}
-          </el-form-item>
-        </el-col>
+<template lang="pug">
+//- 用户角色
+mixin Roles
+  el-col(
+    :span="10"
+  ): el-form-item(
+    label="用户角色："
+  ): span {{roles}}
 
-        <el-col :span="8">
-          <el-form-item label="名称：">
-            <el-input placeholder="请输入您的名称" v-model="name" clearable />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="手机：">
-            <el-input placeholder="请输入手机号码" v-model="mobile" clearable />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="邮箱：">
-            <el-input placeholder="请输入邮箱地址" v-model="email" clearable />
-          </el-form-item>
-        </el-col>
-        <!-- 修改密码 -->
-        <el-col :span="12">
-          <el-form-item label="旧密码：">
-            <el-input
-              :disabled="!enableUpdatePassword"
-              placeholder="请输入旧密码(需先点击修改密码)"
-              v-model="password"
-              clearable
-              show-password
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="新密码：">
-            <el-input
-              :disabled="!enableUpdatePassword"
-              placeholder="请输入新密码(需先点击修改密码)"
-              v-model="newPassword"
-              show-password
-              clearable
-            />
-          </el-form-item>
-        </el-col>
+//- 邮箱
+mixin Email
+  el-col(
+    :span="10"
+  ): el-form-item(
+    label="用户邮箱："
+  ): el-input(
+    placeholder="请输入您的邮箱地址："
+    v-model="email"
+    clearable
+  )
 
-        <el-col :span="12">
-          <el-form-item>
-            <el-button class="btn" type="primary" @click="onSubmit"
-              >更新</el-button
-            >
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item>
-            <el-button class="btn" @click="goBack">返回</el-button>
-          </el-form-item>
-        </el-col>
-      </el-row>
-    </el-form>
-  </el-card>
+//- 原密码
+mixin OriginalPassword
+  el-col(
+    :span="10"
+  ): el-form-item(
+    label="用户原密码："
+  ): el-input(
+    type="password"
+    :disabled="!enableUpdatePassword"
+    placeholder="请输入您的原密码："
+    v-model="password"
+    clearable
+  )
+
+//- 新密码
+mixin NewPassword
+  el-col(
+    :span="10"
+  ): el-form-item(
+    label="用户新密码："
+  ): el-input(
+    type="password"
+    :disabled="!enableUpdatePassword"
+    placeholder="请输入您的新密码："
+    v-model="newPassword"
+    clearable
+  )
+
+//- 启用更新密码
+mixin EnableUpdatePassword
+  el-col(
+    :span="4"
+  ): el-form-item(
+    label="更新密码："
+  )
+    el-checkbox(
+      v-model="enableUpdatePassword"
+    )
+
+//- 提交与返回
+mixin SubmitAndBack
+  el-col(
+    :span="12"
+  ): el-form-item: ex-button(
+    :onClick="submit"
+  ) 更新 
+  el-col(
+    :span="12"
+  ): el-form-item: el-button.btn(
+    @click="goBack"
+  ) 返回
+el-card.profile
+  template(
+    #header
+  )
+    i.el-icon-user-solid
+    span 用户信息
+  el-form(
+    label-width="120px"
+    v-loading="processing"
+  ): el-row(
+    :gutter="15"
+  )
+    //- 用户角色
+    +Roles 
+
+    //- 邮箱地址
+    +Email
+
+
+    //- 原密码
+    +OriginalPassword
+
+    //- 新密码
+    +NewPassword
+    
+    //- 是否启用更新密码
+    +EnableUpdatePassword
+
+    //- 提交与返回
+    +SubmitAndBack
+
 </template>
-<script>
-import { mapActions, mapState } from "vuex";
-import { LOGIN } from "@/constants/route";
-export default {
+
+<script lang="ts">
+import { defineComponent } from "vue";
+
+import ExButton from "../components/ExButton.vue";
+import { userUpdate, userFetchDetail, userLogout } from "../states/user";
+import { ROUTE_LOGIN } from "../router";
+
+export default defineComponent({
   name: "Profile",
+  components: {
+    ExButton,
+  },
   data() {
     return {
-      enableUpdatePassword: false,
-      password: "",
-      newPassword: "",
+      processing: false,
+      roles: [],
       email: "",
-      mobile: "",
-      name: ""
+      newPassword: "",
+      password: "",
+      enableUpdatePassword: false,
     };
   },
-  computed: mapState({
-    profile: state => state.user.info,
-    processing: state => state.user.profileProcessing
-  }),
+  beforeMount() {
+    this.fetch();
+  },
   methods: {
-    ...mapActions(["fetchUserInfo", "updateMe", "logout"]),
-    async onSubmit() {
-      const {
-        email,
-        mobile,
-        profile,
-        password,
-        newPassword,
-        name,
-        enableUpdatePassword
-      } = this;
-      if ((profile.mobile && !mobile) || (profile.email && !email)) {
-        this.$message.warning("手机号码与邮箱不能删除");
-        return;
-      }
-      const update = {};
-      if (enableUpdatePassword) {
-        if (!password) {
-          this.$message.warning("请输入旧密码");
-          return;
-        }
-        if (newPassword === password) {
-          this.$message.warning("新旧密码不能相同");
-          return;
-        }
-        update.password = password;
-        update.newPassword = newPassword;
-      }
-      if (profile.mobile != mobile) {
-        update.mobile = mobile;
-      }
-      if (profile.email != email) {
-        update.email = email;
-      }
-      if (profile.name != name) {
-        update.name = name;
-      }
-      if (Object.keys(update).length === 0) {
-        this.$message.warning("请修改信息后再更新");
-        return;
-      }
+    // fetch 拉取信息
+    async fetch() {
+      this.processing = true;
       try {
-        await this.updateMe(update);
-        if (update.newPassword) {
-          await this.logout();
-          this.$message.info("信息已成功更新，由于更改了密码需要重新登录");
-          this.$router.push({
-            name: LOGIN
-          });
-        } else {
-          this.$message.info("信息已成功更新");
-        }
+        const data = await userFetchDetail();
+        this.email = data.email;
+        this.roles = data.roles;
       } catch (err) {
-        this.$message.error(err.message);
+        this.$error(err);
+      } finally {
+        this.processing = false;
       }
     },
     goBack() {
       this.$router.back();
     },
-    toggleEnableUpdatePassword() {
-      this.enableUpdatePassword = !this.enableUpdatePassword;
-    }
+    // submit 提交
+    async submit(): Promise<boolean> {
+      let isSuccess = false;
+      const {
+        email,
+        newPassword,
+        password,
+        enableUpdatePassword,
+        processing,
+      } = this;
+      if (processing) {
+        return isSuccess;
+      }
+      const updateData: Record<string, unknown> = {};
+      if (enableUpdatePassword) {
+        if (!newPassword || !password) {
+          this.$error("原密码与新密码不能为空");
+          return isSuccess;
+        }
+        if (newPassword == password) {
+          this.$error("新密码不能与原密码相同");
+          return isSuccess;
+        }
+        updateData.newPassword = newPassword;
+        updateData.password = password;
+      }
+      if (email) {
+        updateData.email = email;
+      }
+      if (Object.keys(updateData).length === 0) {
+        this.$error("请修改数据再更新");
+        return isSuccess;
+      }
+      try {
+        this.processing = true;
+        await userUpdate(updateData);
+        if (updateData.newPassword) {
+          await userLogout();
+          this.$message.info("已成功更新，需要重新登录");
+          this.$router.replace({
+            name: ROUTE_LOGIN,
+          });
+        } else {
+          this.$message.info("成功更新");
+        }
+        isSuccess = true;
+      } catch (err) {
+        this.$error(err);
+      } finally {
+        this.processing = false;
+      }
+      return isSuccess;
+    },
   },
-  async beforeMount() {
-    try {
-      await this.fetchUserInfo();
-      const { email, mobile, name } = this.profile;
-      this.email = email;
-      this.mobile = mobile;
-      this.name = name;
-    } catch (err) {
-      this.$message.error(err.message);
-    }
-  }
-};
+});
 </script>
-<style lang="sass" scoped>
-@import "@/common.sass"
+
+<style lang="stylus" scoped>
+@import "../common";
 .profile
-  margin: $mainMargin
-  i
-    margin-right: 5px
-  .updatePassword
-    float: right
-    font-size: 13px
+  margin $mainMargin
 .btn
-  width: 100%
+  width 100%
+.pagination
+  text-align right
+  margin-top 15px
 </style>

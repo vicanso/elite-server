@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/vicanso/elite/helper"
+	"github.com/vicanso/elite/request"
 	"github.com/vicanso/go-axios"
 )
 
@@ -37,7 +37,7 @@ type qiDian struct {
 // NewQiDian 初始化qidian小说网站实例
 func NewQiDian() *qiDian {
 	return &qiDian{
-		ins: helper.GetQidianInstance(),
+		ins: request.GetQiDian(),
 	}
 }
 

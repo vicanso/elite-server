@@ -24,18 +24,21 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
+	"github.com/vicanso/elite/asset"
 	"github.com/vicanso/elite/config"
-	"github.com/vicanso/elite/ent/schema"
+	"github.com/vicanso/elite/profiler"
 	"github.com/vicanso/elite/router"
+	"github.com/vicanso/elite/schema"
 	"github.com/vicanso/elite/service"
 	"github.com/vicanso/elite/util"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/hes"
 )
 
-type (
-	commonCtrl struct{}
+type commonCtrl struct{}
 
+// 响应相关定义
+type (
 	// applicationInfoResp 应用信息响应
 	applicationInfoResp struct {
 		// 版本号
@@ -94,6 +97,11 @@ func init() {
 		loadUserSession,
 		shouldBeAdmin,
 		ctrl.getProf,
+	)
+	// 获取接口文档
+	g.GET(
+		"/api",
+		ctrl.getAPI,
 	)
 }
 
@@ -172,14 +180,14 @@ func (*commonCtrl) getRandomKeys(c *elton.Context) (err error) {
 	n, _ := strconv.Atoi(c.QueryParam("n"))
 	size, _ := strconv.Atoi(c.QueryParam("size"))
 	if size < 1 {
-		size = 1
+		size = 10
 	}
 	if n < 1 {
-		n = 10
+		n = 1
 	}
-	result := make([]string, size)
-	for index := 0; index < size; index++ {
-		result[index] = util.RandomString(n)
+	result := make([]string, n)
+	for index := 0; index < n; index++ {
+		result[index] = util.RandomString(size)
 	}
 	c.Body = &randomKeysResp{
 		Keys: result,
@@ -197,12 +205,25 @@ func (*commonCtrl) getProf(c *elton.Context) (err error) {
 			return
 		}
 	}
-	result, err := profSrv.Get(d)
+	result, err := profiler.GetProf(d)
 	if err != nil {
 		return
 	}
 	c.SetHeader(elton.HeaderContentType, elton.MIMEBinary)
 	c.SetHeader("Content-Disposition", `attachment; filename="gprof"`)
 	c.BodyBuffer = result
+	return
+}
+
+// getAPI 获取API信息
+func (*commonCtrl) getAPI(c *elton.Context) (err error) {
+	file := "api.yml"
+	buf, err := asset.GetFS().ReadFile(file)
+	if err != nil {
+		return
+	}
+	c.SetHeader(elton.HeaderContentType, "text/vnd.yaml;charset=utf-8")
+
+	c.BodyBuffer = bytes.NewBuffer(buf)
 	return
 }

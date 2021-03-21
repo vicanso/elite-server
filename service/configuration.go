@@ -24,18 +24,19 @@ import (
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/configuration"
-	"github.com/vicanso/elite/ent/schema"
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/log"
+	"github.com/vicanso/elite/request"
+	"github.com/vicanso/elite/schema"
 	"github.com/vicanso/elite/util"
 	"github.com/vicanso/elton"
-	"go.uber.org/zap"
 )
 
-type (
-	// ConfigurationSrv 配置的相关函数
-	ConfigurationSrv struct{}
+// ConfigurationSrv 配置的相关函数
+type ConfigurationSrv struct{}
 
+// 配置数据
+type (
 	// SessionInterceptorData session拦截的数据
 	SessionInterceptorData struct {
 		Message       string   `json:"message,omitempty"`
@@ -53,11 +54,15 @@ type (
 		RouterMock         map[string]RouterConfig `json:"routerMock,omitempty"`
 		SessionInterceptor *SessionInterceptorData `json:"sessionInterceptor,omitempty"`
 	}
+	// RequestLimitConfiguration HTTP请求实例并发限制
+	RequestLimitConfiguration struct {
+		Name string `json:"name,omitempty"`
+		Max  int    `json:"max,omitempty"`
+	}
 )
 
 var (
 	sessionSignedKeys = new(elton.RWMutexSignedKeys)
-
 	// sessionInterceptorConfig session拦截的配置
 	sessionInterceptorConfig = new(sync.Map)
 )
@@ -91,6 +96,7 @@ func GetCurrentValidConfiguration() *CurrentValidConfiguration {
 		RouterConcurrency: GetRouterConcurrency(),
 		RouterMock:        GetRouterMockConfig(),
 	}
+	// 复制数据，避免对此数据修改
 	if interData != nil {
 		v := *interData
 		result.SessionInterceptor = &v
@@ -137,6 +143,8 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	var signedKeys []string
 	blockIPList := make([]string, 0)
 	sessionInterceptorValue := ""
+
+	requestLimitConfigs := make(map[string]int)
 	for _, item := range configs {
 		switch item.Category {
 		case schema.ConfigurationCategoryMockTime:
@@ -160,6 +168,18 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 			if sessionInterceptorValue == "" {
 				sessionInterceptorValue = item.Data
 			}
+		case schema.ConfigurationCategoryRequestConcurrency:
+			c := RequestLimitConfiguration{}
+			err := json.Unmarshal([]byte(item.Data), &c)
+			if err != nil {
+				log.Default().Error().
+					Err(err).
+					Msg("request limit config is invalid")
+				AlarmError("request limit config is invalid:" + err.Error())
+			}
+			if c.Name != "" {
+				requestLimitConfigs[c.Name] = c.Max
+			}
 		}
 	}
 
@@ -170,9 +190,9 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 		interData := &SessionInterceptorData{}
 		err := json.Unmarshal([]byte(sessionInterceptorValue), interData)
 		if err != nil {
-			log.Default().Error("session interceptor config is invalid",
-				zap.Error(err),
-			)
+			log.Default().Error().
+				Err(err).
+				Msg("session interceptor config is invalid")
 			AlarmError("session interceptor config is invalid:" + err.Error())
 		}
 		sessionInterceptorConfig.Store(sessionInterceptorKey, interData)
@@ -197,9 +217,18 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	updateRouterMockConfigs(routerConfigs)
 
 	// 重置IP拦截列表
-	ResetIPBlocker(blockIPList)
+	err = ResetIPBlocker(blockIPList)
+	if err != nil {
+		log.Default().Error().
+			Err(err).
+			Msg("reset ip blocker fail")
+	}
 
 	// 重置路由并发限制
 	ResetRouterConcurrency(routerConcurrencyConfigs)
+
+	// 更新HTTP请求实例并发限制
+	request.UpdateConcurrencyLimit(requestLimitConfigs)
+
 	return
 }

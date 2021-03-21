@@ -29,9 +29,10 @@ import (
 	"github.com/vicanso/elton"
 )
 
-type (
-	fluxCtrl struct{}
+type fluxCtrl struct{}
 
+// 参数相关定义
+type (
 	// fluxListParams flux查询参数
 	fluxListParams struct {
 		Measurement string    `json:"measurement,omitempty"`
@@ -41,9 +42,16 @@ type (
 		Limit       string    `json:"limit,omitempty" validate:"required,xLargerLimit"`
 		Exception   string    `json:"exception,omitempty" validate:"omitempty,xBoolean"`
 		// 用户行为类型筛选
-		Action   string `json:"action,omitempty" validate:"omitempty,xTag"`
-		Result   string `json:"result,omitempty" validate:"omitempty,xTag"`
-		Category string `json:"category,omitempty" validate:"omitempty,xTag"`
+		Action      string `json:"action,omitempty" validate:"omitempty,xTag"`
+		Result      string `json:"result,omitempty" validate:"omitempty,xTag"`
+		Category    string `json:"category,omitempty" validate:"omitempty,xTag"`
+		ErrCategory string `json:"errCategory,omitempty" validate:"omitempty,xTag"`
+		Route       string `json:"route,omitempty" validate:"omitempty,xTag"`
+		Service     string `json:"service,omitempty" validate:"omitempty,xTag"`
+	}
+	// flux tags/fields查询参数
+	fluxListTagOrFieldParams struct {
+		Measurement string `json:"measurement,omitempty" validate:"required,xMeasurement"`
 	}
 	// fluxListTagValuesParams flux tag values查询参数
 	fluxListTagValuesParams struct {
@@ -51,6 +59,8 @@ type (
 		Tag         string `json:"tag,omitempty" validate:"required,xTag"`
 	}
 )
+
+// 响应相关定义
 
 func init() {
 	sessionConfig = config.GetSessionConfig()
@@ -75,11 +85,29 @@ func init() {
 		shouldBeAdmin,
 		ctrl.listAction,
 	)
-	// 获取tag的值
+	// 获取request相关调用统计
+	g.GET(
+		"/v1/requests",
+		shouldBeAdmin,
+		ctrl.listRequest,
+	)
+
+	// 获取tag
+	// 不校验登录状态，无敏感信息
+	g.GET(
+		"/v1/tags/{measurement}",
+		ctrl.listTag,
+	)
+	// 获取tag的取值列表
+	// 不校验登录状态，无敏感信息
 	g.GET(
 		"/v1/tag-values/{measurement}/{tag}",
-		shouldBeAdmin,
 		ctrl.listTagValue,
+	)
+	// 获取field
+	g.GET(
+		"/v1/fields/{measurement}",
+		ctrl.ListField,
 	)
 }
 
@@ -87,50 +115,75 @@ func init() {
 func (params *fluxListParams) Query() string {
 	start := util.FormatTime(params.Begin.UTC())
 	stop := util.FormatTime(params.End.UTC())
-	query := fmt.Sprintf(`
-		|> range(start: %s, stop: %s)
-		|> filter(fn: (r) => r["_measurement"] == "%s")
-		|> sort(columns:["_time"], desc: true)
-		|> limit(n:%s)
-		|> pivot(
-			rowKey:["_time"],
-			columnKey: ["_field"],
-			valueColumn: "_value"
-		)
-		`,
+	query := fmt.Sprintf(`|> range(start: %s, stop: %s)
+|> filter(fn: (r) => r["_measurement"] == "%s")
+`,
 		start,
 		stop,
 		params.Measurement,
-		params.Limit,
 	)
+	addStrQuery := func(key, value string) {
+		query += fmt.Sprintf(`|> filter(fn: (r) => r.%s == "%s")
+`, key, value)
+	}
+	addQuery := func(key string, value interface{}) {
+		query += fmt.Sprintf(`|> filter(fn: (r) => r.%s == %s)
+`, key, value)
+	}
+
+	// TODO 根据measurement判断是tag还是field
+
+	// tag 的筛选
 	// 用户行为类型
 	if params.Action != "" {
-		query += fmt.Sprintf(`|> filter(fn: (r) => r.action == "%s")`, params.Action)
+		addStrQuery(cs.TagAction, params.Action)
 	}
 	// 结果
 	if params.Result != "" {
-		query += fmt.Sprintf(`|> filter(fn: (r) => r.result == "%s")`, params.Result)
+		addStrQuery(cs.TagResult, params.Result)
 	}
+	// 分类
 	if params.Category != "" {
-		query += fmt.Sprintf(`|> filter(fn: (r) => r.category == "%s")`, params.Category)
+		addStrQuery(cs.TagCategory, params.Category)
 	}
+	// service
+	if params.Service != "" {
+		addStrQuery(cs.TagService, params.Service)
+	}
+	// route
+	if params.Route != "" {
+		addStrQuery("route", params.Route)
+	}
+
+	// 筛选完成之后执行pivot
+	query += fmt.Sprintf(`|> sort(columns:["_time"], desc: true)
+|> limit(n:%s)
+|> pivot(
+	rowKey:["_time"],
+	columnKey: ["_field"],
+	valueColumn: "_value"
+)
+`, params.Limit)
+
+	// field 的筛选
 	// 账号
 	if params.Account != "" {
-		query += fmt.Sprintf(`|> filter(fn: (r) => r.account == "%s")`, params.Account)
+		addStrQuery(cs.FieldAccount, params.Account)
 	}
 	// 异常
 	if params.Exception != "" {
-		value := "true"
-		if params.Exception == "0" {
-			value = "false"
-		}
-		query += fmt.Sprintf(`|> filter(fn: (r) => r.exception == %s)`, value)
+		addQuery(cs.FieldException, params.Exception)
 	}
+	// 出错类型
+	if params.ErrCategory != "" {
+		addStrQuery(cs.FieldErrCategory, params.ErrCategory)
+	}
+
 	return query
 }
 
 func (params *fluxListParams) Do(ctx context.Context) (items []map[string]interface{}, err error) {
-	items, err = getInfluxSrv().Query(ctx, params.Query())
+	items, err = GetInfluxSrv().Query(ctx, params.Query())
 	if err != nil {
 		return
 	}
@@ -144,6 +197,42 @@ func (params *fluxListParams) Do(ctx context.Context) (items []map[string]interf
 	return
 }
 
+// listTag returns the tags of measurement
+func (ctrl fluxCtrl) listTag(c *elton.Context) (err error) {
+	params := fluxListTagOrFieldParams{}
+	err = validate.Do(&params, c.Params.ToMap())
+	if err != nil {
+		return
+	}
+	tags, err := GetInfluxSrv().ListTag(c.Context(), params.Measurement)
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge(time.Minute)
+	c.Body = map[string][]string{
+		"tags": tags,
+	}
+	return
+}
+
+// ListField return the fields of measurement
+func (ctrl fluxCtrl) ListField(c *elton.Context) (err error) {
+	params := fluxListTagOrFieldParams{}
+	err = validate.Do(&params, c.Params.ToMap())
+	if err != nil {
+		return
+	}
+	fields, err := GetInfluxSrv().ListField(c.Context(), params.Measurement, "-30d")
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge(time.Minute)
+	c.Body = map[string][]string{
+		"fields": fields,
+	}
+	return
+}
+
 // listValue get the values of tag
 func (ctrl fluxCtrl) listTagValue(c *elton.Context) (err error) {
 	params := fluxListTagValuesParams{}
@@ -151,10 +240,11 @@ func (ctrl fluxCtrl) listTagValue(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	values, err := getInfluxSrv().ListTagValue(c.Context(), params.Measurement, params.Tag)
+	values, err := GetInfluxSrv().ListTagValue(c.Context(), params.Measurement, params.Tag)
 	if err != nil {
 		return
 	}
+	c.CacheMaxAge(time.Minute)
 	c.Body = map[string][]string{
 		"values": values,
 	}
@@ -169,8 +259,16 @@ func (ctrl fluxCtrl) list(c *elton.Context, measurement, responseKey string) (er
 	}
 	params.Measurement = measurement
 	result, err := params.Do(c.Context())
+	if err != nil {
+		return
+	}
+
+	fromBucket := fmt.Sprintf(`from(bucket: "%s")
+`, GetInfluxDB().GetBucket())
 	c.Body = map[string]interface{}{
 		responseKey: result,
+		"count":     len(result),
+		"flux":      fromBucket + params.Query(),
 	}
 	return
 }
@@ -188,4 +286,9 @@ func (ctrl fluxCtrl) listTracker(c *elton.Context) (err error) {
 // listAction list user action
 func (ctrl fluxCtrl) listAction(c *elton.Context) (err error) {
 	return ctrl.list(c, cs.MeasurementUserAction, "actions")
+}
+
+// listRequest list request
+func (ctrl fluxCtrl) listRequest(c *elton.Context) (err error) {
+	return ctrl.list(c, cs.MeasurementHTTPRequest, "requests")
 }

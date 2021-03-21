@@ -2,8 +2,8 @@ FROM node:14-alpine as webbuilder
 
 COPY . /elite
 RUN cd /elite/web \
-  && yarn \
-  && yarn build \
+  && npm i \
+  && npm run build \
   && rm -rf node_module
 
 FROM golang:1.16-alpine as builder
@@ -11,10 +11,13 @@ FROM golang:1.16-alpine as builder
 COPY --from=webbuilder /elite /elite
 
 RUN apk update \
-  && apk add git make \
+  && apk add git make curl jq \
   && cd /elite \
   && rm -rf asset/dist \
-  && cp -rf web/dist asset/dist \
+  && cp -rf web/dist asset/ \
+  && make install \
+  && make generate \
+  && ./download-swagger.sh \
   && make build
 
 FROM alpine 

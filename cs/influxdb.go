@@ -73,10 +73,12 @@ const (
 const (
 	// FieldIP ip
 	FieldIP = "ip"
+	// FieldAddr addr
+	FieldAddr = "addr"
 	// FieldURI uri
 	FieldURI = "uri"
-	// FieldRoute route
-	FieldRoute = "route"
+	// FieldRouteName routeName
+	FieldRouteName = "routeName"
 	// FieldPath path
 	FieldPath = "path"
 	// FieldAccount 账号
@@ -103,8 +105,8 @@ const (
 	FieldCity = "city"
 	// FieldISP ISP
 	FieldISP = "isp"
-	// FieldCategory 分类（注意tag也有分类字段，按需使用）
-	FieldCategory = "category"
+	// FieldErrCategory 出错分类
+	FieldErrCategory = "errCategory"
 )
 
 // int 类型

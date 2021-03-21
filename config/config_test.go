@@ -58,7 +58,6 @@ func TestRedisConfig(t *testing.T) {
 	redisConfig := GetRedisConfig()
 	assert.Equal("127.0.0.1:6379", redisConfig.Addr)
 	assert.Equal("", redisConfig.Password)
-	assert.Equal(0, redisConfig.DB)
 	assert.Equal(200*time.Millisecond, redisConfig.Slow)
 	assert.Equal(uint32(1000), redisConfig.MaxProcessing)
 }
@@ -77,11 +76,11 @@ func TestInfluxdbConfig(t *testing.T) {
 	assert := assert.New(t)
 
 	influxdbConfig := GetInfluxdbConfig()
-	assert.NotEmpty(influxdbConfig.URI)
+	assert.Equal("http://127.0.0.1:8086", influxdbConfig.URI)
 	assert.Equal("elite", influxdbConfig.Bucket)
 	assert.Equal("bigTree", influxdbConfig.Org)
-	assert.NotEmpty(influxdbConfig.Token)
-	assert.Equal(uint(1000), influxdbConfig.BatchSize)
+	assert.Equal("YcAmMWPl0XR_OKJYNIozsiBI0qBGIe4-Y_rWKUcNbQ8sYobWFrsMCgY_t0FRlpAMkVNgghhcQ1TgDixt92Qe6w==", influxdbConfig.Token)
+	assert.Equal(uint(100), influxdbConfig.BatchSize)
 	assert.Equal(10*time.Second, influxdbConfig.FlushInterval)
 	assert.False(influxdbConfig.Disabled)
 }
@@ -105,7 +104,6 @@ func TestGetLocationConfig(t *testing.T) {
 
 	locationConfig := GetLocationConfig()
 	assert.Equal("https://ip.npmtrend.com", locationConfig.BaseURL)
-	assert.Equal("location", locationConfig.Name)
 	assert.Equal(3*time.Second, locationConfig.Timeout)
 }
 
@@ -113,8 +111,8 @@ func TestGetMinioConfig(t *testing.T) {
 	assert := assert.New(t)
 
 	minioConfig := GetMinioConfig()
-	assert.NotEmpty(minioConfig.Endpoint)
-	assert.NotEmpty(minioConfig.AccessKeyID)
-	assert.NotEmpty(minioConfig.SecretAccessKey)
+	assert.Equal("127.0.0.1:9000", minioConfig.Endpoint)
+	assert.Equal("origin", minioConfig.AccessKeyID)
+	assert.Equal("test123456", minioConfig.SecretAccessKey)
 	assert.False(minioConfig.SSL)
 }
