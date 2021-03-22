@@ -74,9 +74,11 @@ var (
 	// 获取influx service
 	GetInfluxSrv = service.GetInfluxSrv
 	// 文件服务
-	fileSrv = &service.FileSrv{}
-	// 小说用回
+	fileSrv = service.NewFileSrv()
+	// 小说服务
 	novelSrv = novel.New()
+	// 图片服务
+	imageSrv = service.NewImageSrv()
 )
 
 func newMagicalCaptchaValidate() elton.Handler {

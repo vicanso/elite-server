@@ -32,7 +32,7 @@ import (
 )
 
 type (
-	FileSrv struct{}
+	fileSrv struct{}
 	// UploadParams 上传文件参数
 	UploadParams struct {
 		// Bucket 文件保存的bucket
@@ -62,18 +62,22 @@ func mustNewMinioClient() *minio.Client {
 	return c
 }
 
+func NewFileSrv() *fileSrv {
+	return &fileSrv{}
+}
+
 // Upload 上传文件
-func (srv *FileSrv) Upload(ctx context.Context, params UploadParams) (info minio.UploadInfo, err error) {
+func (srv *fileSrv) Upload(ctx context.Context, params UploadParams) (info minio.UploadInfo, err error) {
 	return defaultMinioClient.PutObject(ctx, params.Bucket, params.Name, params.Reader, params.Size, params.Opts)
 }
 
 // Get 获取文件
-func (srv *FileSrv) Get(ctx context.Context, bucket, filename string) (*minio.Object, error) {
+func (srv *fileSrv) Get(ctx context.Context, bucket, filename string) (*minio.Object, error) {
 	return defaultMinioClient.GetObject(ctx, bucket, filename, minio.GetObjectOptions{})
 }
 
 // GetData 获取文件内容及对应的http头
-func (srv *FileSrv) GetData(ctx context.Context, bucket, filename string) (data []byte, header http.Header, err error) {
+func (srv *fileSrv) GetData(ctx context.Context, bucket, filename string) (data []byte, header http.Header, err error) {
 	object, err := srv.Get(ctx, bucket, filename)
 	if err != nil {
 		return
@@ -94,7 +98,7 @@ func (srv *FileSrv) GetData(ctx context.Context, bucket, filename string) (data 
 }
 
 // ResizeImage 调整图片尺寸
-func (srv *FileSrv) ResizeImage(reader io.Reader, imageType string, width, height int) (buffer *bytes.Buffer, err error) {
+func (srv *fileSrv) ResizeImage(reader io.Reader, imageType string, width, height int) (buffer *bytes.Buffer, err error) {
 	var img image.Image
 	switch imageType {
 	default:

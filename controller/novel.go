@@ -20,11 +20,13 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/vicanso/elite/ent"
+	"github.com/vicanso/elite/ent/chapter"
 	entNovel "github.com/vicanso/elite/ent/novel"
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/novel"
@@ -35,6 +37,7 @@ import (
 	"github.com/vicanso/elite/validate"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/go-axios"
+	"github.com/vicanso/hes"
 )
 
 type novelCtrl struct{}
@@ -51,6 +54,22 @@ type (
 		AuthorKeyword string
 		NameKeyword   string
 	}
+	// novelChapterListParams 章节查询参数
+	novelChapterListParams struct {
+		listParams
+
+		// ID 小说id，由route param中获取并设置，因此不设置validate
+		ID int `json:"id,omitempty"`
+		// ChapterID 章节id，由route param中获取并设置，因此不设置validate
+		ChapterID int `json:"chapterID,omitempty"`
+	}
+	// novelCoverParams 小说封面参数
+	novelCoverParams struct {
+		Type    string `json:"type,omitempty" validate:"required,xNovelCoverType"`
+		Width   string `json:"width,omitempty" validate:"omitempty,xNovelCoverWidth"`
+		Height  string `json:"height,omitempty" validate:"omitempty,xNovelCoverHeight"`
+		Quality string `json:"quality,omitempty" validate:"required,xNovelCoverQuality"`
+	}
 )
 
 // 接口响应定义
@@ -59,6 +78,11 @@ type (
 	novelListResp struct {
 		Novels []*ent.Novel `json:"novels,omitempty"`
 		Count  int          `json:"count,omitempty"`
+	}
+	// novelChapterListResp 小说章节列表响应
+	novelChapterListResp struct {
+		Chapters []*ent.Chapter `json:"chapters,omitempty"`
+		Count    int            `json:"count,omitempty"`
 	}
 )
 
@@ -71,6 +95,26 @@ func init() {
 	g.GET(
 		"/v1",
 		ctrl.list,
+	)
+	// 单本小说查询
+	g.GET(
+		"/v1/{id}",
+		ctrl.findByID,
+	)
+	// 小说章节查询
+	g.GET(
+		"/v1/{id}/chapters",
+		ctrl.listChapter,
+	)
+	// 小说章节内容
+	g.GET(
+		"/v1/{id}/chapters/{no}",
+		ctrl.getChapterContent,
+	)
+	// 小说封面
+	g.GET(
+		"/v1/{id}/cover",
+		ctrl.getCover,
 	)
 
 	// 更新所有章节
@@ -131,6 +175,69 @@ func (params *novelListParams) count(ctx context.Context) (count int, err error)
 	query = params.where(query)
 
 	return query.Count(ctx)
+}
+
+// where 将查询条件转换为where
+func (params *novelChapterListParams) where(query *ent.ChapterQuery) *ent.ChapterQuery {
+	if params.ID != 0 {
+		query = query.Where(chapter.NovelEQ(params.ID))
+	}
+	if params.ChapterID != 0 {
+		query = query.Where(chapter.ID(params.ChapterID))
+	}
+	return query
+}
+
+// queryAll 查询小说章节
+func (params *novelChapterListParams) queryAll(ctx context.Context) (chapters []*ent.Chapter, err error) {
+	if params.ID == 0 {
+		return nil, hes.NewWithStatusCode("小说ID不能为空", 400)
+	}
+	query := getEntClient().Chapter.Query()
+	query = query.Limit(params.GetLimit()).
+		Offset(params.GetOffset()).
+		Order(params.GetOrders()...)
+	query = params.where(query)
+	fields := params.GetFields()
+	// 如果指定了select的字段
+	if len(fields) != 0 {
+		chapters = make([]*ent.Chapter, 0)
+		err = query.Select(fields[0], fields[1:]...).Scan(ctx, &chapters)
+		if err != nil {
+			return
+		}
+		return
+	}
+	return query.All(ctx)
+}
+
+// count 计算章节总数
+func (params *novelChapterListParams) count(ctx context.Context) (count int, err error) {
+	if params.ID == 0 {
+		return -1, hes.NewWithStatusCode("小说ID不能为空", 400)
+	}
+	query := getEntClient().Chapter.Query()
+	query = params.where(query)
+	return query.Count(ctx)
+}
+
+// getChapterContent 获取章节内容
+func (*novelCtrl) getChapterContent(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	no, err := strconv.Atoi(c.Param("no"))
+	if err != nil {
+		return
+	}
+	result, err := novelSrv.GetChapterContent(id, no)
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge(10 * time.Minute)
+	c.Body = result
+	return
 }
 
 func updateCoverByURL(id int, coverURL string) (err error) {
@@ -276,6 +383,101 @@ func (*novelCtrl) list(c *elton.Context) (err error) {
 		Novels: novels,
 		Count:  count,
 	}
+	return
+}
+
+// findByID 通过id查询书籍
+func (*novelCtrl) findByID(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	result, err := getEntClient().Novel.Query().
+		Where(entNovel.ID(id)).
+		First(c.Context())
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge(10 * time.Minute)
+	c.Body = result
+	return
+}
+
+// listChapter 获取小说章节
+func (*novelCtrl) listChapter(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	params := novelChapterListParams{}
+	err = validate.Do(&params, c.Query())
+	if err != nil {
+		return
+	}
+	params.ID = id
+	count := -1
+	if params.ShouldCount() {
+		count, err = params.count(c.Context())
+		if err != nil {
+			return
+		}
+	}
+	// 如果章节总数为0，则fetch数据
+	if count == 0 {
+		err = novelSrv.UpdateChapters(id)
+		if err != nil {
+			return
+		}
+	}
+	chapters, err := params.queryAll(c.Context())
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge(5 * time.Minute)
+	c.Body = &novelChapterListResp{
+		Count:    count,
+		Chapters: chapters,
+	}
+	return
+}
+
+// getCover 获取小说封面
+func (*novelCtrl) getCover(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	params := novelCoverParams{}
+	err = validate.Do(&params, c.Query())
+	if err != nil {
+		return
+	}
+	cover, err := novelSrv.GetCover(id)
+	if err != nil {
+		return
+	}
+	width, _ := strconv.Atoi(params.Width)
+	height, _ := strconv.Atoi(params.Height)
+	quality, _ := strconv.Atoi(params.Quality)
+
+	data, header, err := imageSrv.GetImageFromBucket(
+		c.Context(),
+		eliteCoverBucket,
+		cover,
+		service.ImageOptimizeParams{
+			Type:    params.Type,
+			Width:   width,
+			Height:  height,
+			Quality: quality,
+		},
+	)
+	if err != nil {
+		return
+	}
+
+	c.MergeHeader(header)
+	c.CacheMaxAge(time.Hour)
+	c.Body = data
 	return
 }
 

@@ -150,6 +150,12 @@ type (
 		Timeout time.Duration `validate:"required"`
 	}
 	NovelConfigs []NovelConfig
+	// TinyConfig tiny config
+	TinyConfig struct {
+		Host    string        `validate:"required,ip"`
+		Port    int           `validate:"required,number"`
+		Timeout time.Duration `validate:"required"`
+	}
 )
 
 func (configs NovelConfigs) Find(name string) NovelConfig {
@@ -384,4 +390,16 @@ func GetNovelConfigs() NovelConfigs {
 		data[index] = conf
 	}
 	return data
+}
+
+// GetTinyConfig get tiny config
+func GetTinyConfig() TinyConfig {
+	prefix := "tiny."
+	tinyConfig := TinyConfig{
+		Host:    defaultViperX.GetString(prefix + "host"),
+		Port:    defaultViperX.GetInt(prefix + "port"),
+		Timeout: defaultViperX.GetDuration(prefix + "timeout"),
+	}
+	mustValidate(&tinyConfig)
+	return tinyConfig
 }

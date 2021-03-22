@@ -74,6 +74,12 @@ pyroscope:
   addr: http://127.0.0.1:4040
   # token: ""
 
+# tiny服务的配置
+tiny:
+  host: 192.168.1.2
+  port: 6002
+  timeout: 10s
+
 # 抓取小说配置
 novel:
   biquge:

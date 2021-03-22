@@ -42,7 +42,7 @@ func (Chapter) Fields() []ent.Field {
 		field.String("title").
 			Comment("章节名称"),
 		field.String("content").
-			Optional().
+			Default("").
 			Comment("章节内容"),
 		field.Int("word_count").
 			Optional().
