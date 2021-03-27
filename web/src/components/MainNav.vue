@@ -79,12 +79,27 @@ import {
   ROUTE_HTTP_ERRORS,
   ROUTE_ACTIONS,
   ROUTE_REQUESTS,
+  NOVEL_LIST,
 } from "../router";
 import { USER_ADMIN, USER_SU } from "../constants/user";
 import useUserState from "../states/user";
 import { isAllowedUser } from "../helpers/util";
 
 const navs = [
+  {
+    name: "小说",
+    icon: "el-icon-notebook-1",
+    roles: [USER_ADMIN, USER_SU],
+    groups: [],
+    children: [
+      {
+        name: "小说列表",
+        route: NOVEL_LIST,
+        roules: [],
+        groups: [],
+      },
+    ],
+  },
   {
     name: "用户",
     icon: "el-icon-user",

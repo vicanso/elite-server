@@ -49,5 +49,15 @@ export const CONFIGS_ID = "/configurations/v1/:id";
 // 当前有效配置
 export const CONFIGS_CURRENT_VALID = "/configurations/v1/current-valid";
 
+// 小说相关url
+// 小说列表
+export const NOVELS = "/novels/v1";
+// 通过ID查找小说
+export const NOVELS_ID = "/novels/v1/:id";
+// 通过ID查找小说章节
+export const NOVELS_CHAPTERS = "/novels/v1/:id/chapters";
+// 通过ID与章节序号查找章节内容
+export const NOVELS_CHAPTERS_ID = "/novels/v1/:id/chapters/:no";
+
 // 管理员相关接口
 export const ADMINS_SESSION_ID = "/@admin/v1/sessions/:id";

@@ -24,6 +24,10 @@ import SessionInterceptor from "../views/configs/SessionInterceptor.vue";
 import Configuration from "../views/configs/Configuration.vue";
 import Others from "../views/Others.vue";
 
+// 小说相关页面
+import Novels from "../views/novels/Novels.vue";
+import NovelDetail from "../views/novels/NovelDetail.vue";
+
 export const ROUTE_HOME = "home";
 export const ROUTE_PROFILE = "profile";
 export const ROUTE_LOGIN = "login";
@@ -45,6 +49,10 @@ export const REQUEST_CONCURRENCY = "requestConcurrency";
 export const ROUTE_SESSION_INTERCEPTOR = "sessionInterceptor";
 export const ROUTE_CONFIGURATION = "configuration";
 export const ROUTE_OTHERS = "others";
+
+// 小说相关
+export const NOVEL_LIST = "novels";
+export const NOVEL_DETAIl = "novelDetail";
 
 interface Location {
   name: string;
@@ -157,6 +165,16 @@ const router = createRouter({
       path: "/others",
       name: ROUTE_OTHERS,
       component: Others,
+    },
+    {
+      path: "/novels",
+      name: NOVEL_LIST,
+      component: Novels,
+    },
+    {
+      path: "/novels/:id",
+      name: NOVEL_DETAIl,
+      component: NovelDetail,
     },
   ],
 });
