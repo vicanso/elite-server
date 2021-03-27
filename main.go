@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /*
-Package main Forest
+Package main Elite
 
 	接口出错统一使用如下格式：{"category": "出错类别", "message": "出错信息", "code": "出错代码", "exception": true}，
 	其中category与code字段为可选，当处理出错时，HTTP的响应状态码为`4xx`与`5xx`。

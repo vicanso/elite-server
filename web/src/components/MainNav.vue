@@ -17,7 +17,7 @@ mixin HomeLogo
       :to='{name: homeRoute}'
     )
       i.el-icon-cpu
-      | Forest
+      | Elite
 
 //- 菜单栏
 mixin Menu

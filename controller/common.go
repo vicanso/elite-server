@@ -27,6 +27,7 @@ import (
 	"github.com/vicanso/elite/asset"
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/profiler"
+	"github.com/vicanso/elite/request"
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/schema"
 	"github.com/vicanso/elite/service"
@@ -69,6 +70,10 @@ type (
 	randomKeysResp struct {
 		Keys []string `json:"keys,omitempty"`
 	}
+	// httpStatsListResp http性能统计响应
+	httpStatsListResp struct {
+		StatusList []*request.InstanceStats `json:"statusList,omitempty"`
+	}
 )
 
 const (
@@ -102,6 +107,11 @@ func init() {
 	g.GET(
 		"/api",
 		ctrl.getAPI,
+	)
+	// 获取http实例性能指标
+	g.GET(
+		"/http-stats",
+		ctrl.listHTTPInstanceStats,
 	)
 }
 
@@ -225,5 +235,15 @@ func (*commonCtrl) getAPI(c *elton.Context) (err error) {
 	c.SetHeader(elton.HeaderContentType, "text/vnd.yaml;charset=utf-8")
 
 	c.BodyBuffer = bytes.NewBuffer(buf)
+	return
+}
+
+// listHTTPInstanceStats 获取http实例的性能统计
+func (*commonCtrl) listHTTPInstanceStats(c *elton.Context) (err error) {
+	stats := request.GetHTTPStats()
+	c.CacheMaxAge(5 * time.Minute)
+	c.Body = &httpStatsListResp{
+		StatusList: stats,
+	}
 	return
 }

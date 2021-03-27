@@ -103,6 +103,12 @@ psql -c "CREATE USER vicanso WITH PASSWORD 'A123456';" -U postgres
 psql -c "GRANT ALL PRIVILEGES ON DATABASE elite to vicanso;" -U postgres
 ```
 
+### 导出数据
+
+```bash
+pg_dump -U vicanso -d elite > /backup/elite.sql
+```
+
 ## redis
 
 ```

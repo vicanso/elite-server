@@ -15,8 +15,6 @@
 package request
 
 import (
-	"sync/atomic"
-
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/go-axios"
 )
@@ -31,6 +29,12 @@ var insList = map[string]*axios.Instance{
 	locationService: locationIns,
 	qiDianService:   qiDianIns,
 	biQuGeService:   biQuGeIns,
+}
+
+type InstanceStats struct {
+	Name           string `json:"name,omitempty"`
+	MaxConcurrency int    `json:"maxConcurrency,omitempty"`
+	Concurrency    int    `json:"concurrency,omitempty"`
 }
 
 // newLocation 初始化location的实例
@@ -64,21 +68,28 @@ func GetBiQuGe() *axios.Instance {
 }
 
 // GetHTTPStats get http instance stats
-func GetHTTPStats() map[string]interface{} {
-	data := make(map[string]interface{})
+func GetHTTPStats() []*InstanceStats {
+	statsList := make([]*InstanceStats, len(insList))
+	index := 0
 	for name, ins := range insList {
-		data[name] = int(ins.GetConcurrency())
+		stats := InstanceStats{
+			Name:           name,
+			MaxConcurrency: int(ins.Config.MaxConcurrency),
+			Concurrency:    int(ins.GetConcurrency()),
+		}
+		statsList[index] = &stats
+		index++
 	}
-	return data
+	return statsList
 }
 
 // UpdateConcurrencyLimit update the concurrency limit for instance
 func UpdateConcurrencyLimit(limits map[string]int) {
 	for name, ins := range insList {
 		v := limits[name]
-		limit := uint32(v)
+		limit := int32(v)
 		if ins.Config.MaxConcurrency != limit {
-			atomic.StoreUint32(&ins.Config.MaxConcurrency, limit)
+			ins.SetMaxConcurrency(limit)
 		}
 	}
 }

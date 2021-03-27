@@ -36,7 +36,7 @@ mixin HomeLogo
     :to='{name: homeRoute}'
   )
     i.el-icon-cpu
-    | Forest
+    | Elite
 
 header.header
   //- 用户信息
