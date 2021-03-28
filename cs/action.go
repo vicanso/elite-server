@@ -34,3 +34,13 @@ const (
 	// ActionAdminCleanSession clean session
 	ActionAdminCleanSession = "cleanSession"
 )
+
+// 小说相关的操作
+const (
+	// ActionNovelUpdate update novel
+	ActionNovelUpdate = "updateNovel"
+	// ActionNovelChaptersUpdate update novel chapters
+	ActionNovelChaptersUpdate = "updateNovelChapters"
+	// ActionNovelChapterUpdate update novel chapter
+	ActionNovelChapterUpdate = "updateNovelChapter"
+)

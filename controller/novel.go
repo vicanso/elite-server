@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/chapter"
 	entNovel "github.com/vicanso/elite/ent/novel"
@@ -43,6 +44,7 @@ import (
 type novelCtrl struct{}
 
 const eliteCoverBucket = "elite-covers"
+const errNovelCategory = "novel"
 
 // 接口参数定义
 type (
@@ -53,6 +55,12 @@ type (
 		Keyword       string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
 		AuthorKeyword string
 		NameKeyword   string
+	}
+	// novelUpdateParams 更新小说参数
+	novelUpdateParams struct {
+		ID      int    `json:"id,omitempty"`
+		Status  int    `json:"status,omitempty" validate:"omitempty,xNovelStatus"`
+		Summary string `json:"summary,omitempty" validate:"omitempty,xNovelSummary"`
 	}
 	// novelChapterListParams 章节查询参数
 	novelChapterListParams struct {
@@ -100,6 +108,14 @@ func init() {
 	g.GET(
 		"/v1/{id}",
 		ctrl.findByID,
+	)
+	// 单本小说更新
+	g.PATCH(
+		"/v1/{id}",
+		newTrackerMiddleware(cs.ActionNovelUpdate),
+		loadUserSession,
+		shouldBeAdmin,
+		ctrl.updateByID,
 	)
 	// 小说章节查询
 	g.GET(
@@ -219,6 +235,30 @@ func (params *novelChapterListParams) count(ctx context.Context) (count int, err
 	query := getEntClient().Chapter.Query()
 	query = params.where(query)
 	return query.Count(ctx)
+}
+
+// update 更新小说
+func (params *novelUpdateParams) update(ctx context.Context) (err error) {
+	if params.ID == 0 {
+		err = hes.New("小说ID不能为空", errNovelCategory)
+		return
+	}
+	update := getEntClient().Novel.UpdateOneID(params.ID)
+	if params.Summary != "" {
+		update = update.SetSummary(params.Summary)
+	}
+	if params.Status != 0 {
+		update = update.SetStatus(params.Status)
+	}
+	result, err := update.Save(ctx)
+	if err != nil {
+		return
+	}
+	if result == nil {
+		err = hes.New("无匹配的小说记录", errNovelCategory)
+		return
+	}
+	return
 }
 
 // getChapterContent 获取章节内容
@@ -400,6 +440,26 @@ func (*novelCtrl) findByID(c *elton.Context) (err error) {
 	}
 	c.CacheMaxAge(10 * time.Minute)
 	c.Body = result
+	return
+}
+
+// updateByID 根据id更新小说信息
+func (*novelCtrl) updateByID(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	params := novelUpdateParams{}
+	err = validate.Do(&params, c.RequestBody)
+	if err != nil {
+		return
+	}
+	params.ID = id
+	err = params.update(c.Context())
+	if err != nil {
+		return
+	}
+	c.NoContent()
 	return
 }
 

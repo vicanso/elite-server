@@ -78,8 +78,9 @@ mixin OpColumn
 
 mixin Pagination
   el-pagination.pagination(
+    v-if="novels.count >= 0"
     layout="prev, pager, next, sizes"
-    :current-page="currentPage"
+    :current-page="query.page"
     :page-size="query.limit"
     :page-sizes="pageSizes"
     :total="novels.count"
@@ -152,11 +153,12 @@ export default defineComponent({
     };
   },
   data() {
+    const { query } = this.$route;
     return {
       query: {
-        offset: 0,
-        limit: PAGE_SIZES[0],
-        order: "-updatedAt",
+        page: Number(query.page || 1),
+        limit: Number(query.limit || PAGE_SIZES[0]),
+        order: query.order || "-updatedAt",
       },
     };
   },
@@ -164,25 +166,35 @@ export default defineComponent({
     this.fetch();
   },
   methods: {
+    updateRouteQuery() {
+      this.$router.push({
+        name: this.$route.name,
+        query: this.query,
+      });
+      this.fetch();
+    },
     async fetch() {
       const { query, novels } = this;
       if (novels.processing) {
         return;
       }
       try {
-        await novelList(query);
+        const params = Object.assign({}, query);
+        params.offset = (params.page - 1) * params.limit;
+        delete params.page;
+        await novelList(params);
       } catch (err) {
         this.$error(err);
       }
     },
     handleCurrentChange(page: number): void {
-      this.query.offset = (page - 1) * this.query.limit;
-      this.fetch();
+      this.query.page = page;
+      this.updateRouteQuery();
     },
     handleSizeChange(pageSize: number): void {
       this.query.limit = pageSize;
-      this.query.offset = 0;
-      this.fetch();
+      this.query.page = 1;
+      this.updateRouteQuery();
     },
     handleSortChange(params: { prop: string; order: string }): void {
       let key = params.prop;
@@ -193,14 +205,8 @@ export default defineComponent({
         key = `-${key}`;
       }
       this.query.order = key;
-      this.query.offset = 0;
-      this.fetch();
-    },
-  },
-  computed: {
-    currentPage(): number {
-      const { offset, limit } = this.query;
-      return Math.floor(offset / limit) + 1;
+      this.query.page = 1;
+      this.updateRouteQuery();
     },
   },
 });

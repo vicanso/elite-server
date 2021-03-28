@@ -77,6 +77,9 @@ type EntListParams struct {
 
 	// 忽略计算总数，如果此字段不为空则表示不查询总数
 	IgnoreCount string `json:"ignoreCount,omitempty"`
+
+	// 计算总数，如果此字段不为空则表示必须查询总数
+	MustCount string `json:"mustCount,omitempty"`
 }
 
 var currentEntProcessingStats = new(entProcessingStats)
@@ -158,6 +161,9 @@ func (params *EntListParams) GetFields() []string {
 
 // ShouldCount 判断是否需要计算总数
 func (params *EntListParams) ShouldCount() bool {
+	if params.MustCount != "" {
+		return true
+	}
 	return params.IgnoreCount == "" && params.GetOffset() == 0
 }
 
