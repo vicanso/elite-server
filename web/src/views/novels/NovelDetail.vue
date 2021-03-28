@@ -93,7 +93,7 @@ mixin SummaryField
     @click="update"
   ) 更新
   div: el-button.fullFill.btn(
-    @click="goBack"
+    @click="$router.back()"
   ) 返回
 </template>
 
@@ -159,9 +159,6 @@ export default defineComponent({
       } catch (err) {
         this.$error(err);
       }
-    },
-    goBack() {
-      this.$router.back();
     },
   },
 });

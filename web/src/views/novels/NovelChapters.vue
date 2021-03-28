@@ -1,42 +1,32 @@
 <template lang="pug">
-//- 小说ID
-mixin IDColumn
+//- 章节序列
+mixin NoColumn
   el-table-column(
-    prop="id"
-    key="id"
-    label="ID"
-    width="80"
+    prop="no"
+    key="no"
+    label="章节序号"
+    width="100"
     sortable
   )
 
-//- 小说名称
-mixin NameColumn
+//- 章节名称
+mixin TitleColumn
   el-table-column(
-    prop="name"
-    key="name"
-    label="名称"
-    width="150"
+    prop="title"
+    key="title"
+    label="标题"
   )
 
-//- 小说作者
-mixin AuthorColumn
+//- 章节字数
+mixin WordCountColumn
   el-table-column(
-    prop="author"
-    key="author"
-    label="作者"
-    width="150"
+    prop="wordCount"
+    key="wordCount"
+    label="章节字数"
+    width="100"
   )
 
-//- 小说状态
-mixin StatusColumn
-  el-table-column(
-    label="状态"
-    width="80"
-  ): template(
-    #default="scope"
-  ) {{statuses.items[scope.row.status]}}
-
-//- 小说更新时间 
+//- 更新时间
 mixin UpdatedAtColumn
   el-table-column(
     sortable
@@ -49,85 +39,63 @@ mixin UpdatedAtColumn
   ): time-formater(
     :time="scope.row.updatedAt"
   )
-
-//- 简介
-mixin SummaryColumn
-  el-table-column(
-    label="简介"
-    width="300"
-  ): template(
-    #default="scope"
-  ): base-tooltip(
-    :viewSize="30"
-    :content="scope.row.summary"
-  )
-
 //- 操作
 mixin OpColumn
   el-table-column(
     fixed="right"
     label="操作"
-    width="120"
+    width="80"
   ): template(
     #default="scope"
   ): .tac
     router-link.mright10(
-      :to="{name: detailRoute, params: {id: scope.row.id}}"
+      :to="{name: 'novelChapters', params: {id: $route.params.id, no: scope.row.no}}"
     )
       i.el-icon-edit
       span 编辑
-    router-link(
-      :to="{name: chaptersRoute, params: {id: scope.row.id}}"
-    )
-      i.el-icon-s-operation
-      span 章节
+
 mixin Pagination
   el-pagination.pagination(
-    v-if="novels.count >= 0"
+    v-if="chapters.count >= 0"
     layout="prev, pager, next, sizes"
     :current-page="query.page"
     :page-size="query.limit"
     :page-sizes="pageSizes"
-    :total="novels.count"
+    :total="chapters.count"
     @size-change="handleSizeChange"
     @current-change="handleCurrentChange"
   )
-.novels
+
+.novelChapters
   el-card
     template(
       #header
     )
-      i.el-icon-notebook-1
-      span 小说列表
+      i.el-icon-s-operation
+      span 小说章节列表
     div(
-      v-loading="novels.processing"
+      v-loading="chapters.processing"
     ): el-table(
-      :data="novels.items"
+      :data="chapters.items"
       row-key="id"
       stripe
       @sort-change="handleSortChange"
     )
-      //- 小说ID
-      +IDColumn
+      +NoColumn
 
-      //- 小说名称
-      +NameColumn
+      +TitleColumn
 
-      //- 小说作者
-      +AuthorColumn
+      +WordCountColumn
 
-      //- 小说状态
-      +StatusColumn
-
-      //- 小说更新时间
       +UpdatedAtColumn
 
-      //- 小说简介
-      +SummaryColumn
-
       +OpColumn
+
     //- 分页设置
     +Pagination
+  el-button.fullFill.btn(
+    @click="$router.back()"
+  ) 返回
 </template>
 
 <script lang="ts">
@@ -135,27 +103,25 @@ import { defineComponent, onUnmounted } from "vue";
 
 import { PAGE_SIZES } from "../../constants/common";
 import TimeFormater from "../../components/TimeFormater.vue";
-import BaseTooltip from "../../components/Tooltip.vue";
-import useNovelState, { novelList, novelListClear } from "../../states/novel";
-import { NOVEL_DETAIl, NOVEL_CHAPTERS } from "../../router";
+import useNovelState, {
+  novelListChapter,
+  novelChaptersClear,
+} from "../../states/novel";
 
 export default defineComponent({
-  name: "Novels",
+  name: "NovelChapters",
   components: {
     TimeFormater,
-    BaseTooltip,
   },
   setup() {
     onUnmounted(() => {
-      novelListClear();
+      novelChaptersClear();
     });
+
     const novelState = useNovelState();
     return {
       pageSizes: PAGE_SIZES,
-      statuses: novelState.statuses,
-      novels: novelState.novels,
-      detailRoute: NOVEL_DETAIl,
-      chaptersRoute: NOVEL_CHAPTERS,
+      chapters: novelState.chapters,
     };
   },
   data() {
@@ -164,7 +130,8 @@ export default defineComponent({
       query: {
         page: Number(query.page || 1),
         limit: Number(query.limit || PAGE_SIZES[0]),
-        order: query.order || "-updatedAt",
+        order: query.order || "-no",
+        fields: "id,title,no,wordCount,updatedAt",
       },
     };
   },
@@ -180,15 +147,16 @@ export default defineComponent({
       this.fetch();
     },
     async fetch() {
-      const { query, novels } = this;
-      if (novels.processing) {
+      const { query, chapters, $route } = this;
+      if (chapters.processing) {
         return;
       }
       try {
         const params = Object.assign({}, query);
         params.offset = (params.page - 1) * params.limit;
         delete params.page;
-        await novelList(params);
+        const novelID = Number($route.params.id);
+        await novelListChapter(novelID, params);
       } catch (err) {
         this.$error(err);
       }
@@ -221,10 +189,12 @@ export default defineComponent({
 <style lang="stylus" scoped>
 @import "../../common";
 
-.novels
+.novelChapters
   margin $mainMargin
-i
-  margin-right 3px
+
+.btn
+  margin-top $mainMargin
+
 .pagination
   text-align right
   margin-top 15px

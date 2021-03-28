@@ -34,6 +34,29 @@ const novels: Novels = reactive({
   items: [],
 });
 
+interface Chapter {
+  id: number;
+  title: string;
+  no: number;
+  content?: string;
+  wordCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+interface Chapters {
+  novel: number;
+  processing: boolean;
+  count: number;
+  items: Chapter[];
+}
+
+const chapters: Chapters = reactive({
+  novel: 0,
+  processing: false,
+  count: -1,
+  items: [],
+});
+
 interface NovelStatuses {
   items: string[];
 }
@@ -58,11 +81,17 @@ interface ReadonlyNovelState {
   novels: DeepReadonly<Novels>;
   statuses: DeepReadonly<NovelStatuses>;
   detail: DeepReadonly<NovelDetail>;
+  chapters: DeepReadonly<Chapters>;
 }
 
 function fillInfo(item: Novel): Novel {
   item.id = item.id || 0;
   item.status = item.status || 0;
+  return item;
+}
+
+function fillChapterInfo(item: Chapter): Chapter {
+  item.no = item.no || 0;
   return item;
 }
 
@@ -150,10 +179,56 @@ export async function novelUpdateDetail(
   }
 }
 
+// novelListChapter 获取小说章节
+export async function novelListChapter(
+  novelID: number,
+  params: {
+    limit: number;
+    offset: number;
+    fields?: string;
+    mustCount?: string;
+    ignoreCount?: string;
+  }
+): Promise<void> {
+  if (chapters.processing) {
+    return;
+  }
+  try {
+    chapters.novel = novelID;
+    chapters.processing = true;
+    const listParams = Object.assign({}, params);
+    // 如果总数为-1（从其它返回或直接刷新 ），则强制获取总数
+    if (chapters.count === -1) {
+      listParams.mustCount = "1";
+    }
+    const { data } = await request.get(
+      NOVELS_CHAPTERS.replace(":id", `${novelID}`),
+      {
+        params: listParams,
+      }
+    );
+    const count = data.count || 0;
+    if (count >= 0) {
+      chapters.count = count;
+    }
+    chapters.items = data.chapters || [];
+    chapters.items.forEach(fillChapterInfo);
+  } finally {
+    chapters.processing = false;
+  }
+}
+
+// novelChaptersClear 清空小说章节
+export function novelChaptersClear(): void {
+  chapters.count = -1;
+  chapters.items.length = 0;
+}
+
 const state: ReadonlyNovelState = {
   novels: readonly(novels),
   statuses: readonly(statues),
   detail: readonly(detail),
+  chapters: readonly(chapters),
 };
 
 // useNovelState 用户小说相关state

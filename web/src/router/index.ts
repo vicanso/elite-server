@@ -27,6 +27,7 @@ import Others from "../views/Others.vue";
 // 小说相关页面
 import Novels from "../views/novels/Novels.vue";
 import NovelDetail from "../views/novels/NovelDetail.vue";
+import NovelChapters from "../views/novels/NovelChapters.vue";
 
 export const ROUTE_HOME = "home";
 export const ROUTE_PROFILE = "profile";
@@ -53,6 +54,7 @@ export const ROUTE_OTHERS = "others";
 // 小说相关
 export const NOVEL_LIST = "novels";
 export const NOVEL_DETAIl = "novelDetail";
+export const NOVEL_CHAPTERS = "novelChapters";
 
 interface Location {
   name: string;
@@ -175,6 +177,11 @@ const router = createRouter({
       path: "/novels/:id",
       name: NOVEL_DETAIl,
       component: NovelDetail,
+    },
+    {
+      path: "/novels/:id/chapters",
+      name: NOVEL_CHAPTERS,
+      component: NovelChapters,
     },
   ],
 });

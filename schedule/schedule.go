@@ -50,8 +50,6 @@ func init() {
 	_, _ = c.AddFunc("@every 1m", routerConcurrencyStats)
 	_, _ = c.AddFunc("@every 12h", updateAllNovelWordCount)
 
-	updateAllNovelWordCount()
-
 	// 如果是开发环境，则不执行定时任务
 	if util.IsDevelopment() {
 		return
