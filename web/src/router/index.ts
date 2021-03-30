@@ -28,6 +28,7 @@ import Others from "../views/Others.vue";
 import Novels from "../views/novels/Novels.vue";
 import NovelDetail from "../views/novels/NovelDetail.vue";
 import NovelChapters from "../views/novels/NovelChapters.vue";
+import NovelChapterDetail from "../views/novels/NovelChapterDetail.vue";
 
 export const ROUTE_HOME = "home";
 export const ROUTE_PROFILE = "profile";
@@ -55,6 +56,7 @@ export const ROUTE_OTHERS = "others";
 export const NOVEL_LIST = "novels";
 export const NOVEL_DETAIl = "novelDetail";
 export const NOVEL_CHAPTERS = "novelChapters";
+export const NOVEL_CHAPTER_DETAIL = "novelChapterDetail";
 
 interface Location {
   name: string;
@@ -182,6 +184,11 @@ const router = createRouter({
       path: "/novels/:id/chapters",
       name: NOVEL_CHAPTERS,
       component: NovelChapters,
+    },
+    {
+      path: "/novels/:id/chapters/:no",
+      name: NOVEL_CHAPTER_DETAIL,
+      component: NovelChapterDetail,
     },
   ],
 });

@@ -54,11 +54,10 @@ mixin UpdatedAtColumn
 mixin SummaryColumn
   el-table-column(
     label="简介"
-    width="300"
   ): template(
     #default="scope"
   ): base-tooltip(
-    :viewSize="30"
+    :viewSize="-50"
     :content="scope.row.summary"
   )
 

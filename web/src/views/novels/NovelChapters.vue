@@ -49,7 +49,7 @@ mixin OpColumn
     #default="scope"
   ): .tac
     router-link.mright10(
-      :to="{name: 'novelChapters', params: {id: $route.params.id, no: scope.row.no}}"
+      :to="{name: chapterDetailRoute, params: {id: $route.params.id, no: scope.row.no}}"
     )
       i.el-icon-edit
       span 编辑
@@ -71,6 +71,10 @@ mixin Pagination
     template(
       #header
     )
+      a.mright10.bold(
+        @click.prevent="$router.back()"
+        href="#"
+      ): i.el-icon-arrow-left
       i.el-icon-s-operation
       span 小说章节列表
     div(
@@ -93,9 +97,6 @@ mixin Pagination
 
     //- 分页设置
     +Pagination
-  el-button.fullFill.btn(
-    @click="$router.back()"
-  ) 返回
 </template>
 
 <script lang="ts">
@@ -107,6 +108,7 @@ import useNovelState, {
   novelListChapter,
   novelChaptersClear,
 } from "../../states/novel";
+import { NOVEL_CHAPTER_DETAIL } from "../../router";
 
 export default defineComponent({
   name: "NovelChapters",
@@ -120,6 +122,7 @@ export default defineComponent({
 
     const novelState = useNovelState();
     return {
+      chapterDetailRoute: NOVEL_CHAPTER_DETAIL,
       pageSizes: PAGE_SIZES,
       chapters: novelState.chapters,
     };

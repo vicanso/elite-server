@@ -8,8 +8,11 @@ el-tooltip(
     :class="$props.icon"
   )
   span(
-    v-else
+    v-else-if="$props.viewSize >= 0"
   ) {{$props.content.substring($props.content.length - $props.viewSize)}}
+  span(
+    v-else
+  ) {{$props.content.substring(0, -$props.viewSize)}}
 span(
   v-else
 ) --

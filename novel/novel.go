@@ -349,7 +349,6 @@ func (srv *Srv) UpdateWordCount(id int, updatedAfter time.Time) (err error) {
 
 	err = getEntClient().Chapter.Query().
 		Where(chapter.Novel(id)).
-		Where(chapter.WordCountNotNil()).
 		Select(chapter.FieldWordCount).
 		Scan(ctx, &chapters)
 	if err != nil {
@@ -482,7 +481,7 @@ func (srv *Srv) FetchAllChapterContent(id int) (err error) {
 		return
 	}
 	for i := 0; i < count; i++ {
-		_, err = srv.GetChapterContent(id, i)
+		_, err = srv.GetChapterDetail(id, i)
 		if err != nil {
 			return
 		}
@@ -490,12 +489,12 @@ func (srv *Srv) FetchAllChapterContent(id int) (err error) {
 	return
 }
 
-// GetChapterContent 获取小说章节内容
-func (srv *Srv) GetChapterContent(id, no int) (result *ent.Chapter, err error) {
+// GetChapterDetail 获取小说章节内容
+func (srv *Srv) GetChapterDetail(novelID, no int) (result *ent.Chapter, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*defaultQueryTimeout)
 	defer cancel()
 	result, err = getEntClient().Chapter.Query().
-		Where(chapter.NovelEQ(id)).
+		Where(chapter.NovelEQ(novelID)).
 		Where(chapter.NoEQ(no)).
 		First(ctx)
 	if err != nil {
@@ -504,7 +503,7 @@ func (srv *Srv) GetChapterContent(id, no int) (result *ent.Chapter, err error) {
 	if result.Content != "" {
 		return
 	}
-	fetcher, err := srv.GetFetcherByID(id)
+	fetcher, err := srv.GetFetcherByID(novelID)
 	if err != nil {
 		return
 	}
@@ -520,6 +519,25 @@ func (srv *Srv) GetChapterContent(id, no int) (result *ent.Chapter, err error) {
 		return
 	}
 	return
+}
+
+// UpdateChapterContent 更新章节内容
+func (srv *Srv) UpdateChapterContent(novelID, no int, content string) (*ent.Chapter, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*defaultQueryTimeout)
+	defer cancel()
+
+	chapter, err := getEntClient().Chapter.Query().
+		Where(chapter.NovelEQ(novelID)).
+		Where(chapter.NoEQ(no)).
+		First(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return getEntClient().Chapter.
+		UpdateOneID(chapter.ID).
+		SetContent(content).
+		SetWordCount(len(content)).
+		Save(ctx)
 }
 
 // GetCover 获取小说封面

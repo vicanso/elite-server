@@ -67,7 +67,12 @@ mixin SummaryField
   )
     template(
       #header
-    ) 小说详情
+    )
+      a.mright10.bold(
+        @click.prevent="$router.back()"
+        href="#"
+      ): i.el-icon-arrow-left
+      | 小说详情
     el-form(
       ref="form"
       v-if="detail.data.id"
@@ -88,13 +93,10 @@ mixin SummaryField
 
       +SummaryField
 
-  div: el-button.fullFill.btn(
+  el-button.fullFill.mtopMain(
     type="primary"
     @click="update"
   ) 更新
-  div: el-button.fullFill.btn(
-    @click="$router.back()"
-  ) 返回
 </template>
 
 <script lang="ts">
@@ -153,6 +155,10 @@ export default defineComponent({
         this.$message.warning("请先修改要更新的信息");
         return;
       }
+      if (data.status === 0) {
+        this.$message.warning("状态不允许设置为未知");
+        return;
+      }
       try {
         await novelUpdateDetail(detail.data.id, data);
         this.$message.info("已成功更新信息");
@@ -168,7 +174,4 @@ export default defineComponent({
 @import "../../common";
 .novelDetail
   margin $mainMargin
-
-.btn
-  margin-top $mainMargin
 </style>

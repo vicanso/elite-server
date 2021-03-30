@@ -71,6 +71,10 @@ type (
 		// ChapterID 章节id，由route param中获取并设置，因此不设置validate
 		ChapterID int `json:"chapterID,omitempty"`
 	}
+	// novelChapterUpdateParams 章节更新参数
+	novelChapterUpdateParams struct {
+		Content string `json:"content,omitempty" validate:"required"`
+	}
 	// novelCoverParams 小说封面参数
 	novelCoverParams struct {
 		Type    string `json:"type,omitempty" validate:"required,xNovelCoverType"`
@@ -125,7 +129,12 @@ func init() {
 	// 小说章节内容
 	g.GET(
 		"/v1/{id}/chapters/{no}",
-		ctrl.getChapterContent,
+		ctrl.getChapterDetail,
+	)
+	// 小说章节内容
+	g.PATCH(
+		"/v1/{id}/chapters/{no}",
+		ctrl.updateChapterDetail,
 	)
 	// 小说封面
 	g.GET(
@@ -261,8 +270,8 @@ func (params *novelUpdateParams) update(ctx context.Context) (err error) {
 	return
 }
 
-// getChapterContent 获取章节内容
-func (*novelCtrl) getChapterContent(c *elton.Context) (err error) {
+// getChapterDetail 获取章节内容
+func (*novelCtrl) getChapterDetail(c *elton.Context) (err error) {
 	id, err := getIDFromParams(c)
 	if err != nil {
 		return
@@ -271,12 +280,36 @@ func (*novelCtrl) getChapterContent(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	result, err := novelSrv.GetChapterContent(id, no)
+	result, err := novelSrv.GetChapterDetail(id, no)
 	if err != nil {
 		return
 	}
 	c.CacheMaxAge(10 * time.Minute)
 	c.Body = result
+	return
+}
+
+// updateChapterContent 更新章节内容
+func (*novelCtrl) updateChapterDetail(c *elton.Context) (err error) {
+	id, err := getIDFromParams(c)
+	if err != nil {
+		return
+	}
+	no, err := strconv.Atoi(c.Param("no"))
+	if err != nil {
+		return
+	}
+	params := novelChapterUpdateParams{}
+	err = validate.Do(&params, c.RequestBody)
+	if err != nil {
+		return
+	}
+	_, err = novelSrv.UpdateChapterContent(id, no, params.Content)
+	if err != nil {
+		return
+	}
+	c.NoContent()
+
 	return
 }
 
