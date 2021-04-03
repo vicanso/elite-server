@@ -12,20 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package service
+package session
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/elton"
-	session "github.com/vicanso/elton-session"
+	se "github.com/vicanso/elton-session"
 )
 
 func newUserSession(data string) *UserSession {
-	se := session.Session{}
+	se := se.Session{}
 	_, _ = se.Fetch()
-	_ = se.Set(UserSessionInfoKey, data)
+	_ = se.Set(UserInfoKey, data)
 	return &UserSession{
 		se: &se,
 	}
@@ -58,7 +58,7 @@ func TestUserSession(t *testing.T) {
 	t.Run("set info", func(t *testing.T) {
 		us := newUserSession(`{}`)
 		assert.Equal("", us.MustGetInfo().Account)
-		err := us.SetInfo(UserSessionInfo{
+		err := us.SetInfo(UserInfo{
 			Account: "treexie",
 		})
 		assert.Nil(err)
@@ -73,7 +73,7 @@ func TestNewUserSession(t *testing.T) {
 	us := NewUserSession(c)
 	assert.Nil(us)
 
-	c.Set(session.Key, &session.Session{})
+	c.Set(se.Key, &se.Session{})
 	// 读取session并生成user session，并保存至context中
 	us = NewUserSession(c)
 	assert.NotNil(us)

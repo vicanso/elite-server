@@ -27,12 +27,22 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/vicanso/elite/cache"
+	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/ent/novelsource"
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/request"
 	"github.com/vicanso/go-axios"
 	lruttl "github.com/vicanso/lru-ttl"
 )
+
+var biQuGeIns *axios.Instance
+
+func init() {
+	service := "biquge"
+	conf := config.GetNovelConfigs().Find(service)
+	biQuGeIns = request.NewHTTP(service, conf.BaseURL, conf.Timeout)
+	request.Register(service, biQuGeIns)
+}
 
 const (
 	// 详情接口
@@ -54,7 +64,7 @@ type biQuGeNovel struct {
 // NewBiQuGe 初始化biquge小说网站实例
 func NewBiQuGe() *biQuGe {
 	return &biQuGe{
-		ins:   request.GetBiQuGe(),
+		ins:   biQuGeIns,
 		max:   50000,
 		cache: cache.NewMultilevelCache(50, 5*time.Minute, "biquge:"),
 	}

@@ -24,6 +24,7 @@ import (
 	"github.com/vicanso/elite/helper"
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/service"
+	"github.com/vicanso/elite/session"
 	"github.com/vicanso/elite/util"
 	"github.com/vicanso/elton"
 	"github.com/vicanso/hes"
@@ -68,7 +69,7 @@ func NewError() elton.Handler {
 		}
 		account := ""
 		tid := util.GetTrackID(c)
-		us := service.NewUserSession(c)
+		us := session.NewUserSession(c)
 		if us != nil && us.IsLogin() {
 			account = us.MustGetInfo().Account
 		}

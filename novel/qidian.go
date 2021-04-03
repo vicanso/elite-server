@@ -21,9 +21,19 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/request"
 	"github.com/vicanso/go-axios"
 )
+
+var qiDianIns *axios.Instance
+
+func init() {
+	service := "qidian"
+	conf := config.GetNovelConfigs().Find(service)
+	qiDianIns = request.NewHTTP(service, conf.BaseURL, conf.Timeout)
+	request.Register(service, qiDianIns)
+}
 
 const (
 	// 查询接口
@@ -37,7 +47,7 @@ type qiDian struct {
 // NewQiDian 初始化qidian小说网站实例
 func NewQiDian() *qiDian {
 	return &qiDian{
-		ins: request.GetQiDian(),
+		ins: qiDianIns,
 	}
 }
 

@@ -32,11 +32,12 @@ import (
 	"github.com/vicanso/elite/ent/predicate"
 	"github.com/vicanso/elite/ent/user"
 	"github.com/vicanso/elite/ent/userlogin"
+	"github.com/vicanso/elite/location"
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/middleware"
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/schema"
-	"github.com/vicanso/elite/service"
+	"github.com/vicanso/elite/session"
 	"github.com/vicanso/elite/tracer"
 	"github.com/vicanso/elite/util"
 	"github.com/vicanso/elite/validate"
@@ -57,7 +58,7 @@ type (
 	userInfoResp struct {
 		// 服务器当前时间，2021-03-06T15:10:12+08:00
 		Date string `json:"date,omitempty"`
-		service.UserSessionInfo
+		session.UserInfo
 	}
 
 	// userListResp 用户列表响应
@@ -463,7 +464,7 @@ func pickUserInfo(c *elton.Context) (resp userInfoResp, err error) {
 	resp = userInfoResp{
 		Date: now(),
 	}
-	resp.UserSessionInfo = userInfo
+	resp.UserInfo = userInfo
 	return
 }
 
@@ -546,7 +547,7 @@ func (*userCtrl) getLoginToken(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	userInfo := service.UserSessionInfo{
+	userInfo := session.UserInfo{
 		Token: util.RandomString(8),
 	}
 	err = us.SetInfo(userInfo)
@@ -589,7 +590,7 @@ func (*userCtrl) me(c *elton.Context) (err error) {
 		tracerInfo := tracer.GetTracerInfo()
 		go func() {
 			tracer.SetTracerInfo(tracerInfo)
-			location, _ := service.GetLocationByIP(context.Background(), ip)
+			location, _ := location.GetByIP(context.Background(), ip)
 			if location.IP != "" {
 				fields[cs.FieldCountry] = location.Country
 				fields[cs.FieldProvince] = location.Province
@@ -683,7 +684,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 	account := u.Account
 
 	// 设置session
-	err = us.SetInfo(service.UserSessionInfo{
+	err = us.SetInfo(session.UserInfo{
 		Account: account,
 		ID:      u.ID,
 		Roles:   u.Roles,
@@ -709,7 +710,7 @@ func (*userCtrl) login(c *elton.Context) (err error) {
 			cs.FieldTID:       tid,
 			cs.FieldSID:       sid,
 		}
-		location, _ := service.GetLocationByIP(context.Background(), ip)
+		location, _ := location.GetByIP(context.Background(), ip)
 		country := ""
 		province := ""
 		city := ""

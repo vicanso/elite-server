@@ -61,6 +61,7 @@ import (
 	"github.com/vicanso/elite/router"
 	_ "github.com/vicanso/elite/schedule"
 	"github.com/vicanso/elite/service"
+	"github.com/vicanso/elite/tracer"
 	"github.com/vicanso/elite/util"
 	"github.com/vicanso/elton"
 	compress "github.com/vicanso/elton-compress"
@@ -312,7 +313,7 @@ func main() {
 		}), "requestLimit")
 	}
 	// tracer中间件在最大请求限制中间件之后，保证进入tracer的goroutine不要过多
-	e.UseWithName(middleware.NewTracer(), "tracer")
+	e.UseWithName(tracer.New(), "tracer")
 
 	// 配置只针对snappy与zstd压缩（主要用于减少内网线路带宽，对外的压缩由前置反向代理完成）
 	compressMinLength := 2 * 1024

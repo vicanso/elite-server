@@ -28,6 +28,7 @@ import (
 	"github.com/vicanso/elite/novel"
 	"github.com/vicanso/elite/schema"
 	"github.com/vicanso/elite/service"
+	"github.com/vicanso/elite/session"
 	"github.com/vicanso/elite/tracer"
 	"github.com/vicanso/elite/util"
 	"github.com/vicanso/elton"
@@ -41,9 +42,9 @@ var (
 	getEntClient = helper.EntGetClient
 	now          = util.NowString
 
-	getUserSession = service.NewUserSession
+	getUserSession = session.NewUserSession
 	// 加载用户session
-	loadUserSession = elton.Compose(middleware.NewSession(), sessionHandle)
+	loadUserSession = elton.Compose(session.New(), sessionHandle)
 	// 判断用户是否登录
 	shouldBeLogin = checkLoginMiddleware
 	// 判断用户是否未登录
@@ -91,7 +92,7 @@ func newMagicalCaptchaValidate() elton.Handler {
 
 // isLogin 判断是否登录状态
 func isLogin(c *elton.Context) bool {
-	us := service.NewUserSession(c)
+	us := session.NewUserSession(c)
 	return us.IsLogin()
 }
 
@@ -128,7 +129,7 @@ func newCheckRolesMiddleware(validRoles []string) elton.Handler {
 		if err != nil {
 			return
 		}
-		us := service.NewUserSession(c)
+		us := session.NewUserSession(c)
 		userInfo, err := us.GetInfo()
 		if err != nil {
 			return
@@ -153,7 +154,7 @@ func newTrackerMiddleware(action string) elton.Handler {
 		OnTrack: func(info *M.TrackerInfo, c *elton.Context) {
 			account := ""
 			tid := util.GetTrackID(c)
-			us := service.NewUserSession(c)
+			us := session.NewUserSession(c)
 			if us != nil && us.IsLogin() {
 				account = us.MustGetInfo().Account
 			}
@@ -222,7 +223,7 @@ func getIDFromParams(c *elton.Context) (id int, err error) {
 func sessionHandle(c *elton.Context) error {
 	interData, _ := service.GetSessionInterceptorData()
 
-	us := service.NewUserSession(c)
+	us := session.NewUserSession(c)
 	account := ""
 	if us.IsLogin() {
 		account = us.MustGetInfo().Account

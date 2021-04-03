@@ -15,21 +15,10 @@
 package request
 
 import (
-	"github.com/vicanso/elite/config"
 	"github.com/vicanso/go-axios"
 )
 
-var locationIns = newLocation()
-var qiDianIns = newQiDian()
-var biQuGeIns = newBiQuGe()
-var locationService = "location"
-var qiDianService = "qidian"
-var biQuGeService = "biquge"
-var insList = map[string]*axios.Instance{
-	locationService: locationIns,
-	qiDianService:   qiDianIns,
-	biQuGeService:   biQuGeIns,
-}
+var insList = map[string]*axios.Instance{}
 
 type InstanceStats struct {
 	Name           string `json:"name,omitempty"`
@@ -37,34 +26,9 @@ type InstanceStats struct {
 	Concurrency    int    `json:"concurrency,omitempty"`
 }
 
-// newLocation 初始化location的实例
-func newLocation() *axios.Instance {
-	locationConfig := config.GetLocationConfig()
-	return NewHTTP(locationService, locationConfig.BaseURL, locationConfig.Timeout)
-}
-
-func newQiDian() *axios.Instance {
-	conf := config.GetNovelConfigs().Find(qiDianService)
-	return NewHTTP(qiDianService, conf.BaseURL, conf.Timeout)
-}
-func newBiQuGe() *axios.Instance {
-	conf := config.GetNovelConfigs().Find(biQuGeService)
-	return NewHTTP(biQuGeService, conf.BaseURL, conf.Timeout)
-}
-
-// GetLocation get location instance
-func GetLocation() *axios.Instance {
-	return locationIns
-}
-
-// GetQiDian get qi dian instance
-func GetQiDian() *axios.Instance {
-	return qiDianIns
-}
-
-// GetBiQuGe get bi qu ge instance
-func GetBiQuGe() *axios.Instance {
-	return biQuGeIns
+// Register register http instance
+func Register(service string, ins *axios.Instance) {
+	insList[service] = ins
 }
 
 // GetHTTPStats get http instance stats

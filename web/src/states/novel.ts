@@ -123,6 +123,7 @@ export async function novelList(params: {
   }
   try {
     novels.processing = true;
+    novels.items.length = 0;
     const listParams = Object.assign({}, params);
     // 如果总数为-1（从其它返回或直接刷新 ），则强制获取总数
     if (novels.count === -1) {
@@ -210,6 +211,7 @@ export async function novelListChapter(
   try {
     chapters.novel = novelID;
     chapters.processing = true;
+    chapters.items.length = 0;
     const listParams = Object.assign({}, params);
     // 如果总数为-1（从其它返回或直接刷新 ），则强制获取总数
     if (chapters.count === -1) {

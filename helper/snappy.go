@@ -14,7 +14,9 @@
 
 package helper
 
-import "github.com/golang/snappy"
+import (
+	"github.com/golang/snappy"
+)
 
 func SnappyEncode(data []byte) []byte {
 	dst := []byte{}

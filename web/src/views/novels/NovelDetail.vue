@@ -48,10 +48,18 @@ mixin UpdatedAtField
     :time="detail.data.updatedAt"
   )
 
+//- 小说封面
+mixin CoverField
+  el-col(
+    :span="8"
+  ): img(
+      src="/api/novels/v1/1/cover?type=jpg&quality=80"
+    )
+
 //- 小说简介
 mixin SummaryField
   el-col(
-    :span="24"
+    :span="16"
   ): el-form-item(
     label="简介："
   ): el-input(
@@ -92,6 +100,8 @@ mixin SummaryField
       +StatusField
 
       +SummaryField
+
+      +CoverField
 
   el-button.fullFill.mtopMain(
     type="primary"
@@ -174,4 +184,8 @@ export default defineComponent({
 @import "../../common";
 .novelDetail
   margin $mainMargin
+img
+  display block
+  max-height 100px
+  max-width 100%
 </style>

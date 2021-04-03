@@ -1,4 +1,4 @@
-// Copyright 2021 tree xie
+// Copyright 2020 tree xie
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package middleware
+package session
 
 import (
-	"github.com/vicanso/elite/tracer"
-	"github.com/vicanso/elite/util"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/elton"
+	se "github.com/vicanso/elton-session"
 )
 
-// NewTracer create a tracer middleware
-func NewTracer() elton.Handler {
-	return func(c *elton.Context) error {
-		deviceID := c.GetRequestHeader("X-Device-ID")
-		if deviceID == "" {
-			deviceID = util.GetTrackID(c)
-		}
-		// 设置tracer的信息
-		tracer.SetTracerInfo(tracer.TracerInfo{
-			TraceID:  c.ID,
-			DeviceID: deviceID,
-		})
-		return c.Next()
+func TestNewSession(t *testing.T) {
+	assert := assert.New(t)
+
+	req := httptest.NewRequest("GET", "/", nil)
+	c := elton.NewContext(nil, req)
+	c.Next = func() error {
+		return nil
 	}
+	fn := New()
+	err := fn(c)
+	assert.Nil(err)
+	assert.NotNil(c.Get(se.Key))
 }
