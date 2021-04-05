@@ -439,6 +439,7 @@ func (*novelCtrl) list(c *elton.Context) (err error) {
 		if len(novels) > limit {
 			novels = novels[:limit]
 		}
+		count = len(novels)
 	} else {
 		if params.ShouldCount() {
 			count, err = params.count(c.Context())

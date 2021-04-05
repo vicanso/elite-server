@@ -98,6 +98,28 @@ mixin Pagination
     )
       i.el-icon-notebook-1
       span 小说列表
+    el-form(
+      label-width="80px" 
+    ): el-row(
+      :gutter="20"
+    )
+      el-col(
+        :span="16"
+      ): el-form-item(
+        label="关键字："
+      ): el-input(
+        clearable
+        v-model="query.keyword"
+        placeholder="请输入搜索关键字"
+      )
+      el-col(
+        :span="8"
+      ): el-button.fullFill(
+        @click="filter"
+        type="primary"
+        icon="el-icon-search"
+      ) 筛选
+
     div(
       v-loading="novels.processing"
     ): el-table(
@@ -164,6 +186,7 @@ export default defineComponent({
         page: Number(query.page || 1),
         limit: Number(query.limit || PAGE_SIZES[0]),
         order: query.order || "-updatedAt",
+        keyword: "",
       },
     };
   },
@@ -213,6 +236,10 @@ export default defineComponent({
       this.query.page = 1;
       this.updateRouteQuery();
     },
+    filter() {
+      this.query.page = 1;
+      this.updateRouteQuery();
+    }
   },
 });
 </script>
