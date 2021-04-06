@@ -35,13 +35,12 @@ import (
 	lruttl "github.com/vicanso/lru-ttl"
 )
 
-var biQuGeIns *axios.Instance
+var biQuGeIns = newBiQuGeInstance()
 
-func init() {
+func newBiQuGeInstance() *axios.Instance {
 	service := "biquge"
 	conf := config.GetNovelConfigs().Find(service)
-	biQuGeIns = request.NewHTTP(service, conf.BaseURL, conf.Timeout)
-	request.Register(service, biQuGeIns)
+	return request.NewHTTP(service, conf.BaseURL, conf.Timeout)
 }
 
 const (

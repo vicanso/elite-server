@@ -44,7 +44,7 @@ mixin OpColumn
   el-table-column(
     fixed="right"
     label="操作"
-    width="80"
+    width="160"
   ): template(
     #default="scope"
   ): .tac
@@ -53,6 +53,12 @@ mixin OpColumn
     )
       i.el-icon-edit
       span 编辑
+    el-button(
+      type="text"
+      @click="preview(scope.row)"
+    ) 
+      i.el-icon-document
+      |预览
 
 mixin Pagination
   el-pagination.pagination(
@@ -67,7 +73,9 @@ mixin Pagination
   )
 
 .novelChapters
-  el-card
+  el-card(
+    v-if="!mode"
+  )
     template(
       #header
     )
@@ -97,6 +105,25 @@ mixin Pagination
 
     //- 分页设置
     +Pagination
+  .chapterPreview(
+    v-else
+  )
+    el-card(
+      v-loading="chapterDetail.processing"
+    )
+      template(
+        #header
+      )
+        a.mright10.bold(
+          @click.prevent="mode = ''"
+          href="#"
+        ): i.el-icon-arrow-left
+        | {{chapterDetail.data.title}}
+      div
+        p(
+          v-for="item in splitContent(chapterDetail.data.content)"
+        ) {{item}}
+
 </template>
 
 <script lang="ts">
@@ -107,6 +134,7 @@ import TimeFormater from "../../components/TimeFormater.vue";
 import useNovelState, {
   novelListChapter,
   novelChaptersClear,
+  novelGetChapterDetail,
 } from "../../states/novel";
 import { NOVEL_CHAPTER_DETAIL } from "../../router";
 
@@ -125,11 +153,13 @@ export default defineComponent({
       chapterDetailRoute: NOVEL_CHAPTER_DETAIL,
       pageSizes: PAGE_SIZES,
       chapters: novelState.chapters,
+      chapterDetail: novelState.chapterDetail,
     };
   },
   data() {
     const { query } = this.$route;
     return {
+      mode: "",
       query: {
         page: Number(query.page || 1),
         limit: Number(query.limit || PAGE_SIZES[0]),
@@ -185,6 +215,24 @@ export default defineComponent({
       this.query.page = 1;
       this.updateRouteQuery();
     },
+    splitContent(content: string) {
+      if (!content) {
+        return [];
+      }
+      const arr = content.split("\n");
+      return arr;
+    },
+    async preview(item) {
+      this.mode = "preview";
+      try {
+        await novelGetChapterDetail({
+          id: Number(this.$route.params.id),
+          no: item.no,
+        });
+      } catch (err) {
+        this.$error(err);
+      }
+    },
   },
 });
 </script>
@@ -201,4 +249,7 @@ export default defineComponent({
 .pagination
   text-align right
   margin-top 15px
+
+p
+  margin-bottom $mainMargin
 </style>

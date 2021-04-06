@@ -123,4 +123,5 @@ export default defineComponent({
 .mainContent
   padding-left $mainNavWidth
   padding-top $mainHeaderHeight
+  min-height 100vh
 </style>

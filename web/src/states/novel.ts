@@ -68,27 +68,27 @@ interface NovelDetail {
   processing: boolean;
   data: Novel;
 }
-const detail: NovelDetail = {
+const detail: NovelDetail = reactive({
   processing: false,
   data: {
     id: 0,
     name: "",
     author: "",
   },
-};
+});
 
 interface NovelChapterDetail {
   processing: boolean;
   data: NovelChapter;
 }
-const chapterDetail: NovelChapterDetail = {
+const chapterDetail: NovelChapterDetail = reactive({
   processing: false,
   data: {
     id: 0,
     title: "",
     no: 0,
   },
-};
+});
 
 interface ReadonlyNovelState {
   novels: DeepReadonly<Novels>;
@@ -182,15 +182,11 @@ export async function novelUpdateDetail(
     return;
   }
   try {
-    if (detail.data.id === id) {
-      detail.processing = true;
-    }
+    detail.processing = true;
     await request.patch(NOVELS_ID.replace(":id", `${id}`), data);
     Object.assign(detail.data, data);
   } finally {
-    if (detail.data.id === id) {
-      detail.processing = false;
-    }
+    detail.processing = false;
   }
 }
 
@@ -249,6 +245,9 @@ export async function novelGetChapterDetail(params: {
     return;
   }
   try {
+    chapterDetail.data.content = "";
+    chapterDetail.data.title = "";
+    chapterDetail.processing = true;
     const url = NOVELS_CHAPTERS_ID.replace(":id", `${params.id}`).replace(
       ":no",
       `${params.no}`
@@ -270,6 +269,7 @@ export async function novelUpdateChapterDetail(params: {
     return;
   }
   try {
+    chapterDetail.processing = true;
     const url = NOVELS_CHAPTERS_ID.replace(":id", `${params.id}`).replace(
       ":no",
       `${params.no}`

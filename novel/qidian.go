@@ -26,13 +26,12 @@ import (
 	"github.com/vicanso/go-axios"
 )
 
-var qiDianIns *axios.Instance
+var qiDianIns = newQiDianInstance()
 
-func init() {
+func newQiDianInstance() *axios.Instance {
 	service := "qidian"
 	conf := config.GetNovelConfigs().Find(service)
-	qiDianIns = request.NewHTTP(service, conf.BaseURL, conf.Timeout)
-	request.Register(service, qiDianIns)
+	return request.NewHTTP(service, conf.BaseURL, conf.Timeout)
 }
 
 const (

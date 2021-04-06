@@ -71,7 +71,7 @@ mixin SummaryField
 
 .novelDetail
   el-card(
-    v-loading="detail.processing"
+    v-loading="processing"
   )
     template(
       #header
@@ -133,6 +133,7 @@ export default defineComponent({
   },
   data() {
     return {
+      processing: false,
       form: {
         status: 0,
         summary: "",
@@ -144,15 +145,15 @@ export default defineComponent({
   },
   methods: {
     async fetch() {
+      if (this.detail.processing) {
+        return;
+      }
       const { id } = this.$route.params;
       try {
         const { form, detail } = this;
         await novelGetDetail(Number(id));
         form.status = detail.data.status;
         form.summary = detail.data.summary;
-        // 由于数据均在state中，不知为啥无法更新组件，
-        // 因此强制更新
-        this.$forceUpdate();
       } catch (err) {
         this.$error(err);
       }
@@ -160,6 +161,9 @@ export default defineComponent({
     // 更新小说信息
     async update() {
       const { form, detail } = this;
+      if (detail.processing) {
+        return;
+      }
       const { modifiedCount, data } = diff(form, detail.data);
       if (modifiedCount === 0) {
         this.$message.warning("请先修改要更新的信息");

@@ -13,7 +13,7 @@
       | {{chapter.data.title}}
     el-input(
       type="textarea"
-      :autosize="{ minRows: 20, maxRows: 10 }" 
+      :autosize="{ minRows: 20, maxRows: 25 }" 
       v-model="content"
     ) 
     el-button.fullFill.mtopMain(

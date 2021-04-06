@@ -239,7 +239,7 @@ export default defineComponent({
     filter() {
       this.query.page = 1;
       this.updateRouteQuery();
-    }
+    },
   },
 });
 </script>
