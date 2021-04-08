@@ -52,9 +52,7 @@ mixin UpdatedAtField
 mixin CoverField
   el-col(
     :span="8"
-  ): img(
-      src="/api/novels/v1/1/cover?type=jpg&quality=80"
-    )
+  )
 
 //- 小说简介
 mixin SummaryField
