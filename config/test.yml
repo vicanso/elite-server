@@ -4,7 +4,7 @@
 # redis 配置
 redis:
   # 可以配置为下面的形式，则从env中获取REDIS_URI对应的字符串来当redis连接串
-  uri: REDIS_UR
+  uri: REDIS_URI
 
 # postgres postgres配置
 postgres:
