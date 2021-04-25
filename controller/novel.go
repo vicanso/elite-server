@@ -53,6 +53,7 @@ type (
 		listParams
 
 		Keyword       string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
+		IDS           string `json:"ids,omitempty" validate:"omitempty,xNovelIDS"`
 		AuthorKeyword string
 		NameKeyword   string
 	}
@@ -168,6 +169,18 @@ func (params *novelListParams) where(query *ent.NovelQuery) *ent.NovelQuery {
 	// 通过keyword转换而来
 	if params.AuthorKeyword != "" {
 		query = query.Where(entNovel.AuthorContains(params.AuthorKeyword))
+	}
+
+	if params.IDS != "" {
+		arr := strings.Split(params.IDS, ",")
+		ids := make([]int, 0, len(arr))
+		for _, v := range arr {
+			id, _ := strconv.Atoi(v)
+			if id != 0 {
+				ids = append(ids, id)
+			}
+		}
+		query = query.Where(entNovel.IDIn(ids...))
 	}
 
 	return query

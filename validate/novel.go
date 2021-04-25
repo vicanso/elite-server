@@ -14,6 +14,13 @@
 
 package validate
 
+import (
+	"strconv"
+	"strings"
+
+	"github.com/go-playground/validator/v10"
+)
+
 func init() {
 	AddAlias("xNovelName", "min=1,max=30")
 	AddAlias("xNovelAuthor", "min=1,max=20")
@@ -30,4 +37,22 @@ func init() {
 	}))
 	AddAlias("xNovelChapterTitle", "min=1,max=1000")
 	AddAlias("xNovelChapterContent", "min=1,max=50000")
+
+	Add("xNovelIDS", func(fl validator.FieldLevel) bool {
+		value, ok := toString(fl)
+		if !ok {
+			return false
+		}
+		//  长度不能超过
+		if len(value) > 1000 {
+			return false
+		}
+		for _, v := range strings.Split(value, ",") {
+			_, e := strconv.Atoi(v)
+			if e != nil {
+				return false
+			}
+		}
+		return true
+	})
 }
