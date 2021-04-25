@@ -49,6 +49,7 @@ func init() {
 	_, _ = c.AddFunc("@every 1m", httpInstanceStats)
 	_, _ = c.AddFunc("@every 1m", routerConcurrencyStats)
 	_, _ = c.AddFunc("@every 12h", updateAllNovelWordCount)
+	_, _ = c.AddFunc("@every 12h", updateAllNovelChapterCount)
 
 	// 如果是开发环境，则不执行定时任务
 	if util.IsDevelopment() {
@@ -221,4 +222,10 @@ func syncNovelSource() {
 func updateAllNovelWordCount() {
 	srv := novel.Srv{}
 	doTask("update all novel word count", srv.UpdateAllWordCount)
+}
+
+// updateAllNovelChapterCount 更新小说章节总数
+func updateAllNovelChapterCount() {
+	srv := novel.Srv{}
+	doTask("update all novel chapter count", srv.UpdateAllChapterCount)
 }

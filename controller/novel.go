@@ -600,6 +600,8 @@ func updateNovelChapters(id int, fetchingContent bool) (err error) {
 	if err != nil {
 		return
 	}
+	// 如果更新章节数失败，则忽略
+	_ = novelSrv.UpdateChapterCount(id)
 	return novelSrv.UpdateWordCount(id, time.Unix(0, 0))
 }
 

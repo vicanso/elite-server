@@ -69,6 +69,11 @@ func (Novel) Fields() []ent.Field {
 				return nil
 			}).
 			Comment("小说状态"),
+		field.Int("chapter_count").
+			Default(0).
+			// 如果需要select此字段，则需要设置sql
+			StructTag(`json:"chapterCount,omitempty" sql:"chapter_count"`).
+			Comment("章节总数"),
 		field.Int("word_count").
 			Optional().
 			Default(0).

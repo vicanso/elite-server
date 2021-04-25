@@ -323,6 +323,44 @@ func (srv *Srv) UpdateAllChaptersByWeight(minUpdatedWeight int) (err error) {
 	return
 }
 
+func (srv *Srv) UpdateChapterCount(id int) (err error) {
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, defaultQueryTimeout*2)
+	defer cancel()
+	latestChapter, err := getEntClient().Chapter.Query().
+		Where(chapter.Novel(id)).
+		Select(chapter.FieldNo).
+		Order(ent.Desc(chapter.FieldNo)).
+		First(ctx)
+	if err != nil {
+		// 将not found的error忽略
+		if ent.IsNotFound(err) {
+			err = nil
+		}
+		return
+	}
+	result, err := getEntClient().Novel.
+		Query().
+		Where(novel.ID(id)).
+		Select(novel.FieldChapterCount).
+		First(ctx)
+	if err != nil {
+		return
+	}
+	if result.ChapterCount == latestChapter.No {
+		return
+	}
+
+	_, err = getEntClient().Novel.UpdateOneID(id).
+		SetChapterCount(latestChapter.No).
+		Save(context.Background())
+	if err != nil {
+		return
+	}
+
+	return
+}
+
 // UpdateWordCount 更新总字数
 func (srv *Srv) UpdateWordCount(id int, updatedAfter time.Time) (err error) {
 	ctx := context.Background()
@@ -422,6 +460,22 @@ func (srv *Srv) UpdateAllWordCount() (err error) {
 	updatedAfter := time.Now().AddDate(0, 0, -2)
 	return srv.doAll(func(id int) error {
 		return srv.UpdateWordCount(id, updatedAfter)
+	})
+}
+
+// UpdateAllChapterCount 更新所有小说章节总数
+func (srv *Srv) UpdateAllChapterCount() (err error) {
+	// 确认是否有其它实例在更新
+	// 保证最少10分钟内不要有相同的更新任务
+	redisSrv := cache.GetRedisCache()
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	ok, err := redisSrv.Lock(ctx, "novel-update-chapter-count", 10*time.Minute)
+	if err != nil || !ok {
+		return
+	}
+	return srv.doAll(func(id int) error {
+		return srv.UpdateChapterCount(id)
 	})
 }
 
