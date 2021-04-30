@@ -40,6 +40,7 @@ const (
 
 	defaultQueryTimeout = 3 * time.Second
 )
+const novelSearchHotKeywords = "nshkws"
 
 // 小说来源
 const (
@@ -606,4 +607,25 @@ func (*Srv) GetCover(id int) (cover string, err error) {
 	}
 	cover = result.Cover
 	return
+}
+
+// AddHotKeyword 添加搜索关键字
+func (*Srv) AddHotKeyword(keyword string) (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
+	defer cancel()
+	return helper.RedisGetClient().ZIncrBy(ctx, novelSearchHotKeywords, 1, keyword).Err()
+}
+
+// ListHotKeyword 获取热门搜索关键字
+func (*Srv) ListHotKeyword() (keywords []string, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
+	defer cancel()
+	return helper.RedisGetClient().ZRevRange(ctx, novelSearchHotKeywords, 0, 10).Result()
+}
+
+// ClearHotKeyword 清除热门搜索
+func (*Srv) ClearHotKeywords() (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
+	defer cancel()
+	return helper.RedisGetClient().Del(ctx, novelSearchHotKeywords).Err()
 }

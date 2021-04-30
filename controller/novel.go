@@ -97,6 +97,10 @@ type (
 		Chapters []*ent.Chapter `json:"chapters,omitempty"`
 		Count    int            `json:"count,omitempty"`
 	}
+	// novelHotKeywordListResp 热门搜索关键字列表响应
+	novelHotKeywordListResp struct {
+		Keywords []string `json:"keywords"`
+	}
 )
 
 func init() {
@@ -157,6 +161,11 @@ func init() {
 		loadUserSession,
 		shouldBeAdmin,
 		ctrl.publishAll,
+	)
+
+	g.GET(
+		"/v1/hot-keywords",
+		ctrl.listHotKeyword,
 	)
 }
 
@@ -430,6 +439,8 @@ func (*novelCtrl) list(c *elton.Context) (err error) {
 	var novels []*ent.Novel
 	// 如果有关键字，则不计算总数
 	if params.Keyword != "" {
+		// 如果添加不成功忽略
+		_ = novelSrv.AddHotKeyword(params.Keyword)
 		limit := params.GetLimit()
 		// 优先查名字，再查作者
 		keyword := params.Keyword
@@ -625,5 +636,18 @@ func (*novelCtrl) updateAllChapters(c *elton.Context) (err error) {
 		}
 	}()
 	c.NoContent()
+	return
+}
+
+// listHotKeyword 获取热门搜索关键字
+func (*novelCtrl) listHotKeyword(c *elton.Context) (err error) {
+	keywords, err := novelSrv.ListHotKeyword()
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge(5 * time.Minute)
+	c.Body = &novelHotKeywordListResp{
+		Keywords: keywords,
+	}
 	return
 }
