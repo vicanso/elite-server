@@ -439,8 +439,6 @@ func (*novelCtrl) list(c *elton.Context) (err error) {
 	var novels []*ent.Novel
 	// 如果有关键字，则不计算总数
 	if params.Keyword != "" {
-		// 如果添加不成功忽略
-		_ = novelSrv.AddHotKeyword(params.Keyword)
 		limit := params.GetLimit()
 		// 优先查名字，再查作者
 		keyword := params.Keyword
@@ -464,6 +462,11 @@ func (*novelCtrl) list(c *elton.Context) (err error) {
 			novels = novels[:limit]
 		}
 		count = len(novels)
+		// 有符合条件的搜索才记录关键字
+		if count > 0 {
+			// 如果添加不成功忽略
+			_ = novelSrv.AddHotKeyword(params.Keyword)
+		}
 	} else {
 		if params.ShouldCount() {
 			count, err = params.count(c.Context())
