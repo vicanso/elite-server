@@ -866,9 +866,9 @@ func (ctrl userCtrl) listLoginRecord(c *elton.Context) (err error) {
 
 // addUserAction add user action
 func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
-	tid := util.GetTrackID(c)
-	// 如果没有tid，则直接返回
-	if tid == "" {
+	deviceID := util.GetDeviceID(c)
+	// 如果没有deviceID，则直接返回
+	if deviceID == "" {
 		c.NoContent()
 		return
 	}
@@ -899,7 +899,7 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 		fields := map[string]interface{}{
 			cs.FieldRouteName: item.Route,
 			cs.FieldPath:      item.Path,
-			cs.FieldTID:       tid,
+			cs.FieldDiviceID:  deviceID,
 		}
 		if account != "" {
 			fields[cs.FieldAccount] = account
@@ -909,6 +909,24 @@ func (ctrl userCtrl) addUserAction(c *elton.Context) (err error) {
 			cs.TagCategory: item.Category,
 			cs.TagResult:   strconv.Itoa(item.Result),
 		}, fields, t)
+
+		bookIDField, ok := item.Extra["bookID"]
+		if !ok {
+			continue
+		}
+		v, ok := bookIDField.(float64)
+		if !ok {
+			continue
+		}
+		bookID := int(v)
+		switch item.Category {
+		// 阅读次数
+		case cs.ActionNovelDetail:
+			_ = novelSrv.AddViews(bookID)
+			// 收藏次数
+		case cs.ActionAddToFavorite:
+			_ = novelSrv.AddFavorites(bookID)
+		}
 	}
 	c.Body = map[string]int{
 		"count": count,

@@ -36,11 +36,12 @@ func NewStats() elton.Handler {
 			// us := service.NewUserSession(c)
 			sid := util.GetSessionID(c)
 			// 由客户端设置的uuid
-			// zap.String("uuid", c.GetRequestHeader("X-UUID")),
+			deviceID := util.GetDeviceID(c)
 			log.Default().Info().
 				Str("category", "accessLog").
 				Str("ip", info.IP).
 				Str("sid", sid).
+				Str("deviceID", deviceID).
 				Str("method", info.Method).
 				Str("route", info.Route).
 				Str("uri", info.URI).

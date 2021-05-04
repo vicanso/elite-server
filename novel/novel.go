@@ -629,3 +629,28 @@ func (*Srv) ClearHotKeywords() (err error) {
 	defer cancel()
 	return helper.RedisGetClient().Del(ctx, novelSearchHotKeywords).Err()
 }
+
+// AddViews 添加阅读次数
+func (*Srv) AddViews(id int) (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
+	defer cancel()
+	_, err = getEntClient().Novel.UpdateOneID(id).
+		AddViews(1).
+		Save(ctx)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (*Srv) AddFavorites(id int) (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
+	defer cancel()
+	_, err = getEntClient().Novel.UpdateOneID(id).
+		AddFavorites(1).
+		Save(ctx)
+	if err != nil {
+		return
+	}
+	return
+}

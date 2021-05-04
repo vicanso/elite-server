@@ -44,3 +44,14 @@ const (
 	// ActionNovelChapterUpdate update novel chapter
 	ActionNovelChapterUpdate = "updateNovelChapter"
 )
+
+// 客户端的相关操作
+const (
+	ActionContinueReading    = "continueReading"
+	ActionFetchMoreNovel     = "fetchMoreNovel"
+	ActionNovelDetail        = "novelDetail"
+	ActionChapterList        = "chapterList"
+	ActionChapterDetail      = "chapterDetail"
+	ActionAddToFavorite      = "addToFavorite"
+	ActionRemoveFromFavorite = "removeFromFavorite"
+)

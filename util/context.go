@@ -15,11 +15,26 @@
 package util
 
 import (
+	"regexp"
+
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elton"
 )
 
 var sessionConfig = config.GetSessionConfig()
+var uuidReg = regexp.MustCompile(`uuid/(\S+)`)
+
+func GetDeviceID(c *elton.Context) string {
+	deviceID := ""
+	arr := uuidReg.FindStringSubmatch(c.Request.UserAgent())
+	if len(arr) == 2 {
+		deviceID = arr[1]
+	}
+	if deviceID == "" {
+		deviceID = GetTrackID(c)
+	}
+	return deviceID
+}
 
 // GetTrackID 获取track id
 func GetTrackID(c *elton.Context) string {

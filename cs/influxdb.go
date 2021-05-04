@@ -89,6 +89,8 @@ const (
 	FieldSID = "sid"
 	// FieldTID track id
 	FieldTID = "tid"
+	// FieldDiviceID device id
+	FieldDiviceID = "did"
 	// FieldQuery url query
 	FieldQuery = "query"
 	// FieldParams url route params

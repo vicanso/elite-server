@@ -14,6 +14,8 @@
 
 package validate
 
+import "github.com/vicanso/elite/cs"
+
 func init() {
 	// 用户账号
 	AddAlias("xUserAccount", "ascii,min=2,max=10")
@@ -30,11 +32,13 @@ func init() {
 	// 用户行为分类
 	// TODO 是否调整为支持配置的方式
 	Add("xUserActionCategory", newIsInString([]string{
-		"click",
-		"login",
-		"register",
-		"routeChange",
-		"error",
+		cs.ActionContinueReading,
+		cs.ActionFetchMoreNovel,
+		cs.ActionNovelDetail,
+		cs.ActionChapterList,
+		cs.ActionChapterDetail,
+		cs.ActionAddToFavorite,
+		cs.ActionRemoveFromFavorite,
 	}))
 	// 用户行为触发所在路由
 	AddAlias("xUserActionRoute", "max=50")

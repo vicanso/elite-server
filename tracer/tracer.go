@@ -20,8 +20,6 @@
 package tracer
 
 import (
-	"regexp"
-
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/huandu/go-tls/g"
 	"github.com/vicanso/elite/util"
@@ -82,16 +80,8 @@ func SetTracerInfo(info TracerInfo) {
 
 // New create a tracer middleware
 func New() elton.Handler {
-	reg := regexp.MustCompile(`uuid/(\S+)`)
 	return func(c *elton.Context) error {
-		deviceID := ""
-		arr := reg.FindStringSubmatch(c.Request.UserAgent())
-		if len(arr) == 2 {
-			deviceID = arr[1]
-		}
-		if deviceID == "" {
-			deviceID = util.GetTrackID(c)
-		}
+		deviceID := util.GetDeviceID(c)
 		// 设置tracer的信息
 		SetTracerInfo(TracerInfo{
 			TraceID:  c.ID,
