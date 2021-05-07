@@ -62,6 +62,7 @@ type (
 	Novel struct {
 		Name     string
 		Author   string
+		Category string
 		Summary  string
 		SourceID int
 		Source   int
@@ -651,6 +652,42 @@ func (*Srv) AddFavorites(id int) (err error) {
 		Save(ctx)
 	if err != nil {
 		return
+	}
+	return
+}
+
+// UpdateAllCategory 更新所有分类
+func (*Srv) UpdateAllCategory() (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
+	defer cancel()
+	novels, err := getEntClient().Novel.Query().
+		// 最少有100章的小说
+		Where(novel.ChapterCountGT(100)).
+		// 分类为空
+		Where(novel.CategoriesIsNil()).
+		All(ctx)
+	if err != nil {
+		return
+	}
+	qiDian := NewQiDian()
+	for _, item := range novels {
+		result, _ := qiDian.Search(item.Name, item.Author)
+		if result.Category != "" {
+			subCtx, subCancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
+			defer subCancel()
+			// 如果更新失败，则忽略
+			_, e := getEntClient().Novel.UpdateOneID(item.ID).
+				SetCategories([]string{
+					result.Category,
+				}).
+				Save(subCtx)
+			if e != nil {
+				log.Default().Error().
+					Str("name", item.Name).
+					Str("author", item.Author).
+					Msg("update category fail")
+			}
+		}
 	}
 	return
 }

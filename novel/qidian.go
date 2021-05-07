@@ -76,10 +76,11 @@ func (qd *qiDian) Search(name, author string) (novel Novel, err error) {
 			if ok {
 				cover = strings.Replace("https:"+cover, bid+"/150", bid+"/180", 1)
 			}
-			// TODO 添加分类
+			category := item.Find(".author").Find("a").Eq(1).Text()
 			novel = Novel{
 				Name:     curName,
 				Author:   curAuthor,
+				Category: category,
 				Summary:  summary,
 				Source:   NovelSourceQiDian,
 				SourceID: id,

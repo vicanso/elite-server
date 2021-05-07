@@ -103,6 +103,10 @@ func (Novel) Fields() []ent.Field {
 			Comment("小说封面"),
 		field.String("summary").
 			Comment("小说简介"),
+		// 小说分类
+		field.Strings("categories").
+			Optional().
+			Comment("小说分类"),
 	}
 }
 
@@ -115,5 +119,6 @@ func (Novel) Indexes() []ent.Index {
 	return []ent.Index{
 		// 唯一索引
 		index.Fields("name", "author").Unique(),
+		index.Fields("categories"),
 	}
 }
