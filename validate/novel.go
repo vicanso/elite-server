@@ -27,6 +27,7 @@ func init() {
 	AddAlias("xNovelID", "number")
 	AddAlias("xNovelStatus", "number,min=1")
 	AddAlias("xNovelSummary", "min=1,max=1000")
+	AddAlias("xNovelCategory", "min=1,max=5")
 	AddAlias("xNovelCoverWidth", "number")
 	AddAlias("xNovelCoverHeight", "number")
 	AddAlias("xNovelCoverQuality", "number")

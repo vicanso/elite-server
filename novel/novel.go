@@ -42,6 +42,8 @@ const (
 )
 const novelSearchHotKeywords = "nshkws"
 
+const novelCategorySummary = "novelCategorySummary"
+
 // 小说来源
 const (
 	// NovelSourceBiQuGe biquge source
@@ -80,6 +82,12 @@ type (
 		Author string
 		Source int
 	}
+	// CategorySummary 小说分类汇总
+	CategorySummary struct {
+		Name  string `json:"name"`
+		Count int    `json:"count"`
+	}
+	CategorySummaries []*CategorySummary
 )
 
 func New() *Srv {
@@ -689,5 +697,48 @@ func (*Srv) UpdateAllCategory() (err error) {
 			}
 		}
 	}
+	return
+}
+
+// UpdateCategorySummary 更新小说分类汇总
+func (*Srv) UpdateCategorySummary() (err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultQueryTimeout)
+	defer cancel()
+	novels, err := getEntClient().Novel.Query().
+		Where(novel.CategoriesNotNil()).
+		All(ctx)
+	if err != nil {
+		return
+	}
+	data := make(map[string]int)
+	for _, item := range novels {
+		for _, cat := range item.Categories {
+			_, ok := data[cat]
+			if !ok {
+				data[cat] = 0
+			}
+			data[cat]++
+		}
+	}
+	// 分类数据缓存
+	_ = cache.GetRedisCache().SetStruct(context.Background(), novelCategorySummary, data, 5*24*time.Hour)
+	return
+}
+
+// ListCategorySummary 获取小说分类汇总
+func (*Srv) ListCategorySummary(ctx context.Context) (summaries CategorySummaries, err error) {
+	data := make(map[string]int)
+	err = cache.GetRedisCache().GetStruct(ctx, novelCategorySummary, &data)
+	if err != nil {
+		return
+	}
+	summaries = make(CategorySummaries, 0)
+	for k, v := range data {
+		summaries = append(summaries, &CategorySummary{
+			Name:  k,
+			Count: v,
+		})
+	}
+
 	return
 }

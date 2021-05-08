@@ -52,6 +52,7 @@ func init() {
 	_, _ = c.AddFunc("@every 12h", updateAllNovelChapterCount)
 	_, _ = c.AddFunc("0 2 * * *", clearHotKeywords)
 	_, _ = c.AddFunc("0 3 * * *", updateAllNovelCategory)
+	_, _ = c.AddFunc("0 1 * * *", updateNovelCategorySummary)
 
 	// 如果是开发环境，则不执行定时任务
 	if util.IsDevelopment() {
@@ -242,4 +243,10 @@ func clearHotKeywords() {
 func updateAllNovelCategory() {
 	srv := novel.Srv{}
 	doTask("update all novel category", srv.UpdateAllCategory)
+}
+
+// updateNovelCategorySummary 更新小说分类汇总
+func updateNovelCategorySummary() {
+	srv := novel.Srv{}
+	doTask("update novel category summary", srv.UpdateCategorySummary)
 }

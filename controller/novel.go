@@ -24,11 +24,14 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"github.com/minio/minio-go/v7"
 	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/chapter"
 	entNovel "github.com/vicanso/elite/ent/novel"
+	"github.com/vicanso/elite/ent/predicate"
 	"github.com/vicanso/elite/log"
 	"github.com/vicanso/elite/novel"
 	"github.com/vicanso/elite/router"
@@ -52,10 +55,13 @@ type (
 	novelListParams struct {
 		listParams
 
-		Keyword       string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
-		IDS           string `json:"ids,omitempty" validate:"omitempty,xNovelIDS"`
-		AuthorKeyword string
-		NameKeyword   string
+		Keyword  string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
+		IDS      string `json:"ids,omitempty" validate:"omitempty,xNovelIDS"`
+		Category string `json:"category,omitempty" validate:"omitempty,xNovelCategory"`
+
+		// 以下字段搜索时生成
+		AuthorKeyword string `json:"authorKeyword,omitempty"`
+		NameKeyword   string `json:"nameKeyword,omitempty"`
 	}
 	// novelUpdateParams 更新小说参数
 	novelUpdateParams struct {
@@ -100,6 +106,9 @@ type (
 	// novelHotKeywordListResp 热门搜索关键字列表响应
 	novelHotKeywordListResp struct {
 		Keywords []string `json:"keywords"`
+	}
+	novelCategorySummaryListResp struct {
+		Summaries novel.CategorySummaries `json:"summaries"`
 	}
 )
 
@@ -167,6 +176,11 @@ func init() {
 		"/v1/hot-keywords",
 		ctrl.listHotKeyword,
 	)
+
+	g.GET(
+		"/v1/category-summaries",
+		ctrl.listCategorySummary,
+	)
 }
 
 // where 将查询条件中的参数转换为对应的where条件
@@ -178,6 +192,13 @@ func (params *novelListParams) where(query *ent.NovelQuery) *ent.NovelQuery {
 	// 通过keyword转换而来
 	if params.AuthorKeyword != "" {
 		query = query.Where(entNovel.AuthorContains(params.AuthorKeyword))
+	}
+
+	// 分类搜索
+	if params.Category != "" {
+		query = query.Where(predicate.Novel(func(s *sql.Selector) {
+			s.Where(sqljson.ValueContains(entNovel.FieldCategories, params.Category))
+		}))
 	}
 
 	if params.IDS != "" {
@@ -652,5 +673,19 @@ func (*novelCtrl) listHotKeyword(c *elton.Context) (err error) {
 	c.Body = &novelHotKeywordListResp{
 		Keywords: keywords,
 	}
+	return
+}
+
+// listCategorySummary 获取分类汇总信息
+func (*novelCtrl) listCategorySummary(c *elton.Context) (err error) {
+	summaries, err := novelSrv.ListCategorySummary(c.Context())
+	if err != nil {
+		return
+	}
+	c.CacheMaxAge(10 * time.Minute)
+	c.Body = &novelCategorySummaryListResp{
+		Summaries: summaries,
+	}
+
 	return
 }
