@@ -39,6 +39,7 @@ func init() {
 		cs.ActionChapterDetail,
 		cs.ActionAddToFavorite,
 		cs.ActionRemoveFromFavorite,
+		cs.ActionFetchCategoryNovel,
 	}))
 	// 用户行为触发所在路由
 	AddAlias("xUserActionRoute", "max=50")

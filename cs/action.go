@@ -54,4 +54,5 @@ const (
 	ActionChapterDetail      = "chapterDetail"
 	ActionAddToFavorite      = "addToFavorite"
 	ActionRemoveFromFavorite = "removeFromFavorite"
+	ActionFetchCategoryNovel = "fetchCategoryNovel"
 )
