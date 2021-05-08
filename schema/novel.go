@@ -120,5 +120,7 @@ func (Novel) Indexes() []ent.Index {
 		// 唯一索引
 		index.Fields("name", "author").Unique(),
 		index.Fields("categories"),
+		index.Fields("views"),
+		index.Fields("favorites"),
 	}
 }
