@@ -81,15 +81,12 @@ func (Novel) Fields() []ent.Field {
 			StructTag(`json:"wordCount,omitempty" sql:"word_count"`).
 			Comment("小说总字数"),
 		field.Int("views").
-			Optional().
 			Default(0).
 			Comment("小说阅读次数"),
 		field.Int("downloads").
-			Optional().
 			Default(0).
 			Comment("小说下载次数"),
 		field.Int("favorites").
-			Optional().
 			Default(0).
 			Comment("小说收藏次数"),
 		// 根据更新频率计算权重
