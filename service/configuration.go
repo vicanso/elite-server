@@ -59,6 +59,11 @@ type (
 		Name string `json:"name,omitempty"`
 		Max  int    `json:"max,omitempty"`
 	}
+
+	// ApplicationSetting 应用配置
+	ApplicationSetting struct {
+		LatestVersion string `json:"latestVersion"`
+	}
 )
 
 var (
@@ -128,6 +133,26 @@ func (*ConfigurationSrv) available() ([]*ent.Configuration, error) {
 		Where(configuration.EndedAtGT(now)).
 		Order(ent.Desc(configuration.FieldUpdatedAt)).
 		All(ctx)
+}
+
+// GetApplicationSetting 获取应用配置
+func (*ConfigurationSrv) GetApplicationSetting(ctx context.Context) (setting *ApplicationSetting, err error) {
+	now := time.Now()
+	result, err := helper.EntGetClient().Configuration.Query().
+		Where(configuration.CategoryEQ(configuration.CategoryApplicationSetting)).
+		Where(configuration.Status(schema.StatusEnabled)).
+		Where(configuration.StartedAtLT(now)).
+		Where(configuration.EndedAtGT(now)).
+		First(ctx)
+	if err != nil {
+		return
+	}
+	setting = &ApplicationSetting{}
+	err = json.Unmarshal([]byte(result.Data), setting)
+	if err != nil {
+		return
+	}
+	return
 }
 
 // Refresh 刷新配置
@@ -231,4 +256,8 @@ func (srv *ConfigurationSrv) Refresh() (err error) {
 	request.UpdateConcurrencyLimit(requestLimitConfigs)
 
 	return
+}
+
+func NewConfigurationSrv() *ConfigurationSrv {
+	return &ConfigurationSrv{}
 }

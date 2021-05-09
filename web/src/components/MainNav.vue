@@ -67,6 +67,7 @@ import {
   ROUTE_LOGINS,
   ROUTE_USERS,
   ROUTE_TRACKERS,
+  ROUTE_APPLICATION_SETTING,
   ROUTE_MOCK_TIME,
   ROUTE_BLOCK_IP,
   ROUTE_SIGNED_KEY,
@@ -135,6 +136,12 @@ const navs = [
       {
         name: "所有配置",
         route: ROUTE_CONFIGURATION,
+        roles: [],
+        groups: [],
+      },
+      {
+        name: "应用配置",
+        route: ROUTE_APPLICATION_SETTING,
         roles: [],
         groups: [],
       },

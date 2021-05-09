@@ -14,6 +14,7 @@ import HTTPErrors from "../views/HTTPErrors.vue";
 import Requests from "../views/Requests.vue";
 
 // 系统配置
+import ApplicationSetting from "../views/configs/ApplicationSetting.vue";
 import MockTime from "../views/configs/MockTime.vue";
 import BlockIP from "../views/configs/BlockIP.vue";
 import SignedKey from "../views/configs/SignedKey.vue";
@@ -42,6 +43,7 @@ export const ROUTE_HTTP_ERRORS = "httpErrors";
 export const ROUTE_REQUESTS = "requests";
 
 // 系统配置
+export const ROUTE_APPLICATION_SETTING = "applicationSetting";
 export const ROUTE_MOCK_TIME = "mockTime";
 export const ROUTE_BLOCK_IP = "blockIP";
 export const ROUTE_SIGNED_KEY = "signedKey";
@@ -124,6 +126,11 @@ const router = createRouter({
       path: "/requests",
       name: ROUTE_REQUESTS,
       component: Requests,
+    },
+    {
+      path: "/application-settings",
+      name: ROUTE_APPLICATION_SETTING,
+      component: ApplicationSetting,
     },
     {
       path: "/mock-time",

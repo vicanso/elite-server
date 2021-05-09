@@ -277,6 +277,7 @@ func init() {
 	// 添加用户行为
 	g.POST(
 		"/v1/actions",
+		newTrackerMiddleware(cs.ActionAddUserTracker),
 		ctrl.addUserAction,
 	)
 

@@ -80,6 +80,8 @@ var (
 	novelSrv = novel.New()
 	// 图片服务
 	imageSrv = service.NewImageSrv()
+	// 配置服务
+	configurationSrv = service.NewConfigurationSrv()
 )
 
 func newMagicalCaptchaValidate() elton.Handler {
