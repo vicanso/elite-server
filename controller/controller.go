@@ -257,9 +257,9 @@ func sessionHandle(c *elton.Context) error {
 }
 
 // isIntranet 判断是否内网访问
-func isIntranet(c *elton.Context) error {
-	if elton.IsIntranet(c.ClientIP()) {
-		return c.Next()
-	}
-	return hes.NewWithStatusCode("Forbidden", 403)
-}
+// func isIntranet(c *elton.Context) error {
+// 	if elton.IsIntranet(c.ClientIP()) {
+// 		return c.Next()
+// 	}
+// 	return hes.NewWithStatusCode("Forbidden", 403)
+// }

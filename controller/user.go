@@ -247,7 +247,6 @@ func init() {
 		"/inner/v1/me/login",
 		newTrackerMiddleware(cs.ActionLogin),
 		captchaValidate,
-		isIntranet,
 		ctrl.login,
 	)
 
