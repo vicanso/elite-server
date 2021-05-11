@@ -23,7 +23,9 @@ import (
 
 var sessionConfig = config.GetSessionConfig()
 var uuidReg = regexp.MustCompile(`uuid/(\S+)`)
+var versionReg = regexp.MustCompile(`elite/(\S+)`)
 
+// GetDeviceID 获取设备ID
 func GetDeviceID(c *elton.Context) string {
 	deviceID := ""
 	arr := uuidReg.FindStringSubmatch(c.Request.UserAgent())
@@ -34,6 +36,16 @@ func GetDeviceID(c *elton.Context) string {
 		deviceID = GetTrackID(c)
 	}
 	return deviceID
+}
+
+// GetAppVersion 获取应用版本
+func GetAppVersion(c *elton.Context) string {
+	version := ""
+	arr := versionReg.FindStringSubmatch(c.Request.UserAgent())
+	if len(arr) == 2 {
+		version = arr[1]
+	}
+	return version
 }
 
 // GetTrackID 获取track id

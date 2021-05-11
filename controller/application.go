@@ -15,8 +15,6 @@
 package controller
 
 import (
-	"time"
-
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elton"
 )
@@ -32,11 +30,14 @@ func init() {
 }
 
 func (*applicationCtrl) getSetting(c *elton.Context) (err error) {
-	setting, err := configurationSrv.GetApplicationSetting(c.Context())
+	settings, err := configurationSrv.ListApplicationSetting(c.Context())
 	if err != nil {
 		return
 	}
-	c.CacheMaxAge(5 * time.Minute)
-	c.Body = setting
+	if len(settings) == 0 {
+		c.NoContent()
+		return
+	}
+	c.Body = settings[0]
 	return
 }

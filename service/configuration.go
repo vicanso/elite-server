@@ -62,8 +62,11 @@ type (
 
 	// ApplicationSetting 应用配置
 	ApplicationSetting struct {
-		LatestVersion string `json:"latestVersion"`
+		LatestVersion     string `json:"latestVersion,omitempty"`
+		ApplIcableVersion string `json:"applIcableVersion,omitempty"`
+		PrefetchSize      int    `json:"prefetchSize,omitempty"`
 	}
+	ApplicationSettings []*ApplicationSetting
 )
 
 var (
@@ -135,23 +138,28 @@ func (*ConfigurationSrv) available() ([]*ent.Configuration, error) {
 		All(ctx)
 }
 
-// GetApplicationSetting 获取应用配置
-func (*ConfigurationSrv) GetApplicationSetting(ctx context.Context) (setting *ApplicationSetting, err error) {
+// ListApplicationSetting 获取应用配置
+func (*ConfigurationSrv) ListApplicationSetting(ctx context.Context) (settings ApplicationSettings, err error) {
 	now := time.Now()
 	result, err := helper.EntGetClient().Configuration.Query().
 		Where(configuration.CategoryEQ(configuration.CategoryApplicationSetting)).
 		Where(configuration.Status(schema.StatusEnabled)).
 		Where(configuration.StartedAtLT(now)).
 		Where(configuration.EndedAtGT(now)).
-		First(ctx)
+		All(ctx)
 	if err != nil {
 		return
 	}
-	setting = &ApplicationSetting{}
-	err = json.Unmarshal([]byte(result.Data), setting)
-	if err != nil {
-		return
+	settings = make(ApplicationSettings, len(result))
+	for index, item := range result {
+		setting := &ApplicationSetting{}
+		err = json.Unmarshal([]byte(item.Data), setting)
+		if err != nil {
+			return
+		}
+		settings[index] = setting
 	}
+
 	return
 }
 
