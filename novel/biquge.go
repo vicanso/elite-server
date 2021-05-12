@@ -90,7 +90,7 @@ func (bgq *biQuGe) NewFetcher(id int) Fetcher {
 }
 
 type biQuGeDetail struct {
-	Data []byte `json:"data,omitempty"`
+	Data []byte `json:"data"`
 }
 
 func (bqg *biQuGe) getDetail(id int) (data []byte, err error) {

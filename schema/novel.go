@@ -72,13 +72,13 @@ func (Novel) Fields() []ent.Field {
 		field.Int("chapter_count").
 			Default(0).
 			// 如果需要select此字段，则需要设置sql
-			StructTag(`json:"chapterCount,omitempty" sql:"chapter_count"`).
+			StructTag(`json:"chapterCount" sql:"chapter_count"`).
 			Comment("章节总数"),
 		field.Int("word_count").
 			Optional().
 			Default(0).
 			// 如果需要select此字段，则需要设置sql
-			StructTag(`json:"wordCount,omitempty" sql:"word_count"`).
+			StructTag(`json:"wordCount" sql:"word_count"`).
 			Comment("小说总字数"),
 		field.Int("views").
 			Default(0).
@@ -93,7 +93,7 @@ func (Novel) Fields() []ent.Field {
 		field.Int("updated_weight").
 			Optional().
 			Default(0).
-			StructTag(`json:"updatedWeight,omitempty" sql:"updated_weight"`).
+			StructTag(`json:"updatedWeight" sql:"updated_weight"`).
 			Comment("小说更新权重"),
 		field.String("cover").
 			Optional().

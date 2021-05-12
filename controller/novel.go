@@ -55,39 +55,39 @@ type (
 	novelListParams struct {
 		listParams
 
-		Keyword  string `json:"keyword,omitempty" validate:"omitempty,xKeyword"`
-		IDS      string `json:"ids,omitempty" validate:"omitempty,xNovelIDS"`
-		Category string `json:"category,omitempty" validate:"omitempty,xNovelCategory"`
+		Keyword  string `json:"keyword" validate:"omitempty,xKeyword"`
+		IDS      string `json:"ids" validate:"omitempty,xNovelIDS"`
+		Category string `json:"category" validate:"omitempty,xNovelCategory"`
 
 		// 以下字段搜索时生成
-		AuthorKeyword string `json:"authorKeyword,omitempty"`
-		NameKeyword   string `json:"nameKeyword,omitempty"`
+		AuthorKeyword string `json:"authorKeyword"`
+		NameKeyword   string `json:"nameKeyword"`
 	}
 	// novelUpdateParams 更新小说参数
 	novelUpdateParams struct {
-		ID      int    `json:"id,omitempty"`
-		Status  int    `json:"status,omitempty" validate:"omitempty,xNovelStatus"`
-		Summary string `json:"summary,omitempty" validate:"omitempty,xNovelSummary"`
+		ID      int    `json:"id"`
+		Status  int    `json:"status" validate:"omitempty,xNovelStatus"`
+		Summary string `json:"summary" validate:"omitempty,xNovelSummary"`
 	}
 	// novelChapterListParams 章节查询参数
 	novelChapterListParams struct {
 		listParams
 
 		// ID 小说id，由route param中获取并设置，因此不设置validate
-		ID int `json:"id,omitempty"`
+		ID int `json:"id"`
 		// ChapterID 章节id，由route param中获取并设置，因此不设置validate
-		ChapterID int `json:"chapterID,omitempty"`
+		ChapterID int `json:"chapterID"`
 	}
 	// novelChapterUpdateParams 章节更新参数
 	novelChapterUpdateParams struct {
-		Content string `json:"content,omitempty" validate:"required"`
+		Content string `json:"content" validate:"required"`
 	}
 	// novelCoverParams 小说封面参数
 	novelCoverParams struct {
-		Type    string `json:"type,omitempty" validate:"required,xNovelCoverType"`
-		Width   string `json:"width,omitempty" validate:"omitempty,xNovelCoverWidth"`
-		Height  string `json:"height,omitempty" validate:"omitempty,xNovelCoverHeight"`
-		Quality string `json:"quality,omitempty" validate:"required,xNovelCoverQuality"`
+		Type    string `json:"type" validate:"required,xNovelCoverType"`
+		Width   string `json:"width" validate:"omitempty,xNovelCoverWidth"`
+		Height  string `json:"height" validate:"omitempty,xNovelCoverHeight"`
+		Quality string `json:"quality" validate:"required,xNovelCoverQuality"`
 	}
 )
 
@@ -95,13 +95,13 @@ type (
 type (
 	// novelListResp 小说列表响应
 	novelListResp struct {
-		Novels []*ent.Novel `json:"novels,omitempty"`
-		Count  int          `json:"count,omitempty"`
+		Novels []*ent.Novel `json:"novels"`
+		Count  int          `json:"count"`
 	}
 	// novelChapterListResp 小说章节列表响应
 	novelChapterListResp struct {
-		Chapters []*ent.Chapter `json:"chapters,omitempty"`
-		Count    int            `json:"count,omitempty"`
+		Chapters []*ent.Chapter `json:"chapters"`
+		Count    int            `json:"count"`
 	}
 	// novelHotKeywordListResp 热门搜索关键字列表响应
 	novelHotKeywordListResp struct {

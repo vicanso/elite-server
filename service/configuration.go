@@ -39,32 +39,32 @@ type ConfigurationSrv struct{}
 type (
 	// SessionInterceptorData session拦截的数据
 	SessionInterceptorData struct {
-		Message       string   `json:"message,omitempty"`
-		AllowAccounts []string `json:"allowAccounts,omitempty"`
-		AllowRoutes   []string `json:"allowRoutes,omitempty"`
+		Message       string   `json:"message"`
+		AllowAccounts []string `json:"allowAccounts"`
+		AllowRoutes   []string `json:"allowRoutes"`
 	}
 
 	// CurrentValidConfiguration 当前有效配置
 	CurrentValidConfiguration struct {
-		UpdatedAt          time.Time               `json:"updatedAt,omitempty"`
-		MockTime           string                  `json:"mockTime,omitempty"`
-		IPBlockList        []string                `json:"ipBlockList,omitempty"`
-		SignedKeys         []string                `json:"signedKeys,omitempty"`
-		RouterConcurrency  map[string]uint32       `json:"routerConcurrency,omitempty"`
-		RouterMock         map[string]RouterConfig `json:"routerMock,omitempty"`
-		SessionInterceptor *SessionInterceptorData `json:"sessionInterceptor,omitempty"`
+		UpdatedAt          time.Time               `json:"updatedAt"`
+		MockTime           string                  `json:"mockTime"`
+		IPBlockList        []string                `json:"ipBlockList"`
+		SignedKeys         []string                `json:"signedKeys"`
+		RouterConcurrency  map[string]uint32       `json:"routerConcurrency"`
+		RouterMock         map[string]RouterConfig `json:"routerMock"`
+		SessionInterceptor *SessionInterceptorData `json:"sessionInterceptor"`
 	}
 	// RequestLimitConfiguration HTTP请求实例并发限制
 	RequestLimitConfiguration struct {
-		Name string `json:"name,omitempty"`
-		Max  int    `json:"max,omitempty"`
+		Name string `json:"name"`
+		Max  int    `json:"max"`
 	}
 
 	// ApplicationSetting 应用配置
 	ApplicationSetting struct {
-		LatestVersion     string `json:"latestVersion,omitempty"`
-		ApplIcableVersion string `json:"applIcableVersion,omitempty"`
-		PrefetchSize      int    `json:"prefetchSize,omitempty"`
+		LatestVersion     string `json:"latestVersion"`
+		ApplIcableVersion string `json:"applIcableVersion"`
+		PrefetchSize      int    `json:"prefetchSize"`
 	}
 	ApplicationSettings []*ApplicationSetting
 )

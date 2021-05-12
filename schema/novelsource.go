@@ -59,7 +59,7 @@ func (NovelSource) Fields() []ent.Field {
 			NonNegative().
 			Comment("小说来源"),
 		field.Int("source_id").
-			StructTag(`json:"sourceID,omitempty"`).
+			StructTag(`json:"sourceID"`).
 			NonNegative().
 			Immutable().
 			Comment("小说来源ID"),
