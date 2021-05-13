@@ -5,6 +5,7 @@ go 1.16
 require (
 	entgo.io/ent v0.8.0
 	github.com/PuerkitoBio/goquery v1.6.1
+	github.com/blang/semver/v4 v4.0.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/dustin/go-humanize v1.0.0
 	github.com/felixge/fgprof v0.9.1

@@ -16,6 +16,7 @@ package controller
 
 import (
 	"github.com/vicanso/elite/router"
+	"github.com/vicanso/elite/util"
 	"github.com/vicanso/elton"
 )
 
@@ -38,6 +39,14 @@ func (*applicationCtrl) getSetting(c *elton.Context) (err error) {
 		c.NoContent()
 		return
 	}
-	c.Body = settings[0]
+	setting, err := settings.First(util.GetAppVersion(c))
+	if err != nil {
+		return
+	}
+	if setting == nil {
+		c.NoContent()
+		return
+	}
+	c.Body = setting
 	return
 }

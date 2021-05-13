@@ -21,6 +21,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/blang/semver/v4"
 	"github.com/vicanso/elite/config"
 	"github.com/vicanso/elite/ent"
 	"github.com/vicanso/elite/ent/configuration"
@@ -93,6 +94,26 @@ func GetSignedKeys() elton.SignedKeysGenerator {
 	return sessionSignedKeys
 }
 
+// 获取首个匹配的设置
+func (settings ApplicationSettings) First(currentVersion string) (setting *ApplicationSetting, err error) {
+	ver, err := semver.Parse(currentVersion)
+	if err != nil {
+		return
+	}
+	for _, item := range settings {
+		expectedRange, e := semver.ParseRange(item.ApplIcableVersion)
+		if e != nil {
+			err = e
+			return
+		}
+		if expectedRange(ver) {
+			setting = item
+			break
+		}
+	}
+	return
+}
+
 // GetCurrentValidConfiguration 获取当前有效配置
 func GetCurrentValidConfiguration() *CurrentValidConfiguration {
 	interData, _ := GetSessionInterceptorData()
@@ -146,6 +167,7 @@ func (*ConfigurationSrv) ListApplicationSetting(ctx context.Context) (settings A
 		Where(configuration.Status(schema.StatusEnabled)).
 		Where(configuration.StartedAtLT(now)).
 		Where(configuration.EndedAtGT(now)).
+		Order(ent.Desc(configuration.FieldUpdatedAt)).
 		All(ctx)
 	if err != nil {
 		return

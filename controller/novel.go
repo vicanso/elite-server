@@ -575,7 +575,11 @@ func (*novelCtrl) listChapter(c *elton.Context) (err error) {
 	if err != nil {
 		return
 	}
-	c.CacheMaxAge(5 * time.Minute)
+	maxAge := 5 * time.Minute
+	if len(chapters) == params.GetLimit() {
+		maxAge = 10 * time.Minute
+	}
+	c.CacheMaxAge(maxAge)
 	c.Body = &novelChapterListResp{
 		Count:    count,
 		Chapters: chapters,

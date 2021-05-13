@@ -46,9 +46,11 @@ async function flush() {
     return newAction;
   });
 
-  request.post(USERS_ACTIONS, {
-    actions,
-  });
+  // TODO 网页的用户行为暂时不上报
+  console.info(actions);
+  // request.post(USERS_ACTIONS, {
+  //   actions,
+  // });
 }
 
 // 成功
