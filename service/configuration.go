@@ -63,6 +63,7 @@ type (
 
 	// ApplicationSetting 应用配置
 	ApplicationSetting struct {
+		Name              string `json:"name"`
 		LatestVersion     string `json:"latestVersion"`
 		ApplIcableVersion string `json:"applIcableVersion"`
 		PrefetchSize      int    `json:"prefetchSize"`
@@ -179,6 +180,7 @@ func (*ConfigurationSrv) ListApplicationSetting(ctx context.Context) (settings A
 		if err != nil {
 			return
 		}
+		setting.Name = item.Name
 		settings[index] = setting
 	}
 
