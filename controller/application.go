@@ -15,6 +15,8 @@
 package controller
 
 import (
+	"time"
+
 	"github.com/vicanso/elite/router"
 	"github.com/vicanso/elite/util"
 	"github.com/vicanso/elton"
@@ -47,6 +49,7 @@ func (*applicationCtrl) getSetting(c *elton.Context) (err error) {
 		c.NoContent()
 		return
 	}
+	c.PrivateCacheMaxAge(5 * time.Minute)
 	c.Body = setting
 	return
 }
