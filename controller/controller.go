@@ -17,7 +17,6 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
-	"regexp"
 	"strconv"
 
 	"github.com/rs/zerolog"
@@ -152,7 +151,7 @@ func newTrackerMiddleware(action string) elton.Handler {
 		return string(buf)
 	}
 	return M.NewTracker(M.TrackerConfig{
-		Mask: regexp.MustCompile(`(?i)password`),
+		Mask: cs.MaskRegExp,
 		OnTrack: func(info *M.TrackerInfo, c *elton.Context) {
 			account := ""
 			tid := util.GetTrackID(c)

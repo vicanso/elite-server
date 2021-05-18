@@ -23,11 +23,11 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog"
+	"github.com/vicanso/elite/cs"
 	"github.com/vicanso/elite/tracer"
 	"github.com/vicanso/elite/util"
 )
@@ -54,7 +54,6 @@ var defaultLogger = mustNewLogger("")
 var logLevel = os.Getenv("LOG_LEVEL")
 
 // 日志Dict中需要添加***的处理
-var logMask = regexp.MustCompile(`password`)
 
 // 日志中值的最大长度
 var logFieldValueMaxSize = 30
@@ -148,7 +147,7 @@ func NewEntLogger() *entLogger {
 
 // cutOrMaskString 将输出数据***或截断处理
 func cutOrMaskString(k, v string) string {
-	if logMask.MatchString(k) {
+	if cs.MaskRegExp.MatchString(k) {
 		return "***"
 	}
 	return util.CutRune(v, logFieldValueMaxSize)
@@ -156,7 +155,7 @@ func cutOrMaskString(k, v string) string {
 
 // cutOrMaskString 将输出数据***或截断处理
 func cutOrMaskInterface(k string, v interface{}) interface{} {
-	if logMask.MatchString(k) {
+	if cs.MaskRegExp.MatchString(k) {
 		return "***"
 	}
 	switch v := v.(type) {
