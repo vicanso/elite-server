@@ -17,6 +17,8 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"regexp"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -101,6 +103,18 @@ func (settings ApplicationSettings) First(currentVersion string) (setting *Appli
 	if err != nil {
 		return
 	}
+	// 对配置按期望版本号排序，新版本的排在前面
+	versionReg := regexp.MustCompile(`\d+\.\d+\.\d+`)
+	sort.Slice(settings, func(i, j int) bool {
+		v1 := versionReg.FindString(settings[i].ApplIcableVersion)
+		v2 := versionReg.FindString(settings[j].ApplIcableVersion)
+		// 由于配置已按时间排序，如果版本配置相同，则返回true
+		if v1 == v2 {
+			return true
+		}
+		// 版本大的排在前面
+		return v1 > v2
+	})
 	for _, item := range settings {
 		expectedRange, e := semver.ParseRange(item.ApplIcableVersion)
 		if e != nil {
@@ -174,11 +188,15 @@ func (*ConfigurationSrv) ListApplicationSetting(ctx context.Context) (settings A
 		return
 	}
 	settings = make(ApplicationSettings, len(result))
+	maxPrefetchSize := 50
 	for index, item := range result {
 		setting := &ApplicationSetting{}
 		err = json.Unmarshal([]byte(item.Data), setting)
 		if err != nil {
 			return
+		}
+		if setting.PrefetchSize > maxPrefetchSize {
+			setting.PrefetchSize = maxPrefetchSize
 		}
 		setting.Name = item.Name
 		settings[index] = setting
