@@ -175,6 +175,12 @@ func dependServiceCheck() (err error) {
 	return
 }
 
+func setCORS(c *elton.Context) {
+	c.SetHeader("Access-Control-Allow-Origin", "*")
+	c.SetHeader("Access-Control-Allow-Methods", "GET, POST, PUT")
+	c.SetHeader("Access-Control-Allow-Credentials", "true")
+}
+
 func newOnErrorHandler(e *elton.Elton) {
 	// 未处理的error才会触发
 	// 如果1分钟出现超过5次未处理异常
@@ -297,6 +303,12 @@ func main() {
 	// 捕捉panic异常，避免程序崩溃
 	e.UseWithName(M.NewRecover(), "recover")
 
+	// cors
+	e.Use(func(c *elton.Context) error {
+		setCORS(c)
+		return c.Next()
+	})
+
 	// 入口设置
 	e.UseWithName(middleware.NewEntry(service.IncreaseConcurrency, service.DecreaseConcurrency), "entry")
 
@@ -352,6 +364,12 @@ func main() {
 	for _, g := range router.GetGroups() {
 		e.AddGroup(g)
 	}
+
+	e.OPTIONS("/*", func(c *elton.Context) error {
+		setCORS(c)
+		c.NoContent()
+		return nil
+	})
 
 	// 初始化路由并发限制配置
 	service.InitRouterConcurrencyLimiter(e.GetRouters())

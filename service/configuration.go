@@ -99,6 +99,9 @@ func GetSignedKeys() elton.SignedKeysGenerator {
 
 // 获取首个匹配的设置
 func (settings ApplicationSettings) First(currentVersion string) (setting *ApplicationSetting, err error) {
+	if currentVersion == "" {
+		currentVersion = "0.0.0"
+	}
 	ver, err := semver.Parse(currentVersion)
 	if err != nil {
 		return
