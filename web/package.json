@@ -8,7 +8,7 @@
     "build": "vuedx-typecheck . && STATIC=/static/ vite build"
   },
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "dayjs": "^1.10.4",
     "element-plus": "^1.0.2-beta.35",
     "localforage": "^1.9.0",
